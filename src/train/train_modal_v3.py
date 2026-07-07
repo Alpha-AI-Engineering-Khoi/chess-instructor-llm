@@ -83,9 +83,13 @@ WARMUP_RATIO: float = 0.05
 LR_SCHEDULER: str = "cosine"
 WEIGHT_DECAY: float = 0.01
 OPTIMIZER: str = "adamw_8bit"
-PER_DEVICE_BATCH: int = 2      # A100-80GB has ample headroom for a 32B 4-bit at seq 2048
-GRAD_ACCUM: int = 8            # eff batch 16 (up from v2's 8) for stability on 7k rows
+PER_DEVICE_BATCH: int = 1      # smoke-validated; batch=2 OOM-killed the A100 worker mid-run
+GRAD_ACCUM: int = 16           # eff batch 16 (up from v2's 8) for stability on 7k rows
 LOGGING_STEPS: int = 1
+#: Checkpoint to the shared Volume every N optimizer steps so a preempted/OOM-killed
+#: worker ("Runner failed: Worker disappeared") resumes instead of restarting from 0.
+SAVE_STEPS: int = 40
+SAVE_TOTAL_LIMIT: int = 2
 SEED: int = 3407
 
 SMOKE_MAX_ROWS: int = 20
@@ -259,7 +263,7 @@ def train(smoke: bool = False, merge_16bit: bool = True) -> dict:
         # Checkpoint to the Volume so a Modal worker preemption ("Worker
         # disappeared, in-progress inputs will be re-scheduled") RESUMES instead of
         # restarting from step 0. Committed to the Volume after every save.
-        save_strategy="steps", save_steps=40, save_total_limit=2,
+        save_strategy="steps", save_steps=SAVE_STEPS, save_total_limit=SAVE_TOTAL_LIMIT,
         bf16=is_bfloat16_supported(), fp16=not is_bfloat16_supported(), report_to="none",
     )
     trainer = _make_trainer(model=model, tokenizer=tokenizer, train_dataset=dataset, args=sft_config)

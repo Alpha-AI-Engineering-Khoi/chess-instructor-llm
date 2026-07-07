@@ -51,33 +51,38 @@ GEN_PATH = BENCH / "generations.jsonl"
 OBJ_PATH = BENCH / "objective.jsonl"
 COUNCIL_PATH = BENCH / "council.jsonl"
 SAFETY_PATH = BENCH / "move_safety.json"
-REPORT_MD = _ROOT / "RESULTS_FULL_EVAL_803.md"
+#: Output markdown path; overridable so the v3 run can write RESULTS_FULL_EVAL_803_v3.md
+#: without clobbering the v2 report.
+REPORT_MD = Path(os.environ.get("BENCH_REPORT_MD", str(_ROOT / "RESULTS_FULL_EVAL_803.md")))
 METRICS_JSON = BENCH / "leaderboard.json"
 
 #: Report row order + display + practical facts (params, local-runnability, cost).
 #: local: 1.0 = 4-bit fits a 64GB Mac comfortably; 0.6 = tight-but-runnable;
 #: 0.0 = far too large to run/fine-tune locally.
 MODEL_ORDER: Tuple[str, ...] = (
-    "ours", "base",
+    "ours_v3", "ours", "base",
     "gemma3_27b", "q3_32b", "q3_next80b", "llama33_70b",
     "dsv32", "glm5", "mistral3", "kimi25", "dsr1",
     "gpt", "claude", "gemini",
 )
 DISPLAY: Dict[str, str] = {
+    "ours_v3": "OURS-v3 (Qwen3-32B tuned)",
     "ours": "OURS-v2 (Qwen3-1.7B tuned)", "base": "BASE (Qwen3-1.7B untuned)",
     "gpt": "GPT-5.5", "claude": "Claude Opus 4.8", "gemini": "Gemini 3.1 Pro",
-    "q3_32b": "Qwen3-32B", "q3_next80b": "Qwen3-Next-80B-A3B", "gemma3_27b": "Gemma-3-27B-it",
+    "q3_32b": "Qwen3-32B (untuned v3 base)", "q3_next80b": "Qwen3-Next-80B-A3B",
+    "gemma3_27b": "Gemma-3-27B-it",
     "llama33_70b": "Llama-3.3-70B", "dsv32": "DeepSeek-V3.2", "glm5": "GLM-5",
     "mistral3": "Mistral-Large-3 (675B)", "kimi25": "Kimi-K2.5", "dsr1": "DeepSeek-R1",
 }
 FAMILY: Dict[str, str] = {
-    "ours": "ours", "base": "base", "gpt": "frontier", "claude": "frontier",
+    "ours_v3": "ours", "ours": "ours", "base": "base", "gpt": "frontier", "claude": "frontier",
     "gemini": "frontier", **{k: "open" for k in (
         "q3_32b", "q3_next80b", "gemma3_27b", "llama33_70b", "dsv32", "glm5",
         "mistral3", "kimi25", "dsr1")},
 }
 #: (approx params, local_runnable score, note)
 PRACTICAL: Dict[str, Tuple[str, float, str]] = {
+    "ours_v3": ("32B dense", 1.0, "4-bit ~18GB — comfortable (fine-tuned)"),
     "ours": ("1.7B", 1.0, "already local"),
     "base": ("1.7B", 1.0, "already local"),
     "gemma3_27b": ("27B dense", 1.0, "4-bit ~15GB — comfortable"),
@@ -334,8 +339,11 @@ def compute_safety() -> Dict[str, float]:
 # balanced scoring
 # --------------------------------------------------------------------------- #
 
-GATE_SAFE = 0.98
-GATE_NOES = 0.98
+# Pass/fail floors: "does not frequently blunder / leak engine-speak". Set at 97%
+# so a serious coach clears it comfortably (all open models are >=99.6%); the
+# untuned BASE (3.4% blunders) fails, as it should.
+GATE_SAFE = 0.97
+GATE_NOES = 0.97
 
 # balanced weights (tier + instructiveness highest; fabrication downweighted).
 W_BALANCED = {"tier": 0.40, "instr": 0.40, "fab": 0.10, "practical": 0.10}

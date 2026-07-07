@@ -37,9 +37,11 @@ BENCH = Path(os.environ["BENCH_DIR"])
 SCN_PATH = BENCH / "scenarios.jsonl"
 FRONTIER_IDS = BENCH / "frontier_ids.txt"
 
-#: The definitive 14-model field (all evaluated models get an instructiveness rank).
+#: The definitive field (all evaluated models get an instructiveness rank).
+#: v3 adds ``ours_v3`` -> a 15-model council so OURS-v3 is ranked head-to-head
+#: with OURS-v2 and the untuned Qwen3-32B base under the same blinded rubric.
 FIELD = (
-    "ours", "base",
+    "ours_v3", "ours", "base",
     "gemma3_27b", "q3_32b", "q3_next80b", "llama33_70b",
     "dsv32", "glm5", "mistral3", "kimi25", "dsr1",
     "gpt", "claude", "gemini",

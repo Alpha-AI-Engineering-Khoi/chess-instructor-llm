@@ -77,20 +77,22 @@ class Model:
     reasoning_effort: Optional[str] = None
 
 
+#: The "ours" competitor points at the SHIPPED v2 model by DEFAULT. Previously the
+#: static default was v1 and only the benchmark drivers overrode it to v2, so any
+#: code path using this harness directly silently evaluated v1 — a latent footgun.
+#: ``BENCH_OURS_MODEL`` (the env var the drivers already honour) opts into another
+#: local checkpoint, e.g. ``models/mlx/chess-coach-v1`` to re-run v1 explicitly.
+_OURS_MODEL: str = os.environ.get(
+    "BENCH_OURS_MODEL", str(settings.MODELS / "mlx" / "chess-coach-v2")
+)
+
 #: The five competitors. ``MODEL_ORDER`` fixes their column order in every table.
 MODELS: Dict[str, Model] = {
-    "ours_v3": Model(
-        key="ours_v3",
-        display="OURS-v3 (Qwen3-32B tuned)",
-        kind="mlx",
-        ident=str(settings.MODELS / "mlx" / "chess-coach-v3"),
-        family="local",
-    ),
     "ours": Model(
         key="ours",
-        display="OURS (chess-coach-v1, 1.7B tuned)",
+        display=f"OURS ({Path(_OURS_MODEL).name}, 1.7B tuned)",
         kind="mlx",
-        ident=str(settings.MODELS / "mlx" / "chess-coach-v1"),
+        ident=_OURS_MODEL,
         family="local",
     ),
     "base": Model(

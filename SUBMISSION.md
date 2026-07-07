@@ -6,6 +6,27 @@ a fine-tuned Qwen3-1.7B, end to end (dataset → model → platform → eval →
 **Win condition (from the brief):** the tuned model beats the base model on **spec-adherence,
 level-calibration, and no-engine-speak** — met and exceeded (see the results table below).
 
+> **🆕 `v3` (Qwen3-32B) is evaluated — the strongest LOCAL coach yet.** v3 fine-tunes a
+> 20× larger base (Qwen3-32B) on a larger, faithfulness-filtered contrastive dataset (7,128
+> rows, **0% false labels**). On the definitive **803-position** benchmark vs a **15-model**
+> field, v3 is **2nd overall on the balanced score (61.7 — behind only GPT-5.5's 62.4, ahead of
+> Claude, Gemini, and every open model)** and the **best locally-runnable model**. vs v2:
+> instructiveness council rank **10.07 → 7.06** (top-1 **7.5% → 20.3%**), fabrication **30.2% →
+> 5.4%**; tier-fit holds at field-leading **53.2%** (advanced 60.9% → **83.6%**). vs the untuned
+> Qwen3-32B it was tuned from: tier-fit **+16.3 pts**, council **9.07 → 7.06** — the specialist
+> behavior is *trained in*, not emergent. Honest tradeoffs: beginner move-calibration softened
+> (the 32B leans engine-best; beginner tier-fit 47.9% → 29.6%) and ~4–5% malformed raw outputs
+> (safety/no-jargon just below the strict 97% gate; the actual blunder rate is only **1.3%**, and
+> the malformed outputs are neutralized at serve time). **The v2 platform is untouched and still
+> serves v2.** Full detail: [`RESULTS_V3.md`](RESULTS_V3.md),
+> [`RESULTS_FULL_EVAL_803_v3.md`](RESULTS_FULL_EVAL_803_v3.md).
+>
+> _HF re-publish for v3 is prepared (adapter + updated cards) but pending an HF **write token**
+> (`hf auth login` in the user's terminal); the local 4-bit **MLX** 32B build is disk-blocked on
+> this machine (the `mlx_lm.convert` input is the ~65 GB merged model) and Modal's Linux MLX
+> wheel is broken (`libmlx.so`) — so the deployable v3 is **base-4bit + the QLoRA adapter**, which
+> is exactly what the eval measured._
+
 > **✅ `v2` is shipped and current.** Every number in this document is the **v2** run
 > (`models/mlx/chess-coach-v2`), with the v1→v2 delta shown. The v2 data intervention
 > (faithfulness-filtered labels + tier-aware teacher rule + contrastive multi-tier pairs)

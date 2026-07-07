@@ -202,18 +202,41 @@ def write_markdown(
 
     # ------------------------------------------------------------------ #
     A("## 5. Recommendation\n")
+    if overall_bal_winner:
+        A(f"- **Best overall (balanced), any provider: {display[overall_bal_winner]}** "
+          f"({family[overall_bal_winner]}) — the frontier still coaches best; it is the "
+          f"distillation-teacher benchmark, not a deployable base.")
     if best_open_balanced:
-        A(f"- **Best open model overall (balanced): {display[best_open_balanced]}.** "
-          f"{'This IS Gemma-3-27B.' if best_open_balanced=='gemma3_27b' else 'This is NOT Gemma-3-27B.'}")
+        A(f"- **Best OPEN model (balanced): {display[best_open_balanced]}.** "
+          f"{'This IS Gemma-3-27B.' if best_open_balanced=='gemma3_27b' else 'This is **NOT** Gemma-3-27B'}"
+          f"{'' if best_open_balanced=='gemma3_27b' else ' — GLM-5 is the strongest open coach (best open instructiveness) with solid tier-selection, but it is far too large to run locally.'}")
+    # best-base + near-tie runner-up
     if best_base:
+        rest = [m for m in ranked_base_open if m != best_base
+                and practical.get(m, ("", 0, ""))[1] > 0]
+        runner = rest[0] if rest else None
+        margin = None
+        if runner is not None and _base(best_base) is not None and _base(runner) is not None:
+            margin = (_base(best_base) - _base(runner)) * 100
         A(f"- **Best open v3 base: {display[best_base]}** — the best mix of coaching capacity, "
           f"faithfulness, and 4-bit local fine-tunability/runnability on a 64GB Mac.")
+        if runner is not None and margin is not None and margin < 3.0:
+            fb_best = obj.get(best_base, {}).get("fabrication")
+            fb_run = obj.get(runner, {}).get("fabrication")
+            A(f"- **It is effectively a tie with {display[runner]}** (base-fit "
+              f"{_score100(_base(best_base))} vs {_score100(_base(runner))} — within noise). "
+              f"{display[best_base]} edges it on tier-selection/capacity; {display[runner]} is "
+              f"smaller and more faithful (fab {_pct(fb_run,0)} vs {_pct(fb_best,0)}). Either is a "
+              f"defensible v3 base; prefer {display[runner]} if faithfulness/size is paramount, "
+              f"{display[best_base]} if raw capacity is.")
     if best_open_balanced and best_base and best_open_balanced != best_base:
-        A(f"- **They differ:** {display[best_open_balanced]} wins the raw balanced score, but it "
-          f"{practical.get(best_open_balanced, ('','',''))[2]} — not a viable local base. "
-          f"{display[best_base]} is the pragmatic v3 base.")
+        A(f"- **The balanced winner and the base pick differ:** {display[best_open_balanced]} wins "
+          f"the raw open balanced score, but it {practical.get(best_open_balanced, ('','',''))[2]} "
+          f"— not a viable local base. {display[best_base]} is the pragmatic v3 base because "
+          f"tier-appropriateness (where the giant coaches lead) is exactly what we fine-tune IN, "
+          f"while capacity + faithfulness + local-runnability are what a base must bring.")
     elif best_open_balanced and best_base and best_open_balanced == best_base:
-        A(f"- The balanced winner and best base are the **same** ({display[best_base]}).")
+        A(f"- The best open balanced model and best base are the **same** ({display[best_base]}).")
     A("")
 
     # ------------------------------------------------------------------ #

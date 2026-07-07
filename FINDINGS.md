@@ -22,6 +22,34 @@ _Compiled 2026-07-07 (UTC), covering the v2 + open-model + verifier runs and the
 
 ---
 
+## 0. v3 update (Qwen3-32B) — the capacity bet, tested
+
+The BrainLift predicted the small-model faithfulness deficit is a **capacity effect a bigger
+base removes for free**, and that "small local" should move to a ~27–32B base. v3 tests it: a
+QLoRA fine-tune of **Qwen3-32B** on the larger faithfulness-filtered contrastive set (7,128 rows,
+**0% false labels**), evaluated on the same 803-position benchmark against a **15-model** field.
+
+| Axis | OURS-v2 (1.7B) | untuned Qwen3-32B | **OURS-v3 (32B tuned)** |
+|---|---:|---:|---:|
+| Tier-fit (the moat) | 53.1% | 36.9% | **53.2%** (field-leading; adv 83.6%, beg 29.6%) |
+| Instructiveness (council rank, of 15; lower=better) | 10.07 | 9.07 | **7.06** (best local; top-1 20.3%) |
+| Fabrication | 30.2% | 6.1% | **5.4%** |
+| Balanced score | 51.2 | 53.6 | **61.7** (2nd of 15, behind only GPT-5.5's 62.4) |
+
+**Read honestly.** (1) The capacity bet paid off: fabrication fell ~6× (30.2% → 5.4%) with **no
+faithfulness-specific training** — the bigger base removed the deficit, as predicted. (2)
+Instructiveness jumped a full 3 rank positions; v3 is now the **best locally-runnable coach**,
+behind only the three frontier APIs and one ~355B open model. (3) Tier-fit (moat) held
+field-leading, but its *shape* shifted — the 32B's stronger prior made it excellent at the
+advanced/sharpest move (83.6%) and weaker at the beginner/human-findable move (29.6% vs v2's
+47.9%); the deterministic serve-time `tier_select` can enforce the beginner move if wanted. (4)
+~4–5% of raw outputs are malformed (leading rating-range fragment / occasional prompt echo), so
+v3 sits just under the strict 97% safety/no-jargon gate — but its true **blunder rate is 1.3%**
+(≈ v2) and malformed outputs are caught at serve time. Detail: [`RESULTS_V3.md`](RESULTS_V3.md),
+[`RESULTS_FULL_EVAL_803_v3.md`](RESULTS_FULL_EVAL_803_v3.md). The live platform still serves v2.
+
+---
+
 ## 1. The gap is real — and it is dense
 
 **Claim.** Before claiming a trained model can *fill* a behavior gap, prove a prompted frontier

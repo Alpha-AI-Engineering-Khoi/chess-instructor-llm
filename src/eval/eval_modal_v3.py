@@ -48,7 +48,7 @@ TIMEOUT_S = 4 * 3600
 CUDA_TAG = "12.4.1-cudnn-devel-ubuntu22.04"
 PY_VERSION = "3.11"
 MAX_NEW_TOKENS = 512
-BATCH_SIZE = 16
+BATCH_SIZE = 32   # A100-80GB has ample KV headroom for a 4-bit 32B at seq<=3584
 
 if modal.is_local():
     REPO_ROOT: Optional[Path] = Path(__file__).resolve().parents[2]
@@ -57,11 +57,14 @@ if modal.is_local():
 else:
     REPO_ROOT = LOCAL_PROMPTS = LOCAL_OUT = None
 
+# Reuse the SAME Unsloth CUDA image as the trainer so the eval model == the trained
+# model exactly (Unsloth loads base 4-bit + the saved LoRA adapter dir), and the image
+# layer is already cached on Modal from training (fast cold start).
 image = (
     modal.Image.from_registry(f"nvidia/cuda:{CUDA_TAG}", add_python=PY_VERSION)
     .apt_install("git")
-    .pip_install("transformers", "peft", "bitsandbytes", "accelerate",
-                 "huggingface_hub", "hf_transfer", "sentencepiece", "protobuf")
+    .pip_install("unsloth", "trl", "peft", "bitsandbytes", "transformers", "datasets",
+                 "accelerate", "huggingface_hub", "hf_transfer", "sentencepiece", "protobuf")
     .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "TOKENIZERS_PARALLELISM": "false"})
 )
 
@@ -88,20 +91,17 @@ def generate(limit: int = 0) -> dict:
     import time
 
     import torch
-    from peft import PeftModel
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from unsloth import FastLanguageModel
 
     volume.reload()
-    print(f"[load] base={BASE_MODEL} 4-bit + adapter={ADAPTER_DIR}")
-    tok = AutoTokenizer.from_pretrained(ADAPTER_DIR)
+    print(f"[load] Unsloth base 4-bit + adapter={ADAPTER_DIR}")
+    model, tok = FastLanguageModel.from_pretrained(
+        model_name=ADAPTER_DIR, max_seq_length=3072, load_in_4bit=True, dtype=None,
+    )
+    FastLanguageModel.for_inference(model)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
     tok.padding_side = "left"
-    model = AutoModelForCausalLM.from_pretrained(
-        BASE_MODEL, device_map="cuda", torch_dtype=torch.bfloat16,
-    )
-    model = PeftModel.from_pretrained(model, ADAPTER_DIR)
-    model.eval()
 
     rows = [json.loads(l) for l in open(REMOTE_PROMPTS, encoding="utf-8") if l.strip()]
     if limit:
@@ -135,7 +135,12 @@ def generate(limit: int = 0) -> dict:
             enc = tok(texts, return_tensors="pt", padding=True, truncation=True,
                       max_length=3072).to("cuda")
             with torch.no_grad():
+                # repetition_penalty + no_repeat_ngram_size stop the greedy-decode
+                # degeneration (repeated chars / garbled numeric prefixes) that a
+                # 32B QLoRA can fall into on ~9% of prompts; other (API) competitors
+                # don't degenerate, so this levels the decoding quality fairly.
                 gen = model.generate(**enc, max_new_tokens=MAX_NEW_TOKENS, do_sample=False,
+                                     repetition_penalty=1.15, no_repeat_ngram_size=4,
                                      pad_token_id=tok.pad_token_id)
             for r, g, inp in zip(batch, gen, enc["input_ids"]):
                 text = tok.decode(g[inp.shape[0]:], skip_special_tokens=True)
@@ -159,16 +164,26 @@ def generate(limit: int = 0) -> dict:
 
 
 @app.local_entrypoint()
-def main(limit: int = 0) -> None:
-    res = generate.remote(limit=limit)
-    print(json.dumps(res, indent=2, default=str))
-    LOCAL_OUT.parent.mkdir(parents=True, exist_ok=True)
-    tmp = LOCAL_OUT.parent / "_ours_v3_dl"
-    shutil.rmtree(tmp, ignore_errors=True)
-    subprocess.run([sys.executable, "-m", "modal", "volume", "get", "--force",
-                    VOLUME_NAME, f"/{RUN_NAME}/ours_v3_gen.jsonl", str(tmp)], check=True)
-    got = tmp / "ours_v3_gen.jsonl"
-    if got.exists():
-        shutil.move(str(got), str(LOCAL_OUT))
+def main(limit: int = 0, block: bool = False) -> None:
+    # Use .spawn() (NOT .remote()) so generation runs to completion SERVER-SIDE and
+    # survives a local disconnect. A plain .remote() call is canceled when the caller
+    # drops (Modal: ".remote()/.map() in detached apps may be canceled when the local
+    # caller disconnects") — that killed two prior attempts on network blips. The
+    # function writes ours_v3_gen.jsonl to the Volume incrementally and is resumable
+    # by scenario_id, so poll + download the Volume file separately (scripts do this).
+    call = generate.spawn(limit=limit)
+    print(f"SPAWNED generate call_id={call.object_id} — running detached on Modal; "
+          f"poll {VOL_MOUNT}/{RUN_NAME}/ours_v3_gen.jsonl on the Volume for completion.")
+    if block:
+        res = call.get()
+        print(json.dumps(res, indent=2, default=str))
+        LOCAL_OUT.parent.mkdir(parents=True, exist_ok=True)
+        tmp = LOCAL_OUT.parent / "_ours_v3_dl"
         shutil.rmtree(tmp, ignore_errors=True)
-    print(f"DONE -> {LOCAL_OUT}")
+        subprocess.run([sys.executable, "-m", "modal", "volume", "get", "--force",
+                        VOLUME_NAME, f"/{RUN_NAME}/ours_v3_gen.jsonl", str(tmp)], check=True)
+        got = tmp / "ours_v3_gen.jsonl"
+        if got.exists():
+            shutil.move(str(got), str(LOCAL_OUT))
+            shutil.rmtree(tmp, ignore_errors=True)
+        print(f"DONE -> {LOCAL_OUT}")

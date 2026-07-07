@@ -17,6 +17,18 @@ real position before it reaches you.
 - 🤗 Results dashboard (Space) — [`khoilamalphaai/chess-coach-benchmark`](https://huggingface.co/spaces/khoilamalphaai/chess-coach-benchmark)
 - 💻 Local platform — **The Analysis Room** (FastAPI + Next.js), one command: `./run_platform.sh` (serves `models/mlx/chess-coach-v2`)
 
+> **🆕 `v3` (Qwen3-32B) — evaluated, strongest local coach; v2 still shipped.** v3 fine-tunes a
+> 20× larger base on a larger faithfulness-filtered contrastive dataset (7,128 rows). On the
+> 803-position benchmark vs a 15-model field it is **2nd overall on the balanced score (61.7,
+> behind only GPT-5.5) and the best locally-runnable model**. vs v2: instructiveness council rank
+> **10.07 → 7.06** (top-1 7.5% → 20.3%), fabrication **30.2% → 5.4%**, tier-fit field-leading at
+> **53.2%**; vs the untuned Qwen3-32B, tier-fit **+16.3 pts**. Honest tradeoffs: beginner
+> move-calibration softened (32B leans engine-best) and ~4–5% malformed raw outputs (blunder rate
+> only 1.3%; neutralized at serve time). The live platform still serves **v2** (not auto-switched).
+> Detail: [`RESULTS_V3.md`](RESULTS_V3.md) · [`RESULTS_FULL_EVAL_803_v3.md`](RESULTS_FULL_EVAL_803_v3.md).
+> _(HF v3 re-publish prepared but pending an HF write token; local MLX 32B build is disk-blocked —
+> deployable v3 = base-4bit + QLoRA adapter.)_
+
 > **✅ `v2` is shipped and is the current model** (`models/mlx/chess-coach-v2`); every number
 > below is v2, with the v1→v2 delta shown. The v2 data intervention (faithfulness-filtered labels +
 > tier-aware teacher rule + contrastive multi-tier pairs) did what it set out to: it **improved
@@ -281,7 +293,7 @@ set -a && source .env && set +a          # loads keys (never printed)
 
 # D) base-vs-tuned objective + Claude judge      → RESULTS_V2.md / RESULTS.md
 ~/.venvs/mlx/bin/python -m src.eval.evaluate --model tuned --tuned-path models/mlx/chess-coach-v2 \
-  --num-scenarios 18 --positions data/positions/positions.jsonl \
+  --num-scenarios 15 --positions data/positions/positions.jsonl \
   --compare-to data/eval/results_base_claude.json --out data/eval/results_tuned_v2_claude.json
 ```
 
