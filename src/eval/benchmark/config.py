@@ -79,6 +79,13 @@ class Model:
 
 #: The five competitors. ``MODEL_ORDER`` fixes their column order in every table.
 MODELS: Dict[str, Model] = {
+    "ours_v3": Model(
+        key="ours_v3",
+        display="OURS-v3 (Qwen3-32B tuned)",
+        kind="mlx",
+        ident=str(settings.MODELS / "mlx" / "chess-coach-v3"),
+        family="local",
+    ),
     "ours": Model(
         key="ours",
         display="OURS (chess-coach-v1, 1.7B tuned)",
@@ -91,6 +98,17 @@ MODELS: Dict[str, Model] = {
         display="BASE (Qwen3-1.7B-4bit, untuned)",
         kind="mlx",
         ident="mlx-community/Qwen3-1.7B-4bit",
+        family="local",
+    ),
+    # v3: our Qwen3-32B QLoRA coach. Its 803 gens are produced on Modal
+    # (base 4-bit + adapter, src/eval/eval_modal_v3.py) into gen/ours_v3.jsonl;
+    # the shipped local copy is the 4-bit MLX at models/mlx/chess-coach-v3.
+    # kind="mlx"/ident=local path is only used if ever regenerated locally.
+    "ours_v3": Model(
+        key="ours_v3",
+        display="OURS-v3 (Qwen3-32B tuned)",
+        kind="mlx",
+        ident=str(settings.MODELS / "mlx" / "chess-coach-v3"),
         family="local",
     ),
     "gpt": Model(
