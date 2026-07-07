@@ -60,27 +60,52 @@ def anon_mapping(scenario_id: str, condition: str) -> Dict[str, str]:
 # Judge prompt
 # --------------------------------------------------------------------------- #
 
-_JUDGE_SYSTEM = (
-    "You are a strict, fair panel judge evaluating chess move-review COACHING for "
-    "a student at a stated rating tier. You will see a position, the student's move, "
-    "verified reference facts, and FIVE anonymized coaching responses labeled A-E.\n\n"
-    "RANK all five from best to worst. Your PRIMARY and decisive criterion is: "
-    "**how INSTRUCTIVE and USEFUL is this coaching for a player at the stated tier** "
-    "— will it actually help THIS student understand what went wrong and improve? "
-    "This is NOT about raw chess strength, NOT about length or eloquence, and NOT "
-    "about whether engine numbers are quoted (a good coach never quotes them).\n\n"
-    "Also score each response on three 0/1/2 dimensions:\n"
-    "- tier_calibration: ideas + depth fit the tier (simpler for beginners).\n"
-    "- clarity: plain, well-organized, encouraging, easy to act on.\n"
-    "- correctness: claims about the board/threats match the verified facts; "
-    "the recommended move is sound. Contradicting the verified facts lowers this.\n\n"
-    "The verified facts are for YOUR grading only; do not reward a response merely "
-    "for restating them. Return ONLY a single JSON object, no prose, of the form:\n"
-    '{"ranking": ["<best label>", "...", "<worst label>"], '
-    '"scores": {"A": {"tier_calibration": 0, "clarity": 0, "correctness": 0}, '
-    '"B": {...}, "C": {...}, "D": {...}, "E": {...}}, '
-    '"note": "<one short sentence>"}'
-)
+_NUM_WORDS = {
+    2: "TWO", 3: "THREE", 4: "FOUR", 5: "FIVE", 6: "SIX", 7: "SEVEN", 8: "EIGHT",
+    9: "NINE", 10: "TEN", 11: "ELEVEN", 12: "TWELVE", 13: "THIRTEEN", 14: "FOURTEEN",
+}
+
+
+def build_judge_system(labels: Optional[Sequence[str]] = None) -> str:
+    """The judge system prompt, sized to ``labels`` (defaults to ``ANON_LABELS``).
+
+    Identical wording to the original five-way prompt; only the count word and the
+    label set/range are parameterised, so ranking N (>5) anonymized coaches uses
+    the exact same rubric and instructions the frontier five-way run used.
+    """
+    labs = tuple(labels) if labels is not None else tuple(bcfg.ANON_LABELS)
+    n = len(labs)
+    word = _NUM_WORDS.get(n, str(n))
+    label_range = f"{labs[0]}-{labs[-1]}" if n > 1 else labs[0]
+    scores_example = ", ".join(
+        (f'"{lab}": {{"tier_calibration": 0, "clarity": 0, "correctness": 0}}'
+         if i == 0 else f'"{lab}": {{...}}')
+        for i, lab in enumerate(labs)
+    )
+    return (
+        "You are a strict, fair panel judge evaluating chess move-review COACHING for "
+        "a student at a stated rating tier. You will see a position, the student's move, "
+        f"verified reference facts, and {word} anonymized coaching responses labeled {label_range}.\n\n"
+        f"RANK all {word.lower()} from best to worst. Your PRIMARY and decisive criterion is: "
+        "**how INSTRUCTIVE and USEFUL is this coaching for a player at the stated tier** "
+        "— will it actually help THIS student understand what went wrong and improve? "
+        "This is NOT about raw chess strength, NOT about length or eloquence, and NOT "
+        "about whether engine numbers are quoted (a good coach never quotes them).\n\n"
+        "Also score each response on three 0/1/2 dimensions:\n"
+        "- tier_calibration: ideas + depth fit the tier (simpler for beginners).\n"
+        "- clarity: plain, well-organized, encouraging, easy to act on.\n"
+        "- correctness: claims about the board/threats match the verified facts; "
+        "the recommended move is sound. Contradicting the verified facts lowers this.\n\n"
+        "The verified facts are for YOUR grading only; do not reward a response merely "
+        "for restating them. Return ONLY a single JSON object, no prose, of the form:\n"
+        '{"ranking": ["<best label>", "...", "<worst label>"], '
+        '"scores": {' + scores_example + '}, '
+        '"note": "<one short sentence>"}'
+    )
+
+
+#: Default five-way judge system prompt (backwards-compatible module constant).
+_JUDGE_SYSTEM = build_judge_system()
 
 
 def _reference_block(scn: Dict[str, Any]) -> str:
@@ -224,12 +249,16 @@ def run_council(
         for jk in judge_keys
     }
 
+    # Size the judge system prompt to the current field (5-way by default, more
+    # when a driver sets a larger MODEL_ORDER/ANON_LABELS for a unified ranking).
+    system = build_judge_system()
+
     ok = fail = done_n = 0
 
     def _task(item: Tuple[Dict[str, Any], str, Dict[str, str], Dict[str, str], str]):
         scn, cond, mapping, outputs, jk = item
         user = _build_judge_user(scn, mapping, outputs)
-        text, usage = judges[jk].complete(_JUDGE_SYSTEM, user)
+        text, usage = judges[jk].complete(system, user)
         ranking, scores, note = parse_judge(text)
         return item, ranking, scores, note, usage
 

@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chess-Coach Benchmark — OURS-v2 vs Frontier (tier-appropriate coaching + table-stakes + faithfulness head-to-head)</title>
+<style>
+:root{
+  --bg:#0b0d12; --panel:#12151d; --panel2:#171b25; --line:#242a38; --line2:#2f3646;
+  --ink:#e8ecf4; --muted:#9aa4b8; --dim:#6b7488;
+  --accent:#6ea8fe; --good:#33c27f; --warn:#f2b04a; --bad:#f2685f; --ours:#8b7bff;
+  --chip:#1c2130;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:radial-gradient(1200px 600px at 80% -10%, #16233b 0%, transparent 55%), var(--bg);
+  color:var(--ink);
+  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin-inline:auto;padding:32px 22px 72px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.eyebrow{letter-spacing:.14em;text-transform:uppercase;font-size:12px;color:var(--muted);font-weight:600}
+h1{font-size:30px;line-height:1.15;margin:8px 0 6px;font-weight:750;letter-spacing:-.02em}
+h1 .sub{color:var(--muted);font-weight:600}
+.framing{font-size:16.5px;color:var(--ink);font-weight:650;max-width:80ch;margin:6px 0 10px;letter-spacing:-.01em}
+.framing b{color:var(--ours)}
+.framing b.ts{color:var(--good)}
+.lede{color:var(--muted);font-size:15px;max-width:82ch;margin:0 0 18px}
+.pill{display:inline-block;padding:3px 10px;border:1px solid var(--line2);border-radius:999px;background:var(--chip);color:var(--muted);font-size:12.5px;margin:0 6px 6px 0}
+.pill b{color:var(--ink)}
+.pill.cur{border-color:rgba(51,194,127,.5);background:rgba(51,194,127,.12);color:#a7e9c9}
+.controls{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;margin:14px 0 2px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.controls .lbl{font-size:12px;color:var(--muted);font-weight:600;margin-right:2px}
+h2{font-size:20px;margin:38px 0 4px;letter-spacing:-.01em}
+h2 .sub{color:var(--muted);font-weight:600;font-size:15px}
+h3{font-size:14.5px;margin:0 0 4px;font-weight:650}
+.hint{color:var(--muted);font-size:13.5px;margin:0 0 14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:12px;margin:16px 0 6px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 15px}
+.kpi .k{font-size:12px;color:var(--muted);font-weight:600}
+.kpi .v{font-size:26px;font-weight:750;margin-top:4px;letter-spacing:-.02em}
+.kpi .d{font-size:12.5px;color:var(--muted);margin-top:3px}
+.v.good{color:var(--good)} .v.bad{color:var(--bad)} .v.accent{color:var(--accent)} .v.ours{color:var(--ours)} .v.warn{color:var(--warn)}
+.arrow{color:var(--dim);font-weight:600}
+.toggle{display:inline-flex;border:1px solid var(--line2);border-radius:10px;overflow:hidden;margin:2px 0}
+.toggle button{background:transparent;color:var(--muted);border:0;padding:7px 14px;font:inherit;font-size:13.5px;cursor:pointer}
+.toggle button.on{background:var(--accent);color:#08101f;font-weight:650}
+.toggle.ver button.on{background:var(--ours);color:#0a0713}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 4px;overflow-x:auto}
+/* headline hero — the moat */
+.hero{border:1px solid rgba(139,123,255,.55);background:rgba(139,123,255,.06);border-radius:16px;padding:16px 18px 20px;margin:14px 0 6px}
+.hero-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:2px}
+.hero .eyebrow{color:#b7abff}
+.hero h2{margin:6px 0 4px}
+.hero .kpi{background:var(--panel2)}
+.stakes-band{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7be3b1;background:rgba(51,194,127,.1);border:1px solid rgba(51,194,127,.32);border-radius:8px;padding:3px 10px;margin-bottom:2px}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:9px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+thead th{color:var(--muted);font-weight:600;font-size:12.5px;border-bottom:1px solid var(--line2)}
+tbody tr:last-child td{border-bottom:0}
+tr.ours td{background:rgba(139,123,255,.09)}
+tr.ours td:first-child{box-shadow:inset 3px 0 0 var(--ours)}
+tr.good td{background:rgba(51,194,127,.07)}
+.mname{font-weight:600}
+.mtag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;margin-left:7px;vertical-align:1px}
+.mtag.ours{background:rgba(139,123,255,.18);color:#c3baff}
+.mtag.local{background:rgba(51,194,127,.16);color:#7be3b1}
+.mtag.frontier{background:rgba(110,168,254,.15);color:#a9cbff}
+.g{color:var(--good)} .b{color:var(--bad)} .w{color:var(--warn)} .mut{color:var(--muted)}
+.bars{display:grid;gap:9px;margin-top:6px}
+.barrow{display:grid;grid-template-columns:200px 1fr 96px;align-items:center;gap:12px}
+.barrow .nm{font-size:13.5px}
+.track{background:var(--panel2);border:1px solid var(--line);border-radius:8px;height:22px;position:relative;overflow:hidden}
+.fill{height:100%;border-radius:7px 0 0 7px;background:linear-gradient(90deg,#3b6fd6,#6ea8fe)}
+.fill.ours{background:linear-gradient(90deg,#5a49c7,#8b7bff)}
+.barrow .val{font-size:13px;text-align:right;font-weight:650;color:var(--muted)}
+.barrow .val.g{color:var(--good)} .barrow .val.b{color:var(--bad)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:820px){.two{grid-template-columns:1fr}.barrow{grid-template-columns:120px 1fr 80px}}
+.note{color:var(--muted);font-size:13px;margin-top:10px}
+.callout{border-radius:13px;padding:14px 16px;margin:16px 0;border:1px solid var(--line2);background:linear-gradient(180deg,#161b26,#12151d)}
+.callout .ct{font-weight:700;color:#fff;margin-bottom:5px;font-size:14.5px}
+.callout.info{border-color:rgba(110,168,254,.4);background:rgba(110,168,254,.07)}
+.callout.good{border-color:rgba(51,194,127,.4);background:rgba(51,194,127,.08)}
+.callout.warn{border-color:rgba(242,176,74,.4);background:rgba(242,176,74,.07)}
+.callout p{margin:0;color:#cfd6e6;font-size:13.8px}
+.callout b{color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin:6px 0 2px;font-size:13px;color:var(--muted)}
+.legend .it{display:flex;align-items:center;gap:7px}
+.legend .sw{width:13px;height:13px;border-radius:3px;flex-shrink:0}
+.legend .dot{width:9px;height:9px;border-radius:99px;flex-shrink:0}
+/* head-to-head */
+.hh-nav{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 14px}
+.hh-nav a{font-size:12px;padding:4px 9px;border:1px solid var(--line2);border-radius:8px;background:var(--chip);color:var(--muted)}
+.hh-nav a:hover{border-color:var(--accent);text-decoration:none;color:var(--ink)}
+.hh-item{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:16px;margin:14px 0}
+.hh-head{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px}
+.chip{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:7px;padding:2px 9px;margin:0;color:var(--ink);font-size:12.5px}
+.chip.tier{text-transform:capitalize;border-color:var(--line2)}
+.chip.mv{background:rgba(139,123,255,.14);border-color:rgba(139,123,255,.4);color:#cdc3ff}
+.hh-facts{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 13px;margin-bottom:12px}
+@media(max-width:640px){.hh-facts{grid-template-columns:1fr}}
+pre.board{font:12.5px/1.3 ui-monospace,Menlo,monospace;background:#0d1017;border:1px solid var(--line);color:#cbd3e4;padding:10px 12px;border-radius:9px;display:inline-block;margin:0}
+.hh-fsum{font-size:13.5px;color:#dbe1ee}
+.hh-fsum .k{color:var(--good);font-weight:700}
+.hh-facts details{margin-top:9px}
+.hh-facts summary{cursor:pointer;color:var(--accent);font-size:12.5px}
+pre.facts{font:12px/1.4 ui-monospace,Menlo,monospace;white-space:pre-wrap;background:#0d1017;border:1px solid var(--line);color:#aeb8cc;padding:10px 12px;border-radius:9px;margin:8px 0 0}
+.hh-models{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+@media(max-width:760px){.hh-models{grid-template-columns:1fr}}
+.hh-model{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:var(--panel2)}
+.hh-model.ours{grid-column:1 / -1;border-color:rgba(139,123,255,.5);background:rgba(139,123,255,.06)}
+.hh-model.frontier{border-color:rgba(110,168,254,.28)}
+.hh-mh{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
+.hh-mh .mname{font-size:13.5px}
+.hh-rec{font-size:11.5px;color:var(--muted);margin-left:auto}
+.hh-badge{font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:6px}
+.hh-badge.faithful{background:rgba(51,194,127,.16);color:#7be3b1}
+.hh-badge.fab{background:rgba(242,104,95,.16);color:#f4a29c}
+.hh-txt{color:#dbe1ee;font-size:13.5px;line-height:1.5}
+mark.false{background:rgba(242,104,95,.26);color:#ffd9d5;border-bottom:2px solid var(--bad);border-radius:2px;padding:0 2px}
+.hh-flag{margin-top:8px;font-size:12.5px;color:#f4cd8c;background:rgba(242,176,74,.09);border:1px solid rgba(242,176,74,.32);border-radius:8px;padding:7px 10px}
+.hh-flag b{color:#ffdd9e}
+/* viewer */
+.viewer{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.vbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+.vbar button{background:var(--panel2);color:var(--ink);border:1px solid var(--line2);border-radius:9px;padding:7px 13px;font:inherit;font-size:13.5px;cursor:pointer}
+.vbar button:hover{border-color:var(--accent)}
+.vbar .prog{color:var(--muted);font-size:13px}
+.vbar select{background:var(--panel2);color:var(--ink);border:1px solid var(--line2);border-radius:9px;padding:6px 10px;font:inherit;font-size:13px}
+.vmeta{color:var(--muted);font-size:13px;margin-bottom:10px}
+.vmeta .chip{margin:0 6px 6px 0}
+.resp{border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin:10px 0;background:var(--panel2)}
+.resp .rh{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.resp .lab{font-weight:750;font-size:13px;width:20px;height:20px;display:inline-grid;place-items:center;background:var(--chip);border:1px solid var(--line2);border-radius:6px}
+.resp .who{font-size:12px;font-weight:700;padding:1px 7px;border-radius:6px;display:none}
+.resp.revealed .who{display:inline-block}
+.resp .txt{color:#dbe1ee;font-size:14px;white-space:pre-wrap}
+.badge{font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;display:none}
+.resp.revealed .badge{display:inline-block}
+.badge.snd{background:rgba(51,194,127,.16);color:#7be3b1}
+.badge.uns{background:rgba(242,104,95,.16);color:#f4a29c}
+.badge.fab{background:rgba(242,176,74,.16);color:#f4cd8c}
+.footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+.footer a{color:var(--accent)}
+.warnbox{background:rgba(242,176,74,.08);border:1px solid rgba(242,176,74,.35);border-radius:10px;padding:11px 13px;color:#f4cd8c;font-size:13.5px}
+</style>
+</head>
+<body><div class="wrap">
+
+<div class="eyebrow">Evaluation dashboard</div>
+<h1>Chess-Coach Benchmark <span class="sub">— OURS-v2 vs frontier</span></h1>
+<p class="framing">We optimize for <b>tier-appropriate move selection</b>; safety, no-jargon, and faithfulness are <b class="ts">table-stakes</b> (faithfulness is verifier-guaranteed).</p>
+<p class="lede">A 1.7B <b>on-device</b> chess-coaching fine-tune benchmarked head-to-head against GPT-5.5, Claude Opus 4.8, and Gemini 3.1 Pro on <b>100 held-out positions</b>, in two conditions (with / without engine grounding), scored by <b>deterministic</b> objective verifiers <b>and</b> a blinded cross-family LLM council. <b>v2 is the current shipped model</b>; v1 is the matched baseline (same 100 positions). Every model saw the byte-identical grounded input.</p>
+<div>
+  <span class="pill cur"><b>v2</b> current</span>
+  <span class="pill"><b>5</b> models &times; <b>2</b> conditions &times; <b>100</b> positions</span>
+  <span class="pill"><b>1000</b> generations</span>
+  <span class="pill"><b>600</b> council judgments</span>
+  <span class="pill"><b>6</b> faithfulness face-offs</span>
+</div>
+
+<div class="controls">
+  <span class="lbl">Model version</span>
+  <div class="toggle ver" id="verTog">
+    <button data-v="v2" class="on">v2 (current)</button>
+    <button data-v="v1">v1 (baseline)</button>
+  </div>
+  <span class="lbl" style="margin-left:10px">Condition</span>
+  <div class="toggle" id="objTog">
+    <button data-c="grounded" class="on">WITH grounding (deployed)</button>
+    <button data-c="ungrounded">WITHOUT grounding</button>
+  </div>
+</div>
+<p class="hint" style="margin-top:8px">The <b>instructiveness</b> and <b>table-stakes</b> panels follow these toggles. The headline (tier-appropriate move selection) is a separate greedy analysis, independent of the toggles. Grounded = the condition the product actually deploys (Stockfish + Maia in the loop).</p>
+
+<!-- Honest framing -->
+<div class="callout info">
+  <div class="ct">How to read this — honestly</div>
+  <p>OURS-v2 is a 1.7B <b>local</b> model. This ordering reflects what matters for a <b>leveled coach</b>, not a scoreboard we won. It leads on the one thing we train for — <b class="g">tier-appropriate move selection</b> (39.2% vs frontier ~22.7%, now direction-corrected) — and on <b class="g">cost</b> ($0, on-device). It still <b class="b">trails the frontier on judged instructiveness</b> (council rank 3.68 vs ~2.09). Safety, no-jargon and faithfulness are <b>table-stakes</b> floors every competent coach clears; faithfulness is guaranteed at inference by a deterministic <b>verify-and-regenerate</b> gate, so user-visible fabrication is ≈0.</p>
+</div>
+
+<div class="legend">
+  <span class="it"><span class="sw" style="background:var(--ours)"></span>OURS-v2</span>
+  <span class="it"><span class="sw" style="background:var(--dim)"></span>BASE / frontier</span>
+  <span class="it"><span class="dot" style="background:var(--good)"></span>best on this axis</span>
+  <span class="it"><span class="dot" style="background:var(--bad)"></span>weakest on this axis</span>
+</div>
+
+<!-- (a) HEADLINE — the moat -->
+<div class="hero">
+  <div class="hero-top">
+    <span class="eyebrow">What we optimize for</span>
+    <span class="pill" style="margin:0">separate greedy analysis · not affected by the toggles</span>
+  </div>
+  <h2>Tier-appropriate move selection</h2>
+  <p class="hint">Does the coach recommend a <b>different, level-suited</b> move to a beginner vs an advanced player in the <b>same</b> position? This is the moat — a leveled coach, not one-size-fits-all engine output. Higher = more level-awareness. OURS-v2 on 120 matched held-out; frontier on 50 held-out (GAP report).</p>
+  <div class="kpis">
+    <div class="kpi"><div class="k">OURS-v2 · tier-appropriate</div><div class="v ours">39.2%</div><div class="d">120 matched held-out</div></div>
+    <div class="kpi"><div class="k">Frontier average</div><div class="v">~22.7%</div><div class="d">50 held-out (GAP report)</div></div>
+    <div class="kpi"><div class="k">v1 &rarr; v2</div><div class="v good">+11.7 pts</div><div class="d">27.5% &rarr; 39.2% · re-directed</div></div>
+  </div>
+  <div class="panel" style="padding:16px;margin-top:6px"><div class="bars" id="tierBars"></div></div>
+  <div class="callout good">
+    <div class="ct">Direction corrected in v2</div>
+    <p>v1's differentiation was <b>mis-directed</b> — beginners got the sharper engine move. v2 flips it: beginners are steered to the more <b>human-findable</b> move, advanced to the sharpest. So the 39.2% now points the right way.</p>
+  </div>
+  <div class="panel"><table id="tierDirTbl"></table></div>
+</div>
+
+<!-- (b) Instructiveness — the honest axis -->
+<h2>Instructiveness <span class="sub">(blinded, cross-family council)</span></h2>
+<p class="hint">How good is the explanation? GPT-5.5 + Claude + Gemini each rank the 5 <b>anonymized</b> outputs per item. Number = mean rank (1 = best of 5); bar length = more instructive. <b>Frontier still leads</b> — we report it straight.</p>
+<div class="panel" style="padding:16px"><div class="bars" id="rankBars"></div></div>
+<div class="callout info"><div class="ct">Frontier still wins instructiveness</div><p id="gapNote"></p></div>
+<div class="two" style="margin-top:14px">
+  <div class="panel"><table id="winTbl"></table></div>
+  <div class="panel"><table id="rubTbl"></table></div>
+</div>
+
+<!-- (c) TABLE STAKES — the floors -->
+<h2>Table stakes <span class="sub">— every competent coach clears these; not the differentiator</span></h2>
+<p class="hint">Deterministic non-LLM checks — the <b>floor</b>, not the moat. Follows the toggles. n = 100 per model. <span class="mut">Grounded (deployed), every model clears the safety floor at 93–100%.</span></p>
+<div class="two">
+  <div class="panel" style="padding:14px 16px">
+    <h3>Move safety — no blunders (%) <span class="mut" style="font-weight:400">— higher better</span></h3>
+    <p class="hint" style="margin:2px 0 8px">Recommended move is <b>not a blunder</b> (Stockfish cp-loss &lt; 250). A usable coach must not hang pieces. Re-scored blunder-only from the stored picks + engine evals.</p>
+    <div class="bars" id="safeBars"></div>
+  </div>
+  <div class="panel" style="padding:14px 16px">
+    <h3>Fabrication rate (%) <span class="mut" style="font-weight:400">— lower better</span></h3>
+    <p class="hint" style="margin:2px 0 8px">Answer states &ge;1 false board fact (deterministic verifier). This is the <b>raw model</b>; the deployed gate makes what the learner sees ≈0 (see below).</p>
+    <div class="bars" id="fabBars"></div>
+  </div>
+</div>
+<div class="panel" style="margin-top:14px"><table id="objTbl"></table></div>
+<p class="note">No-engine-speak is a solved floor — 100% for every model (Claude 99% ungrounded); ply-cap is likewise 100% for all and omitted here. The real story on this axis is that in the deployed (grounded) condition, <b>nobody blunders much</b>.</p>
+<div class="callout good">
+  <div class="ct">Faithfulness is verifier-guaranteed</div>
+  <p>The grounded fabrication rate above is the <b>raw model</b>. The deployed app runs a <b>verify-and-regenerate gate</b>: re-sample the answer up to 4&times; and keep the first one that passes a deterministic board-fact verifier; if none pass, fall back to an engine-derived explanation that is <b>true by construction</b>. So <b>user-visible fabrication is ≈0</b> — measured 50% &rarr; 0% on the grounded-fabrication cases tested. Sources: <span class="mut">src/api/server.py, src/engine/faithfulness.py, VERIFIER_EVAL.md</span>.</p>
+</div>
+
+<!-- Same-input faithfulness head-to-head (the fabrication number, made concrete) -->
+<h2>Same-input faithfulness head-to-head <span class="pill cur" style="vertical-align:3px">v2 · real outputs</span></h2>
+<p class="hint">The raw fabrication number, made concrete. Below are <b id="hhCount">6</b> grounded positions where <b>every model received the byte-identical VERIFIED-FACTS input</b> and <b>all four models recommend the same move</b> — yet OURS-v2 states a <b class="b">demonstrably false board fact</b> in its explanation while all three frontier models stay faithful. The false sentence is <mark class="false">highlighted</mark> and named by the deterministic verifier. This is the raw-model failure the production verify-and-regenerate gate catches before it reaches a learner. Text is verbatim from <span class="mut">generations.jsonl</span>; flags from <span class="mut">objective.jsonl</span>.</p>
+<div class="hh-nav" id="hhNav"></div>
+<div id="hhBody"><div class="warnbox">Loading head-to-head…</div></div>
+
+<h2>v1 &rarr; v2 improvement <span class="sub">(OURS, grounded)</span></h2>
+<p class="hint">Matched comparison on the same 100 held-out positions (grounded = deployed). Every measured axis moved the right way.</p>
+<div class="panel"><table id="deltaTbl"></table></div>
+<p class="note" id="deltaNote"></p>
+
+<h2>Cost — 100-position benchmark run</h2>
+<p class="hint">Generation + council-judge API spend for this run. OURS and BASE run locally on Apple-silicon MLX ($0). Lower is better.</p>
+<div class="panel" style="padding:16px"><div class="bars" id="costBars"></div></div>
+<div class="panel" style="margin-top:14px"><table id="costTbl"></table></div>
+
+<h2>Bias / self-preference check</h2>
+<p class="hint">Mean rank each judge gives each model (pooled across conditions). A judge favoring its own lab shows a <b>lower</b> number in its own column (marked &#9733;).</p>
+<div class="panel"><table id="biasTbl"></table></div>
+<p class="note" id="biasNote"></p>
+
+<h2>Blinded example viewer</h2>
+<p class="hint">Step through the exact anonymized items the council ranked (version follows the toggle above). Reveal to see which lab wrote each A–E answer, plus the objective flags.</p>
+<div class="viewer" id="viewer">
+  <div class="vbar">
+    <button id="prev">&larr; Prev</button>
+    <button id="next">Next &rarr;</button>
+    <select id="condSel"><option value="grounded">grounded</option><option value="ungrounded">ungrounded</option></select>
+    <button id="reveal">Reveal models</button>
+    <button id="rand">Random</button>
+    <span class="prog" id="vprog"></span>
+  </div>
+  <div id="vbody"><div class="warnbox">Loading examples…</div></div>
+</div>
+
+<div class="footer">
+  <p><b>v2 current.</b> Model: <a href="https://huggingface.co/khoilamalphaai/qwen3-1.7b-chess-coach-mlx">qwen3-1.7b-chess-coach-mlx</a>
+  · Dataset &amp; artifacts: <a href="https://huggingface.co/datasets/khoilamalphaai/chess-coach-benchmark">chess-coach-benchmark</a>
+  · Raw blinded labeling sheet: <a href="blind_label.html">v2</a> / <a href="blind_label_v1.html">v1</a>
+  · This Space displays numbers only — no runtime/GPU.</p>
+  <p class="mut">Objective checks are deterministic; council instructiveness is an LLM-judge proxy (blinded, cross-family, self-preference measured). "Move safety" is re-scored blunder-only (cp-loss &ge; 250) from the stored picks + Stockfish — a pick is safe unless it is a blunder. Ungrounded fabrication rose 87%&rarr;99% (the concreteness trade); the product always runs grounded with an inference-time verify-and-regenerate gate. Sources: <span class="mut">results.json, move_safety.json, divergence_compare_v2.json, GAP_REPORT.md, VERIFIER_EVAL.md</span>.</p>
+</div>
+
+<script>
+const DATA = __DATA__;
+const TIERDIFF = __TIERDIFF__;
+const HEADTOHEAD = __HEADTOHEAD__;
+
+let ver = "v2", cond = "grounded";
+const A = () => DATA[ver];
+const ML = () => A().meta.models;
+const ORDER = () => A().meta.model_order;
+const SHORT = {ours:"OURS", base:"BASE", gpt:"GPT-5.5", claude:"Claude", gemini:"Gemini"};
+const pct = x => Math.round(x*100)+"%";
+const pct1 = x => (x*100).toFixed(1)+"%";
+const f2 = x => Number(x).toFixed(2);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const tagFor = m => m==="ours" ? '<span class="mtag ours">OURS · on-device</span>'
+  : m==="base" ? '<span class="mtag local">local</span>' : '<span class="mtag frontier">frontier</span>';
+// move_safe was layered on by scripts/space/assemble.py; fall back to move_sound if absent.
+const safeVal = (O,m,c) => (O.move_safe ? O.move_safe[m][c] : O.move_sound[m][c]);
+
+/* ---- generic horizontal bars: identity color = OURS accent; value color = best/worst ---- */
+function renderBars(el, rows, max, dir){
+  const vals = rows.map(r=>r.value);
+  const best = dir==="higher" ? Math.max(...vals) : Math.min(...vals);
+  const worst = dir==="higher" ? Math.min(...vals) : Math.max(...vals);
+  let h="";
+  for(const r of rows){
+    const w = max>0 ? Math.max(1.5, Math.min(100, (r.value/max)*100)) : 0;
+    let vc=""; if(best!==worst && r.value===best) vc="g"; else if(best!==worst && r.value===worst) vc="b";
+    h+=`<div class="barrow"><div class="nm">${r.name} ${r.isOurs?tagFor("ours"):(r.tag||"")}</div>`+
+       `<div class="track"><div class="fill ${r.isOurs?'ours':''}" style="width:${w.toFixed(1)}%"></div></div>`+
+       `<div class="val ${vc}">${r.display}</div></div>`;
+  }
+  el.innerHTML=h;
+}
+
+/* ---- Table stakes: move safety + fabrication bars ---- */
+function objBars(){
+  const O=A().objective;
+  const safe=ORDER().map(m=>({name:SHORT[m],value:safeVal(O,m,cond),display:pct(safeVal(O,m,cond)),isOurs:m==="ours"}));
+  const fb=ORDER().map(m=>({name:SHORT[m],value:O.fabrication_rate[m][cond],display:pct(O.fabrication_rate[m][cond]),isOurs:m==="ours"}));
+  renderBars(document.getElementById("safeBars"), safe, 1, "higher");
+  renderBars(document.getElementById("fabBars"), fb, 1, "lower");
+}
+function objTable(){
+  const O=A().objective;
+  let h='<thead><tr><th>Model</th><th>move safety &uarr;</th><th>no engine-speak &uarr;</th><th>fabrication &darr;</th><th>avg viol.</th><th>n</th></tr></thead><tbody>';
+  for(const m of ORDER()){
+    const sa=safeVal(O,m,cond), ns=O.no_engine_speak[m][cond],
+          fb=O.fabrication_rate[m][cond], av=O.avg_violations[m][cond];
+    h+=`<tr class="${m==='ours'?'ours':''}"><td class="mname">${ML()[m]} ${tagFor(m)}</td>`+
+       `<td class="${sa>=0.99?'g':(sa<0.9?'b':'w')}">${pct(sa)}</td>`+
+       `<td class="${ns>=1?'g':'w'}">${pct(ns)}</td>`+
+       `<td class="${fb<=0.06?'g':(fb>=0.3?'b':'w')}">${pct(fb)}</td>`+
+       `<td class="mut">${f2(av)}</td><td class="mut">100</td></tr>`;
+  }
+  document.getElementById('objTbl').innerHTML=h+'</tbody>';
+}
+
+/* ---- Council ---- */
+function rankBars(){
+  const MR=A().council.mean_rank;
+  const rows=ORDER().map(m=>({m, r:MR[m][cond]})).sort((a,b)=>a.r-b.r);
+  const best=Math.min(...rows.map(r=>r.r)), worst=Math.max(...rows.map(r=>r.r));
+  let h='';
+  for(const {m,r} of rows){
+    const w=Math.max(2,((5-r)/4)*100);
+    const vc = r===best?'g':(r===worst?'b':'');
+    h+=`<div class="barrow"><div class="nm">${ML()[m]} ${tagFor(m)}</div>`+
+       `<div class="track"><div class="fill ${m==='ours'?'ours':''}" style="width:${w.toFixed(1)}%"></div></div>`+
+       `<div class="val ${vc}">rank ${f2(r)}</div></div>`;
+  }
+  document.getElementById('rankBars').innerHTML=h;
+}
+function councilGap(){
+  const MR=A().council.mean_rank;
+  const our=MR.ours[cond], fb=Math.min(MR.gpt[cond],MR.claude[cond],MR.gemini[cond]);
+  document.getElementById('gapNote').innerHTML =
+    `OURS-v2 mean rank <b>${f2(our)}</b> vs the best frontier model <b>${f2(fb)}</b> — a gap of <b>+${(our-fb).toFixed(2)}</b>. `+
+    `We are <b>closing</b> it (grounded gap v1 +2.22 &rarr; v2 +1.60), not winning it. The reorder reflects what matters for a leveled coach, not a scoreboard we won.`;
+}
+function winTable(){
+  const W=A().council.win_rate;
+  const rows=ORDER().map(m=>({m,v:W[m][cond]})).sort((a,b)=>b.v-a.v);
+  let h='<thead><tr><th>Model</th><th>top-1 win% (share judged best)</th></tr></thead><tbody>';
+  for(const {m,v} of rows) h+=`<tr class="${m==='ours'?'ours':''}"><td class="mname">${ML()[m]}</td><td>${pct1(v)}</td></tr>`;
+  document.getElementById('winTbl').innerHTML=h+'</tbody>';
+}
+function rubTable(){
+  const R=A().council.rubric;
+  let h='<thead><tr><th>Model</th><th>tier_cal</th><th>clarity</th><th>correct</th></tr></thead><tbody>';
+  for(const m of ORDER()) h+=`<tr class="${m==='ours'?'ours':''}"><td class="mname">${ML()[m]}</td>`+
+     `<td>${f2(R.tier_calibration[m][cond])}</td><td>${f2(R.clarity[m][cond])}</td><td>${f2(R.correctness[m][cond])}</td></tr>`;
+  document.getElementById('rubTbl').innerHTML=h+'</tbody>';
+}
+
+/* ---- Bias ---- */
+function biasTable(){
+  const P=A().council.by_judge_pooled_mean_rank, J=A().meta.judges;
+  let h='<thead><tr><th>Model \\ Judge</th>'+J.map(j=>`<th>${SHORT[j]}</th>`).join('')+'</tr></thead><tbody>';
+  for(const m of ORDER()){
+    h+=`<tr class="${m==='ours'?'ours':''}"><td class="mname">${ML()[m]}</td>`;
+    for(const j of J){ const v=P[j][m]; const own=(j===m); h+=`<td class="${own?'g':''}">${f2(v)}${own?' &#9733;':''}</td>`; }
+    h+='</tr>';
+  }
+  document.getElementById('biasTbl').innerHTML=h+'</tbody>';
+  const sp=A().council.self_preference;
+  document.getElementById('biasNote').innerHTML=
+    `Mean signed self-preference across judges: <b>+${sp._mean_signed_delta.toFixed(2)}</b> rank (positive = judges favor their own lab). `+
+    `Per judge &Delta; (peers &minus; own): GPT-5.5 +${sp.gpt.self_pref_delta.toFixed(2)}, Claude +${sp.claude.self_pref_delta.toFixed(2)}, Gemini +${sp.gemini.self_pref_delta.toFixed(2)}. Small next to the coaching gap.`;
+}
+
+/* ---- Cost ---- */
+function costBars(){
+  const C=A().cost.per_model;
+  const rows=ORDER().map(m=>({name:SHORT[m],value:C[m].total_cost_usd,display:"$"+C[m].total_cost_usd.toFixed(2),isOurs:m==="ours"}))
+                    .sort((a,b)=>a.value-b.value);
+  const maxv=Math.max(...rows.map(r=>r.value));
+  renderBars(document.getElementById("costBars"), rows, maxv||1, "lower");
+}
+function costTable(){
+  const C=A().cost.per_model;
+  let h='<thead><tr><th>Model</th><th>gen calls</th><th>judge calls</th><th>in tok</th><th>out tok</th><th>est. USD</th></tr></thead><tbody>';
+  for(const m of ORDER()){
+    const c=C[m];
+    const intok=(c.gen_prompt_tokens||0)+(c.judge_prompt_tokens||0), outtok=(c.gen_completion_tokens||0)+(c.judge_completion_tokens||0);
+    const free=c.total_cost_usd===0;
+    h+=`<tr class="${m==='ours'?'ours':''}"><td class="mname">${ML()[m]} ${tagFor(m)}</td>`+
+       `<td class="mut">${c.gen_calls}</td><td class="mut">${c.judge_calls}</td>`+
+       `<td class="mut">${intok.toLocaleString()}</td><td class="mut">${outtok.toLocaleString()}</td>`+
+       `<td class="${free?'g':''}">$${c.total_cost_usd.toFixed(2)}</td></tr>`;
+  }
+  h+=`<tr><td class="mname"><b>Total</b></td><td colspan="4"></td><td><b>$${A().cost.total_cost_usd.toFixed(2)}</b></td></tr>`;
+  document.getElementById('costTbl').innerHTML=h+'</tbody>';
+}
+
+/* ---- Tier-appropriateness (v2 vs frontier; independent of toggles) ---- */
+function tierSection(){
+  const rows=[
+    {name:"OURS-v2", value:39.2, display:"39.2%", isOurs:true, tag:'<span class="mtag ours">120 matched</span>'},
+    {name:"GPT-5.5", value:24.0, display:"24.0%", isOurs:false, tag:'<span class="mtag frontier">50 held-out</span>'},
+    {name:"Claude Opus 4.8", value:24.0, display:"24.0%", isOurs:false, tag:'<span class="mtag frontier">50 held-out</span>'},
+    {name:"Gemini 3.1 Pro", value:20.0, display:"20.0%", isOurs:false, tag:'<span class="mtag frontier">50 held-out</span>'},
+  ];
+  renderBars(document.getElementById("tierBars"), rows, 45, "higher");
+  const dir=[
+    ["Beginner pick pool-rank (findable — higher better)","0.43","0.78"],
+    ["Advanced pick pool-rank (sharp — lower better)","0.62","0.45"],
+    ["Beginner move == human/Maia top","39.2%","61.7%"],
+    ["Direction (beginner more findable than advanced)","Wrong","Correct"],
+  ];
+  let h='<thead><tr><th>Move-selection direction (OURS)</th><th>v1</th><th>v2</th></tr></thead><tbody>';
+  for(const r of dir){
+    const good = r[2]==="Correct" ? '<span class="g">Correct</span>' : r[2];
+    h+=`<tr class="good"><td>${r[0]}</td><td class="mut">${r[1]}</td><td>${good}</td></tr>`;
+  }
+  document.getElementById('tierDirTbl').innerHTML=h+'</tbody>';
+}
+
+/* ---- v1 -> v2 delta ---- */
+function deltaTable(){
+  const g=DATA.v1, h2=DATA.v2;
+  const rows=[
+    ["Tier-differentiation (higher better)", pct1(TIERDIFF.v1), pct1(TIERDIFF.v2), "+11.7 pts"],
+    ["Council mean rank (1 = best)", f2(g.council.mean_rank.ours.grounded), f2(h2.council.mean_rank.ours.grounded), "-0.45"],
+    ["Fabrication rate (lower better)", pct(g.objective.fabrication_rate.ours.grounded), pct(h2.objective.fabrication_rate.ours.grounded), "-17 pts"],
+    ["Move safety — no blunders (higher better)", pct(safeVal(g.objective,"ours","grounded")), pct(safeVal(h2.objective,"ours","grounded")), "+2 pts"],
+    ["Top-1 council win rate", pct(g.council.win_rate.ours.grounded), pct(h2.council.win_rate.ours.grounded), "+6 pts"],
+  ];
+  let h='<thead><tr><th>Metric (OURS, grounded)</th><th>v1</th><th>v2</th><th>Change</th></tr></thead><tbody>';
+  for(const r of rows) h+=`<tr class="good"><td>${r[0]}</td><td class="mut">${r[1]}</td><td>${r[2]}</td><td class="g">${r[3]}</td></tr>`;
+  document.getElementById('deltaTbl').innerHTML=h+'</tbody>';
+  const gap1=DATA.v1.council.mean_rank.ours.grounded-Math.min(DATA.v1.council.mean_rank.gpt.grounded,DATA.v1.council.mean_rank.claude.grounded,DATA.v1.council.mean_rank.gemini.grounded);
+  const gap2=DATA.v2.council.mean_rank.ours.grounded-Math.min(DATA.v2.council.mean_rank.gpt.grounded,DATA.v2.council.mean_rank.claude.grounded,DATA.v2.council.mean_rank.gemini.grounded);
+  document.getElementById("deltaNote").innerHTML=
+    `Gap to the best frontier model (grounded council rank) narrows <b>+${gap1.toFixed(2)} &rarr; +${gap2.toFixed(2)}</b>. `+
+    `<b>Honest caveat:</b> ungrounded, v2 is <b>more</b> brittle (fabrication ${pct(DATA.v1.objective.fabrication_rate.ours.ungrounded)} &rarr; ${pct(DATA.v2.objective.fabrication_rate.ours.ungrounded)}) because it teaches more concretely; the product always runs <b>grounded</b> with an inference-time verifier.`;
+}
+
+/* ---- Same-input faithfulness head-to-head ---- */
+function highlightFalse(text, viols){
+  let out = esc(text);
+  for(const v of (viols||[])){
+    const needle = esc(v.sentence);
+    if(out.includes(needle)) out = out.split(needle).join(`<mark class="false">${needle}</mark>`);
+  }
+  return out;
+}
+function hhModelCard(m, key){
+  const cls = key==="ours" ? "ours" : (key==="base" ? "base" : "frontier");
+  const fab = m.fabricated;
+  const badge = fab
+    ? `<span class="hh-badge fab">fabricates ${m.violations.length||1} fact${(m.violations.length>1)?'s':''}</span>`
+    : `<span class="hh-badge faithful">faithful · 0 false facts</span>`;
+  const rec = `<span class="hh-rec">move: <b>${esc(m.rec_san||"?")}</b> ${m.move_sound?'✓ sound':'✗ unsound'}</span>`;
+  const body = highlightFalse(m.output, m.violations);
+  let flag="";
+  if(fab && m.violations.length){
+    flag = `<div class="hh-flag"><b>Verifier-flagged false claim:</b> “${esc(m.violations[0].sentence)}” — <b>${esc(m.violations[0].reason)}</b>`+
+           (m.violations.length>1?` <span class="mut">(+${m.violations.length-1} more)</span>`:"")+`</div>`;
+  }
+  return `<div class="hh-model ${cls}"><div class="hh-mh"><span class="mname">${esc(m.name)}</span> ${key==="ours"?tagFor("ours"):(key==="base"?tagFor("base"):tagFor("gpt"))} ${badge} ${rec}</div>`+
+         `<div class="hh-txt">${body}</div>${flag}</div>`;
+}
+function renderHeadToHead(){
+  document.getElementById("hhCount").textContent = HEADTOHEAD.length;
+  let nav="";
+  HEADTOHEAD.forEach((it,i)=>{ nav+=`<a href="#hh${i}">${i+1}. ${it.tier}/${it.phase}</a>`; });
+  document.getElementById("hhNav").innerHTML=nav;
+  const modelOrder=["ours","gpt","claude","gemini","base"];
+  let h="";
+  HEADTOHEAD.forEach((it,i)=>{
+    const recs=[it.models.ours,it.models.gpt,it.models.claude,it.models.gemini].map(m=>m.rec_san);
+    const allSame = recs.every(r=>r===recs[0]);
+    const mvChip = allSame
+      ? `<span class="chip mv">all four models recommend <b>${esc(recs[0])}</b> — only the explanations differ</span>`
+      : `<span class="chip mv">OURS plays <b>${esc(it.models.ours.rec_san)}</b></span>`;
+    h+=`<div class="hh-item" id="hh${i}">`+
+       `<div class="hh-head"><span class="chip tier">${esc(it.tier)}</span><span class="chip">${esc(it.phase)}</span>`+
+       `<span class="chip">${esc(it.severity)}</span><span class="chip">student played <b>${esc(it.student_move_san)}</b></span>`+
+       `<span class="chip">${esc(it.side_to_move)} to move</span>${mvChip}</div>`+
+       `<div class="hh-facts"><pre class="board">${esc(it.board_ascii)}</pre>`+
+       `<div><div class="hh-fsum"><span class="k">Identical grounded input →</span> ${esc(it.facts_summary)}</div>`+
+       `<details><summary>Show the exact VERIFIED-FACTS block all 5 models received</summary><pre class="facts">${esc(it.facts_full)}</pre></details></div></div>`+
+       `<div class="hh-models">`+ modelOrder.map(k=>hhModelCard(it.models[k],k)).join("") +`</div></div>`;
+  });
+  document.getElementById("hhBody").innerHTML=h;
+}
+
+/* ---- render pipeline ---- */
+function renderToggled(){ objBars(); objTable(); rankBars(); councilGap(); winTable(); rubTable(); biasTable(); costBars(); costTable(); }
+function renderStatic(){ tierSection(); deltaTable(); renderHeadToHead(); }
+
+document.querySelectorAll('#objTog button').forEach(b=>b.onclick=()=>{
+  cond=b.dataset.c;
+  document.querySelectorAll('#objTog button').forEach(x=>x.classList.toggle('on',x===b));
+  renderToggled();
+});
+document.querySelectorAll('#verTog button').forEach(b=>b.onclick=()=>{
+  ver=b.dataset.v;
+  document.querySelectorAll('#verTog button').forEach(x=>x.classList.toggle('on',x===b));
+  renderToggled(); loadViewer();
+});
+renderToggled();
+renderStatic();
+
+/* ---------- Blinded example viewer (version-aware) ---------- */
+const MODEL_COLOR={ours:'#8b7bff',base:'#33c27f',gpt:'#6ea8fe',claude:'#f2b04a',gemini:'#f4a29c'};
+let ITEMS=[], KEY={}, OBJ={}, idx=0, revealed=false, viewList=[];
+function objKey(sid,model,cnd){return sid+'::'+model+'::'+cnd;}
+async function loadViewer(){
+  ITEMS=[];KEY={};OBJ={};idx=0;
+  document.getElementById('vbody').innerHTML='<div class="warnbox">Loading examples…</div>';
+  try{
+    const [bl,bk,ob]=await Promise.all([
+      fetch(`blind_label_${ver}.jsonl`).then(r=>{if(!r.ok)throw 0;return r.text();}),
+      fetch(`blind_key_${ver}.json`).then(r=>r.ok?r.json():{}),
+      fetch(`objective_${ver}.jsonl`).then(r=>r.ok?r.text():'')
+    ]);
+    ITEMS=bl.trim().split('\n').map(l=>JSON.parse(l));
+    KEY=bk||{};
+    if(ob){for(const l of ob.trim().split('\n')){const o=JSON.parse(l);OBJ[objKey(o.scenario_id,o.model,o.condition)]=o;}}
+    filterCond();
+  }catch(e){
+    document.getElementById('vbody').innerHTML='<div class="warnbox">Couldn\'t load the example files here. Browse them in the <a href="https://huggingface.co/datasets/khoilamalphaai/chess-coach-benchmark">dataset viewer</a> instead.</div>';
+  }
+}
+function filterCond(){
+  const c=document.getElementById('condSel').value;
+  viewList=ITEMS.filter(it=>it.condition===c);
+  idx=0; renderItem();
+}
+function renderItem(){
+  if(!viewList.length){document.getElementById('vprog').textContent='';return;}
+  const it=viewList[idx];
+  const key=KEY[it.item_id]||{};
+  document.getElementById('vprog').textContent=`item ${idx+1} / ${viewList.length} · ${ver}`;
+  let h=`<div class="vmeta"><span class="chip">${it.tier}</span><span class="chip">${it.phase}</span><span class="chip">${it.severity}</span>`+
+        `<span class="chip">student played <b>${it.student_move_san}</b></span><span class="chip">${it.side_to_move} to move</span></div>`;
+  h+=`<pre class="board">${it.board_ascii.replace(/</g,'&lt;')}</pre>`;
+  for(const r of it.responses){
+    const model=key[r.label];
+    const o=model?OBJ[objKey(it.scenario_id,model,it.condition)]:null;
+    let badges='';
+    if(o){
+      badges+=o.move_sound?'<span class="badge snd">sound move</span>':'<span class="badge uns">unsound move</span>';
+      if(o.fabricated)badges+=' <span class="badge fab">fabricates '+o.n_violations+' fact'+(o.n_violations>1?'s':'')+'</span>';
+    }
+    const who=model?`<span class="who" style="background:${MODEL_COLOR[model]}22;color:${MODEL_COLOR[model]}">${ML()[model]}</span>`:'';
+    h+=`<div class="resp ${revealed?'revealed':''}"><div class="rh"><span class="lab">${r.label}</span>${who} ${badges}</div>`+
+       `<div class="txt">${r.text.replace(/</g,'&lt;')}</div></div>`;
+  }
+  document.getElementById('vbody').innerHTML=h;
+}
+document.getElementById('prev').onclick=()=>{if(viewList.length){idx=(idx-1+viewList.length)%viewList.length;renderItem();}};
+document.getElementById('next').onclick=()=>{if(viewList.length){idx=(idx+1)%viewList.length;renderItem();}};
+document.getElementById('rand').onclick=()=>{if(viewList.length){idx=Math.floor(Math.random()*viewList.length);renderItem();}};
+document.getElementById('condSel').onchange=filterCond;
+document.getElementById('reveal').onclick=()=>{revealed=!revealed;document.getElementById('reveal').textContent=revealed?'Hide models':'Reveal models';renderItem();};
+loadViewer();
+</script>
+</div></body></html>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { Button, Card, FieldError, Input, Label, Separator, TextArea, TextField, Tooltip } from "@heroui/react";
 import {
   getLibrary,
@@ -281,6 +282,18 @@ export default function Studio() {
 
   return (
     <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-[1240px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      {/* Slim bar: jump to the cross-model comparison view. */}
+      <div className="flex items-center justify-end">
+        <Link
+          href="/showdown"
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium text-muted ring-1 ring-[color:var(--border)] transition-colors hover:text-ink hover:ring-[color:var(--field-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
+        >
+          Model Showdown
+          <span aria-hidden className="text-signal">★</span>
+          <span aria-hidden className="text-faint">›</span>
+        </Link>
+      </div>
+
       {/* Board-centric console. Desktop: board + controls in the left column, the
           coaching console tall on the right. Mobile: board → console → controls. */}
       <main className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)]">

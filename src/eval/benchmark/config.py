@@ -123,15 +123,93 @@ MODELS: Dict[str, Model] = {
         price_out=10.0,
         reasoning_effort="low",
     ),
+    # ------------------------------------------------------------------ #
+    # Bigger open-source chat/reasoning competitors (TrueFoundry bedrock).
+    # family="open" keeps them out of the frontier self-preference check.
+    # price_in/out are BEST-EFFORT public Bedrock on-demand estimates used
+    # only for the cost readout (the run cost is dominated by the frontier
+    # judges, which are priced exactly). Reachability is probed before use
+    # (scripts/tfy_access_open.py); unreachable ones are simply skipped.
+    # ------------------------------------------------------------------ #
+    "q3_32b": Model(
+        key="q3_32b", display="Qwen3-32B", kind="tfy",
+        ident="aws-bedrock/qwen.qwen3-32b-v1-0", family="open",
+        price_in=0.15, price_out=0.60,
+    ),
+    "q3_next80b": Model(
+        key="q3_next80b", display="Qwen3-Next-80B-A3B", kind="tfy",
+        ident="aws-bedrock/qwen.qwen3-next-80b-a3b", family="open",
+        price_in=0.20, price_out=0.80,
+    ),
+    "gemma3_27b": Model(
+        key="gemma3_27b", display="Gemma-3-27B-it", kind="tfy",
+        ident="aws-bedrock/google.gemma-3-27b-it", family="open",
+        price_in=0.10, price_out=0.40,
+    ),
+    "llama33_70b": Model(
+        key="llama33_70b", display="Llama-3.3-70B", kind="tfy",
+        ident="aws-bedrock/us.meta.llama3-3-70b-instruct-v1-0", family="open",
+        price_in=0.72, price_out=0.72,
+    ),
+    "dsv32": Model(
+        key="dsv32", display="DeepSeek-V3.2", kind="tfy",
+        ident="aws-bedrock/deepseek.v3.2", family="open",
+        price_in=0.30, price_out=0.50,
+    ),
+    "glm5": Model(
+        key="glm5", display="GLM-5", kind="tfy",
+        ident="aws-bedrock/zai.glm-5", family="open",
+        price_in=0.40, price_out=1.60,
+    ),
+    "mistral3": Model(
+        key="mistral3", display="Mistral-Large-3 (675B)", kind="tfy",
+        ident="aws-bedrock/mistral.mistral-large-3-675b-instruct", family="open",
+        price_in=2.00, price_out=6.00,
+    ),
+    "kimi25": Model(
+        key="kimi25", display="Kimi-K2.5", kind="tfy",
+        ident="aws-bedrock/moonshotai.kimi-k2.5", family="open",
+        price_in=0.60, price_out=2.50,
+    ),
+    "dsr1": Model(
+        key="dsr1", display="DeepSeek-R1 (reasoning)", kind="tfy",
+        ident="bedrock-oss-group/deepseek-r1", family="open",
+        price_in=1.35, price_out=5.40,
+    ),
 }
 
 MODEL_ORDER: Tuple[str, ...] = ("ours", "base", "gpt", "claude", "gemini")
 
+#: The nine reachable open-source competitors (probed on TFY). ``llama4-maverick``
+#: is blocked at the provider (Meta Llama access denied) and ``kimi-k2-thinking``
+#: is excluded — it spends its whole token budget reasoning and returns no
+#: coaching content — so both are omitted.
+OPEN_MODEL_ORDER: Tuple[str, ...] = (
+    "q3_32b", "q3_next80b", "gemma3_27b", "llama33_70b", "dsv32",
+    "glm5", "mistral3", "kimi25", "dsr1",
+)
+
 #: The blinded council: the three frontier models act as cross-family judges.
 JUDGE_KEYS: Tuple[str, ...] = ("gpt", "claude", "gemini")
 
+
+def labels_for(n: int) -> Tuple[str, ...]:
+    """``n`` single-letter anonymisation labels (A, B, C, ...), up to 26.
+
+    The council + blind export are field-size agnostic: they read
+    :data:`ANON_LABELS`, so a driver that ranks more than five competitors can
+    set ``ANON_LABELS = labels_for(len(MODEL_ORDER))`` at runtime without
+    touching the harness. The default (five) is unchanged.
+    """
+    import string
+
+    if not 1 <= n <= len(string.ascii_uppercase):
+        raise ValueError(f"need 1..26 labels, got {n}")
+    return tuple(string.ascii_uppercase[:n])
+
+
 #: Anonymisation labels (one per competitor) shown to the council + human labeler.
-ANON_LABELS: Tuple[str, ...] = ("A", "B", "C", "D", "E")
+ANON_LABELS: Tuple[str, ...] = labels_for(len(MODEL_ORDER))
 
 # --------------------------------------------------------------------------- #
 # Generation / judging knobs

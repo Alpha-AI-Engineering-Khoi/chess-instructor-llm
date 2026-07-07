@@ -72,7 +72,7 @@ The fine-tuned 1.7B model is the **last-mile compressor**: it renders that alrea
 already-verified behavior locally, cheaply, privately, and in a steady, low-variance,
 no-engine-speak voice. Its honest wins are **form factor** and **register consistency** — not
 dependability in general. (Full argument, evidence, and a menu of testable stances:
-[`../brainlifts/chess-coach-behavior-thesis/brainlift.md`](../brainlifts/chess-coach-behavior-thesis/brainlift.md).)
+[`brainlift/brainlift.md`](brainlift/brainlift.md).)
 
 ---
 
