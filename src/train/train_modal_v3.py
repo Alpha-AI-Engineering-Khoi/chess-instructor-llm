@@ -248,13 +248,18 @@ def train(smoke: bool = False, merge_16bit: bool = True) -> dict:
 
     max_steps = SMOKE_MAX_STEPS if smoke else -1
     num_epochs = 1.0 if smoke else NUM_EPOCHS
+    trainer_dir = f"{VOL_MOUNT}/{RUN_NAME}/_trainer"
     sft_config = _make_sft_config(
-        output_dir=f"{VOL_MOUNT}/{RUN_NAME}/_trainer",
+        output_dir=trainer_dir,
         dataset_text_field="text", max_seq_length=MAX_SEQ_LEN,
         per_device_train_batch_size=PER_DEVICE_BATCH, gradient_accumulation_steps=GRAD_ACCUM,
         warmup_ratio=WARMUP_RATIO, num_train_epochs=num_epochs, max_steps=max_steps,
         learning_rate=LEARNING_RATE, logging_steps=LOGGING_STEPS, optim=OPTIMIZER,
         weight_decay=WEIGHT_DECAY, lr_scheduler_type=LR_SCHEDULER, seed=SEED,
+        # Checkpoint to the Volume so a Modal worker preemption ("Worker
+        # disappeared, in-progress inputs will be re-scheduled") RESUMES instead of
+        # restarting from step 0. Committed to the Volume after every save.
+        save_strategy="steps", save_steps=40, save_total_limit=2,
         bf16=is_bfloat16_supported(), fp16=not is_bfloat16_supported(), report_to="none",
     )
     trainer = _make_trainer(model=model, tokenizer=tokenizer, train_dataset=dataset, args=sft_config)
@@ -262,9 +267,38 @@ def train(smoke: bool = False, merge_16bit: bool = True) -> dict:
         trainer, instruction_part=QWEN_INSTRUCTION_PART, response_part=QWEN_RESPONSE_PART,
     )
 
+    from transformers import TrainerCallback
+
+    class _VolCommit(TrainerCallback):
+        def on_save(self, args, state, control, **kwargs):  # noqa: ANN001
+            try:
+                volume.commit()
+                print(f"[ckpt] volume committed at step {state.global_step}")
+            except Exception as exc:  # noqa: BLE001
+                print(f"[ckpt] volume commit failed: {exc}")
+
+    trainer.add_callback(_VolCommit())
+
+    # Resume from the latest committed checkpoint if a prior (preempted) run left one.
+    import glob as _glob
+    resume_ckpt = None
+    if not smoke:
+        volume.reload()
+        ckpts = _glob.glob(f"{trainer_dir}/checkpoint-*")
+        if ckpts:
+            resume_ckpt = max(ckpts, key=lambda p: int(p.rsplit("-", 1)[-1]))
+            print(f"[resume] found checkpoint -> {resume_ckpt}")
+
     print(f"[train] starting: max_steps={max_steps} epochs={num_epochs} "
-          f"lr={LEARNING_RATE} r={LORA_R} eff_batch={PER_DEVICE_BATCH * GRAD_ACCUM}")
-    train_output = trainer.train()
+          f"lr={LEARNING_RATE} r={LORA_R} eff_batch={PER_DEVICE_BATCH * GRAD_ACCUM} "
+          f"resume={resume_ckpt}")
+    try:
+        train_output = trainer.train(resume_from_checkpoint=resume_ckpt)
+    except Exception as exc:  # noqa: BLE001 - a corrupt resume must not doom the run
+        if resume_ckpt is None:
+            raise
+        print(f"[resume] resume failed ({exc}); restarting fresh")
+        train_output = trainer.train()
 
     losses = [
         {"step": d.get("step"), "loss": d["loss"]}
