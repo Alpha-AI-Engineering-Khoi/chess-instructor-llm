@@ -67,6 +67,21 @@ export interface CoachRequest {
   student_move?: string | null;
 }
 
+/** Batch request: coach ONE position, get every tier back (no `tier` field). */
+export interface CoachAllRequest {
+  fen: string;
+  student_move?: string | null;
+}
+
+/** All three tiers from a single {@link postCoachAll} call, each the standard
+ *  {@link CoachResponse} shape — the server computes the engine facts once and
+ *  runs the identical coach-gate pipeline per tier. */
+export interface CoachAllResponse {
+  beginner: CoachResponse;
+  intermediate: CoachResponse;
+  advanced: CoachResponse;
+}
+
 /** A pre-computed library entry: a real dataset position + the tuned model's
  *  cached coaching, so the gallery renders instantly without a model call. */
 export interface LibraryEntry {
@@ -307,4 +322,55 @@ export async function postCoachResilient(
   }
 
   throw lastError instanceof Error ? lastError : new Error("The coach didn’t respond in time.");
+}
+
+/** One batch attempt is generous — it generates all three tiers server-side, off
+ *  a single Stockfish pass — so we give it well past a warm three-tier run. */
+const COACH_ALL_TIMEOUT_MS = 200_000;
+
+/** POST /api/coach_all — coach a position at every tier in one round-trip.
+ *
+ * A SINGLE attempt with a generous timeout plus the same early-"waking" hint the
+ * per-tier path uses, so the cold-start UI still shows progress. It deliberately
+ * does NOT retry: any failure — a 404 before this endpoint is deployed, a
+ * cold-start timeout, a network error, a hard 4xx — is thrown so the caller can
+ * fall back to the proven per-tier {@link postCoachResilient} path, which keeps
+ * its own progressive, cold-start-resilient loading. That fallback is why the
+ * Studio never breaks when the batch route is missing or slow.
+ */
+export async function postCoachAll(
+  req: CoachAllRequest,
+  opts: PostCoachResilientOptions = {},
+): Promise<CoachAllResponse> {
+  const { signal, onStatus } = opts;
+  const start = Date.now();
+  const elapsedSec = (): number => Math.round((Date.now() - start) / 1000);
+
+  // Warm calls return well before this fires; if we're still waiting past it,
+  // surface the same "waking the model" hint the per-tier path shows.
+  let earlyTimer: ReturnType<typeof setTimeout> | null = setTimeout(() => {
+    earlyTimer = null;
+    onStatus?.({ phase: "waking", attempt: 0, elapsedSec: elapsedSec() });
+  }, COLD_START.earlyWakingMs);
+  const clearEarly = (): void => {
+    if (earlyTimer !== null) {
+      clearTimeout(earlyTimer);
+      earlyTimer = null;
+    }
+  };
+
+  const link = linkTimeout(signal, COACH_ALL_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${API_BASE}/api/coach_all`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(req),
+      signal: link.signal,
+    });
+    if (!res.ok) throw new CoachHttpError(res.status, await readError(res));
+    return (await res.json()) as CoachAllResponse;
+  } finally {
+    clearEarly();
+    link.cleanup();
+  }
 }

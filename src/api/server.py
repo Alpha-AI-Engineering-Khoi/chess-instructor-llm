@@ -470,13 +470,22 @@ def _maia_best_effort(fen: str, tier: str, notes: List[str]) -> List[MaiaMove]:
         return []
 
 
-@app.post("/api/coach", response_model=CoachResponse)
-def coach(req: CoachRequest) -> CoachResponse:
-    """Ground a position in engine + Maia analysis, run the coach, return JSON."""
-    fen = (req.fen or "").strip()
+# --------------------------------------------------------------------------- #
+# Shared coaching pipeline (ONE unit reused by /api/coach and /api/coach_all)
+#
+# The per-position engine truth (Stockfish sound pool + student-move severity) is
+# tier-independent, so it is split out from the per-tier work (tier-specific Maia
+# net + the trained prompt + the gated generation). /api/coach computes it for one
+# tier; /api/coach_all computes it ONCE and reuses it across all three, so the
+# Studio's "fetch every band up front" costs a single Stockfish pass, not three.
+# --------------------------------------------------------------------------- #
+
+
+def _validate_position(fen_in: str) -> tuple[str, chess.Board]:
+    """Validate + parse a FEN into ``(stripped_fen, board)`` or raise HTTPException."""
+    fen = (fen_in or "").strip()
     if not fen:
         raise HTTPException(status_code=400, detail="A FEN is required.")
-
     try:
         board = chess.Board(fen)
     except ValueError as exc:
@@ -485,17 +494,25 @@ def coach(req: CoachRequest) -> CoachResponse:
         raise HTTPException(status_code=400, detail="The FEN is not a legal position.")
     if board.is_game_over():
         raise HTTPException(status_code=422, detail="The game is already over in this position.")
+    return fen, board
 
-    tier = (req.tier or "beginner").strip().lower()
+
+def _validate_tier(tier_in: str) -> str:
+    """Normalize + validate a tier label, or raise HTTPException."""
+    tier = (tier_in or "beginner").strip().lower()
     if tier not in settings.TIERS:
         raise HTTPException(
             status_code=400,
             detail=f"Unknown tier {tier!r}. Expected one of: {', '.join(settings.TIERS)}.",
         )
+    return tier
 
-    notes: List[str] = []
 
-    # 1) Engine soundness (always). Empty only for a terminal position (handled).
+def _sound_pool_or_raise(fen: str) -> List[SoundMove]:
+    """Stockfish sound-move pool (best-first) or the matching HTTPException.
+
+    Empty only for a terminal position (already rejected upstream) -> 422.
+    """
     try:
         pool = _sound_pool_for(fen)
     except ValueError as exc:
@@ -505,15 +522,20 @@ def coach(req: CoachRequest) -> CoachResponse:
         raise HTTPException(status_code=500, detail=f"Engine error: {exc}") from exc
     if not pool:
         raise HTTPException(status_code=422, detail="No legal moves to analyze.")
+    return pool
 
-    best = pool[0]  # best-first; rank-1 line is the engine's best move
 
-    # 2) Student move (optional) -> mistake severity + red/rust arrow later.
-    student_info: Optional[StudentInfo] = None
-    student_schema: StudentMove
-    if req.student_move and req.student_move.strip():
+def _classify_student(
+    board: chess.Board, fen: str, student_move: Optional[str]
+) -> tuple[Optional[StudentInfo], StudentMove]:
+    """Classify the (optional) student move -> ``(student_info, student_schema)``.
+
+    Tier-independent, so the all-tier endpoint runs this (and its Stockfish
+    ``classify_mistake`` pass) exactly once for the whole batch.
+    """
+    if student_move and student_move.strip():
         try:
-            move = _parse_move(board, req.student_move)
+            move = _parse_move(board, student_move)
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
         try:
@@ -527,14 +549,34 @@ def coach(req: CoachRequest) -> CoachResponse:
             cp_loss=int(cls["cp_loss"]),
             severity=str(cls["severity"]),
         )
-        student_info = StudentInfo(**student_schema)
-    else:
-        student_schema = StudentMove(san="(none provided)", uci="", cp_loss=0, severity="none")
+        return StudentInfo(**student_schema), student_schema
+    return None, StudentMove(san="(none provided)", uci="", cp_loss=0, severity="none")
 
-    # 3) Maia human-likelihoods (best effort).
-    maia_moves = _maia_best_effort(fen, tier, notes)
 
-    # 4) Assemble the exact TeacherInput contract + render the trained prompt.
+def _coach_for_tier(
+    board: chess.Board,
+    tier: str,
+    pool: List[SoundMove],
+    best: SoundMove,
+    student_info: Optional[StudentInfo],
+    student_schema: StudentMove,
+) -> CoachResponse:
+    """Run the SHIPPED coach-gate pipeline for ONE tier over an already-computed
+    engine pool + student classification, returning the standard CoachResponse.
+
+    Only the tier-specific work happens here — the tier's Maia human-likelihoods,
+    the trained prompt, and the gated model generation. The engine truth (sound
+    pool + student severity) is passed in, so this is byte-for-byte the answer a
+    single ``/api/coach`` call would produce for the tier; ``/api/coach_all`` just
+    reuses the same pool across the three tiers.
+    """
+    notes: List[str] = []
+
+    # Maia human-likelihoods are tier-specific (maia-1100 / 1500 / 1900), so they
+    # are read per tier with the CORRECT net for the rating band (best effort).
+    maia_moves = _maia_best_effort(board.fen(), tier, notes)
+
+    # Assemble the exact TeacherInput contract + render the trained prompt.
     teacher_input: TeacherInput = TeacherInput(
         tier=tier,
         fen=board.fen(),
@@ -548,13 +590,11 @@ def coach(req: CoachRequest) -> CoachResponse:
     facts = render_pool_facts(board.fen(), list(pool))
     user_prompt = f"{facts}\n\n{render_user_prompt(teacher_input)}"
 
-    # 5) Run the coach model behind a VERIFY-AND-REGENERATE faithfulness gate, then
-    #    turn the (verified) reply into a recommendation + coaching / takeaway. The
-    #    gate + deterministic fallback are the shared :func:`run_gate` unit (see
-    #    :mod:`src.teacher.coach_gate`) — the SAME code the honest base-vs-tuned eval
-    #    runs, so the pipeline is provably identical across models. If nothing
-    #    verifies within the attempt budget, ``run_gate`` returns a deterministic,
-    #    engine-derived explanation that is truthful by construction.
+    # Run the coach model behind the VERIFY-AND-REGENERATE faithfulness gate — the
+    # shared :func:`run_gate` unit (:mod:`src.teacher.coach_gate`), the SAME code
+    # the honest base-vs-tuned eval runs. If nothing verifies within the attempt
+    # budget it returns a deterministic, engine-derived explanation, true by
+    # construction.
     student_uci = student_schema.get("uci") or ""
     try:
         result = run_gate(
@@ -611,13 +651,69 @@ def coach(req: CoachRequest) -> CoachResponse:
     )
 
 
+@app.post("/api/coach", response_model=CoachResponse)
+def coach(req: CoachRequest) -> CoachResponse:
+    """Ground a position in engine + Maia analysis, run the coach, return JSON."""
+    fen, board = _validate_position(req.fen)
+    tier = _validate_tier(req.tier)
+    pool = _sound_pool_or_raise(fen)
+    student_info, student_schema = _classify_student(board, fen, req.student_move)
+    return _coach_for_tier(board, tier, pool, pool[0], student_info, student_schema)
+
+
+class CoachAllRequest(BaseModel):
+    fen: str = Field(..., description="Position in Forsyth-Edwards Notation.")
+    student_move: Optional[str] = Field(
+        None, description="Optional SAN or UCI move the student played."
+    )
+
+
+class CoachAllResponse(BaseModel):
+    """All three rating bands for one position, each a standard CoachResponse."""
+
+    beginner: CoachResponse
+    intermediate: CoachResponse
+    advanced: CoachResponse
+
+
+@app.post("/api/coach_all", response_model=CoachAllResponse)
+def coach_all(req: CoachAllRequest) -> CoachAllResponse:
+    """Coach a position at ALL THREE tiers from ONE engine pass.
+
+    The Studio fetches every band up front so the Beginner/Intermediate/Advanced
+    buttons switch with no new model call. Doing that as three separate
+    ``/api/coach`` calls recomputes the (expensive) Stockfish sound pool + the
+    student-move severity three times over the identical position. This endpoint
+    computes that engine truth exactly ONCE and then runs the SAME shipped
+    coach-gate pipeline per tier (:func:`_coach_for_tier`), so each returned value
+    is exactly what a single ``/api/coach`` call would produce for that tier — just
+    cheaper to obtain together.
+    """
+    fen, board = _validate_position(req.fen)
+    pool = _sound_pool_or_raise(fen)  # computed ONCE, shared across every tier
+    best = pool[0]
+    student_info, student_schema = _classify_student(board, fen, req.student_move)  # ONCE
+    return CoachAllResponse(
+        beginner=_coach_for_tier(board, "beginner", pool, best, student_info, student_schema),
+        intermediate=_coach_for_tier(
+            board, "intermediate", pool, best, student_info, student_schema
+        ),
+        advanced=_coach_for_tier(board, "advanced", pool, best, student_info, student_schema),
+    )
+
+
 @app.get("/")
 def root() -> Dict[str, Any]:
     return {
         "name": "Chess Coach API",
         "model": COACH_MODEL_PATH,
         "tuned": _is_tuned(),
-        "endpoints": ["/api/health", "/api/examples", "POST /api/coach"],
+        "endpoints": [
+            "/api/health",
+            "/api/examples",
+            "POST /api/coach",
+            "POST /api/coach_all",
+        ],
     }
 
 

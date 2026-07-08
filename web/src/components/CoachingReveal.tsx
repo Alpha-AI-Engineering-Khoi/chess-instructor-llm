@@ -74,8 +74,23 @@ export default function CoachingReveal({
           >
             {result.recommended_move_san}
           </span>
-          <span className="text-sm text-muted">
-            the move for {aOrAn(tier)} {tier} player · {result.side_to_move} to move
+          <span className="inline-flex flex-wrap items-center gap-x-1.5 text-sm text-muted">
+            <Tooltip delay={200}>
+              <Tooltip.Trigger aria-label={`Why this is the move for ${aOrAn(tier)} ${tier} player`}>
+                <span className="cursor-help underline decoration-dotted underline-offset-2">
+                  the move for {aOrAn(tier)} {tier} player
+                </span>
+              </Tooltip.Trigger>
+              <Tooltip.Content showArrow className="max-w-[18rem]">
+                <Tooltip.Arrow />
+                <p className="leading-relaxed">
+                  The tuned model’s one job: pick the move that fits this rating band. Switch levels
+                  to watch the pick adapt.
+                </p>
+              </Tooltip.Content>
+            </Tooltip>
+            <span aria-hidden className="text-faint">·</span>
+            <span>{result.side_to_move} to move</span>
           </span>
         </h2>
         {tag && (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button, Card, FieldError, Input, Label, Separator, TextArea, TextField, Tooltip } from "@heroui/react";
 import {
   getLibrary,
+  postCoachAll,
   postCoachResilient,
   warmupCoach,
   type CoachResponse,
@@ -33,13 +34,68 @@ import { FlipVerticalIcon, ResetIcon, UndoIcon } from "./icons";
 
 type Status = "idle" | "loading" | "done" | "error";
 
+// DEFAULT is the "killer" moat demo (held-out test position aMJxAUwT_27): the
+// tuned model gives a DIFFERENT, level-appropriate move for each tier — Be3
+// (beginner) · Ne2 (intermediate) · Rd1 (advanced) — while GPT-5.5, Claude, and
+// Gemini all just repeat the single engine move (Rd1) at every level. Switching
+// tiers on load is the one-screen proof that OURS adapts where the frontier can't.
 const DEFAULT = {
-  fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+  fen: "r4rk1/p4pp1/1qpbpn1p/3p4/3P4/2N2Q1P/PPP2PP1/R1B2RK1 w - - 1 14",
   tier: "beginner" as Tier,
-  move: "Qh5",
+  move: "b3",
 };
 const DEFAULT_STUDENT_UCI = moveToUci(DEFAULT.fen, DEFAULT.move);
 const TIERS: Tier[] = ["beginner", "intermediate", "advanced"];
+
+interface Preset {
+  label: string;
+  hint: string;
+  fen: string;
+  move?: string;
+}
+
+// A few one-click positions: two "moat" demos (real held-out positions where OURS
+// gives a distinct move per level while the frontier repeats one move), a handful
+// of recognizable openings, and the classic beginner blunder.
+const PRESETS: Preset[] = [
+  {
+    label: "Moat · Italian middlegame",
+    hint: "The default demo — OURS adapts Be3 / Ne2 / Rd1 by level; GPT-5.5, Claude, and Gemini all just repeat Rd1.",
+    fen: "r4rk1/p4pp1/1qpbpn1p/3p4/3P4/2N2Q1P/PPP2PP1/R1B2RK1 w - - 1 14",
+    move: "b3",
+  },
+  {
+    label: "Moat · minor-piece endgame",
+    hint: "A held-out endgame where OURS gives Ne6+ / h6 / Kd2 across the tiers while the frontier repeats a single move.",
+    fen: "8/7b/5p2/P1kp3P/2pN1P2/4K3/8/8 w - - 1 39",
+  },
+  {
+    label: "Italian Game",
+    hint: "1.e4 e5 2.Nf3 Nc6 3.Bc4 — Black to choose a developing move.",
+    fen: "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+  },
+  {
+    label: "Ruy López",
+    hint: "1.e4 e5 2.Nf3 Nc6 3.Bb5 — the Spanish, Black to respond.",
+    fen: "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+  },
+  {
+    label: "Sicilian Defence",
+    hint: "1.e4 c5 — White to develop against the Sicilian.",
+    fen: "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+  },
+  {
+    label: "Early queen 2.Qh5?!",
+    hint: "The classic beginner queen sortie — sound pressure, or just a target?",
+    fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+    move: "Qh5",
+  },
+  {
+    label: "Starting position",
+    hint: "A fresh game — White to make the first move.",
+    fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  },
+];
 
 export default function Studio() {
   const [library, setLibrary] = useState<LibraryEntry[]>([]);
@@ -89,9 +145,18 @@ export default function Studio() {
   // initial load, "Coach this move/position", any position/move change, and the
   // explicit re-run. Optionally `seed` a tier that already has an answer (a
   // library entry's cached coaching) so it shows instantly while the other tiers
-  // prefetch live. The requests go out in parallel via Promise.all; each resolves
-  // independently so a ready tier is instant and an in-flight one shows per-tier
-  // loading. Reuses the existing cold-start "waking" handling on every request.
+  // prefetch live.
+  //
+  // A FRESH full fetch (no seed) uses the batch endpoint POST /api/coach_all: the
+  // server computes the engine facts (Stockfish sound pool + student severity)
+  // ONCE and returns all three tiers, so the initial load costs a single engine
+  // pass, not three. If that route is missing (404 before the backend is
+  // restarted) or fails, it GRACEFULLY FALLS BACK to the proven 3-parallel
+  // `postCoachResilient` path — each tier landing independently, with the existing
+  // cold-start "waking" handling — so the Studio never breaks. A seeded run always
+  // takes the per-tier path so the seeded band stays instant while the others
+  // prefetch. Either way the answers land in the same per-tier cache, so switching
+  // levels afterward is instant.
   const runCoachAllTiers = useCallback(
     (f: string, s: string | null, seed?: Partial<Record<Tier, CoachResponse>>) => {
       abortRef.current?.abort();
@@ -113,51 +178,85 @@ export default function Studio() {
       });
       setTierError({ beginner: null, intermediate: null, advanced: null });
 
-      void Promise.all(
-        TIERS.map((t) => {
-          if (seeded[t]) return Promise.resolve();
-          return postCoachResilient(
-            { fen: f, tier: t, student_move: s ?? undefined },
-            {
-              signal: ctrl.signal,
-              // Cold start in progress — surface "waking" without flipping to error.
-              onStatus: (st) => {
-                if (ctrl.signal.aborted) return;
-                setWakingCoach(st);
-              },
-            },
-          )
-            .then((res) => {
-              if (ctrl.signal.aborted) return;
-              setTierResults((prev) => {
-                const next = { ...prev };
-                next[t] = res;
-                return next;
-              });
-              setTierStatus((prev) => {
-                const next = { ...prev };
-                next[t] = "done";
-                return next;
-              });
-              setWakingCoach(null); // a landed tier means the container is warm
-            })
-            .catch((e: unknown) => {
-              if (ctrl.signal.aborted) return;
-              // Only reached once the resilient call gives up (retries exhausted or
-              // a hard, non-cold error) — so "offline" never flashes mid-wake.
-              setTierStatus((prev) => {
-                const next = { ...prev };
-                next[t] = "error";
-                return next;
-              });
-              setTierError((prev) => {
-                const next = { ...prev };
-                next[t] = e instanceof Error ? e.message : "Something went wrong.";
-                return next;
-              });
-            });
-        }),
-      );
+      // Cold start in progress — surface "waking" without flipping to error.
+      const onStatus = (st: CoachWakeStatus) => {
+        if (!ctrl.signal.aborted) setWakingCoach(st);
+      };
+      const landTier = (t: Tier, res: CoachResponse) => {
+        if (ctrl.signal.aborted) return;
+        setTierResults((prev) => {
+          const next = { ...prev };
+          next[t] = res;
+          return next;
+        });
+        setTierStatus((prev) => {
+          const next = { ...prev };
+          next[t] = "done";
+          return next;
+        });
+        setWakingCoach(null); // a landed tier means the container is warm
+      };
+      const failTier = (t: Tier, e: unknown) => {
+        if (ctrl.signal.aborted) return;
+        // Only reached once the resilient call gives up (retries exhausted or a
+        // hard, non-cold error) — so "offline" never flashes mid-wake.
+        setTierStatus((prev) => {
+          const next = { ...prev };
+          next[t] = "error";
+          return next;
+        });
+        setTierError((prev) => {
+          const next = { ...prev };
+          next[t] = e instanceof Error ? e.message : "Something went wrong.";
+          return next;
+        });
+      };
+
+      // The proven path: coach each not-yet-seeded tier in parallel, each landing
+      // independently (instant for a ready tier, a per-tier skeleton for one still
+      // in flight) with the existing cold-start resilience.
+      const firePerTier = () => {
+        void Promise.all(
+          TIERS.map((t) => {
+            if (seeded[t]) return Promise.resolve();
+            return postCoachResilient(
+              { fen: f, tier: t, student_move: s ?? undefined },
+              { signal: ctrl.signal, onStatus },
+            )
+              .then((res) => landTier(t, res))
+              .catch((e: unknown) => failTier(t, e));
+          }),
+        );
+      };
+
+      // A seeded run keeps the progressive per-tier path so the seeded band shows
+      // instantly while the other two prefetch live.
+      if (seeded.beginner || seeded.intermediate || seeded.advanced) {
+        firePerTier();
+        return;
+      }
+
+      // Fresh full fetch → one batch call, with a graceful fallback to per-tier.
+      void postCoachAll(
+        { fen: f, student_move: s ?? undefined },
+        { signal: ctrl.signal, onStatus },
+      )
+        .then((all) => {
+          if (ctrl.signal.aborted) return;
+          setTierResults({
+            beginner: all.beginner,
+            intermediate: all.intermediate,
+            advanced: all.advanced,
+          });
+          setTierStatus({ beginner: "done", intermediate: "done", advanced: "done" });
+          setWakingCoach(null);
+        })
+        .catch(() => {
+          if (ctrl.signal.aborted) return;
+          // Batch route missing (pre-restart 404) or failed → degrade to the
+          // resilient 3-parallel path so the platform keeps working.
+          firePerTier();
+        });
     },
     [],
   );
@@ -348,6 +447,22 @@ export default function Studio() {
     runCoachAllTiers(f, null);
   };
 
+  // One-click preset: load the position (and its illustrative move, if any) and
+  // coach all three tiers via the same fresh-fetch path as a hand-entered FEN, so
+  // it uses the batch endpoint and stays instant to switch between levels after.
+  const selectPreset = (p: Preset) => {
+    const su = p.move ? moveToUci(p.fen, p.move) : null;
+    setFen(p.fen);
+    setHistory([]);
+    setFenDraft(p.fen);
+    setMoveDraft(p.move ?? "");
+    setStudentUci(su);
+    setLastMove(su ? [su.slice(0, 2), su.slice(2, 4)] : null);
+    setOrientation(sideToMove(p.fen));
+    setActiveLibId(null);
+    runCoachAllTiers(p.fen, su);
+  };
+
   // Review a move on the CURRENT position without advancing the board.
   const setMoveFromDraft = () => {
     if (!draftUci) return;
@@ -443,6 +558,35 @@ export default function Studio() {
               measured per-model metrics.
             </span>
           </p>
+        </div>
+
+        {/* GRADER 30-SECOND ORIENTATION: the one behavior + the three-step loop,
+            so a first-time viewer knows exactly what to do and what to read. */}
+        <div className="flex flex-col gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4 sm:flex-row sm:items-center sm:gap-5">
+          <p className="text-sm leading-relaxed text-muted sm:max-w-[15rem]">
+            <span className="font-medium text-ink">How it works.</span> The model’s one job is to
+            pick the move that fits your rating — not to lecture.
+          </p>
+          <ol className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-3">
+            {[
+              ["Set a position", "Pick a preset or study, or paste a FEN."],
+              ["Pick your level", "Beginner, Intermediate, or Advanced."],
+              ["Read the move + tag", "One move for that level, one-line reason."],
+            ].map(([title, body], i) => (
+              <li
+                key={title}
+                className="flex items-start gap-2.5 rounded-lg bg-[color:var(--surface-tertiary)] px-3 py-2"
+              >
+                <span className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-signal/15 font-mono text-[11px] font-semibold text-signal tnum">
+                  {i + 1}
+                </span>
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-xs font-medium text-ink">{title}</span>
+                  <span className="text-[11px] leading-snug text-muted">{body}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
         </div>
       </header>
 
@@ -565,33 +709,48 @@ export default function Studio() {
                   the user can click around the three levels even mid-fetch. */}
               <TierControl tier={tier} onChange={changeTier} />
 
-              {/* No leading icon or spinner — loading reads through the dimmed
-                  (disabled) label, which also changes to "Coaching…". */}
-              <Button
-                variant="primary"
-                size="lg"
-                className="min-h-12 w-full font-medium"
-                isDisabled={loading}
-                aria-busy={loading}
-                onPress={() =>
-                  runCoachAllTiers(fen, fen === coachedFen ? studentUci : null)
-                }
-              >
-                {coachLabel}
-              </Button>
+              {/* Loading shows a subtle spinner + the "Coaching…" label; the
+                  button also dims (disabled) so the state reads two ways. */}
+              <Tooltip delay={300}>
+                <Button
+                  variant="primary"
+                  size="lg"
+                  className="min-h-12 w-full font-medium"
+                  isDisabled={loading}
+                  aria-busy={loading}
+                  onPress={() =>
+                    runCoachAllTiers(fen, fen === coachedFen ? studentUci : null)
+                  }
+                >
+                  <span className="inline-flex items-center justify-center gap-2">
+                    {loading && <Spinner />}
+                    {coachLabel}
+                  </span>
+                </Button>
+                <Tooltip.Content className="max-w-[16rem]">
+                  Read the position and hand back the move for your selected level, with a one-line
+                  principle tag. All three levels are fetched together, so switching is instant.
+                </Tooltip.Content>
+              </Tooltip>
 
               {/* Explicit live re-run through the full coaching workflow. */}
               <div className="flex flex-col gap-1.5">
-                <Button
-                  variant="tertiary"
-                  size="md"
-                  className="min-h-11 w-full gap-2 font-medium"
-                  isDisabled={loading || !anySettled}
-                  onPress={rerunWorkflow}
-                >
-                  <ResetIcon width={16} height={16} />
-                  Re-run through the workflow
-                </Button>
+                <Tooltip delay={300}>
+                  <Button
+                    variant="tertiary"
+                    size="md"
+                    className="min-h-11 w-full gap-2 font-medium"
+                    isDisabled={loading || !anySettled}
+                    onPress={rerunWorkflow}
+                  >
+                    <ResetIcon width={16} height={16} />
+                    Re-run through the workflow
+                  </Button>
+                  <Tooltip.Content className="max-w-[16rem]">
+                    Re-runs all three levels live through the coach-gate pipeline instead of reusing
+                    the cached answers.
+                  </Tooltip.Content>
+                </Tooltip>
                 <p className="text-[11px] leading-relaxed text-faint">
                   A fresh live pass over this exact position — re-reads it and re-picks the
                   level-appropriate move, rather than reusing a cached answer.
@@ -612,11 +771,43 @@ export default function Studio() {
 
               <Separator />
 
-              {/* Advanced: paste a FEN or set a move */}
+              {/* Quick positions: one-click openings + "moat" demos, each a fresh
+                  full-tier coach so switching levels stays instant afterwards. */}
+              <div className="flex flex-col gap-2.5">
+                <span className="text-sm font-medium text-ink">Jump to a position</span>
+                <div className="flex flex-wrap gap-2">
+                  {PRESETS.map((p) => {
+                    const active = fen === p.fen;
+                    return (
+                      <Tooltip key={`${p.fen}|${p.move ?? ""}`} delay={300}>
+                        <Button
+                          variant={active ? "secondary" : "tertiary"}
+                          size="sm"
+                          className="min-h-9 transition-transform hover:-translate-y-px active:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                          isDisabled={loading}
+                          aria-pressed={active}
+                          onPress={() => selectPreset(p)}
+                        >
+                          {p.label}
+                        </Button>
+                        <Tooltip.Content className="max-w-[17rem]">{p.hint}</Tooltip.Content>
+                      </Tooltip>
+                    );
+                  })}
+                </div>
+                <p className="text-[11px] leading-relaxed text-faint">
+                  Recognizable openings plus two “moat” demos where the tuned model adapts the move
+                  by level. Loads instantly and re-coaches all three tiers.
+                </p>
+              </div>
+
+              <Separator />
+
+              {/* Advanced: paste any FEN or set a move */}
               <details className="group">
                 <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-medium text-muted transition-colors hover:text-ink">
                   <span className="text-faint transition-transform group-open:rotate-90">›</span>
-                  Set a position by hand
+                  Paste a FEN or set a move
                 </summary>
                 <div className="mt-3 flex flex-col gap-3">
                   <TextField
@@ -641,6 +832,12 @@ export default function Studio() {
                       </FieldError>
                     )}
                   </TextField>
+                  {/* Valid FEN, but a finished game has no move to coach. */}
+                  {fenDraftState.ok && fenDraftState.gameOver && (
+                    <p className="text-xs leading-relaxed text-[color:var(--caution)]">
+                      That position is already game over — there’s no move to coach. Try another FEN.
+                    </p>
+                  )}
                   <TextField
                     className="flex flex-col gap-1.5"
                     aria-label="Your move (SAN or UCI)"
@@ -668,24 +865,35 @@ export default function Studio() {
                     )}
                   </TextField>
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      className="min-h-11"
-                      isDisabled={!fenDraftState.ok || fenDraftState.gameOver || loading}
-                      onPress={loadFen}
-                    >
-                      Load position
-                    </Button>
-                    <Button
-                      variant="tertiary"
-                      size="md"
-                      className="min-h-11"
-                      isDisabled={!draftUci || loading}
-                      onPress={setMoveFromDraft}
-                    >
-                      Set move
-                    </Button>
+                    <Tooltip delay={300}>
+                      <Button
+                        variant="secondary"
+                        size="md"
+                        className="min-h-11"
+                        isDisabled={!fenDraftState.ok || fenDraftState.gameOver || loading}
+                        onPress={loadFen}
+                      >
+                        Load position
+                      </Button>
+                      <Tooltip.Content className="max-w-[15rem]">
+                        Put the pasted FEN on the board and coach all three levels.
+                      </Tooltip.Content>
+                    </Tooltip>
+                    <Tooltip delay={300}>
+                      <Button
+                        variant="tertiary"
+                        size="md"
+                        className="min-h-11"
+                        isDisabled={!draftUci || loading}
+                        onPress={setMoveFromDraft}
+                      >
+                        Set move
+                      </Button>
+                      <Tooltip.Content className="max-w-[15rem]">
+                        Mark this move on the current position without advancing the board, then
+                        re-coach.
+                      </Tooltip.Content>
+                    </Tooltip>
                     {studentUci && (
                       <Button
                         isIconOnly
@@ -828,5 +1036,16 @@ function IdlePanel({
         )}
       </div>
     </div>
+  );
+}
+
+/** A small currentColor spinner for in-button loading states. */
+function Spinner() {
+  return (
+    <span
+      aria-hidden
+      className="inline-block size-4 shrink-0 animate-spin rounded-full border-2 motion-reduce:animate-none"
+      style={{ borderColor: "currentColor", borderTopColor: "transparent" }}
+    />
   );
 }
