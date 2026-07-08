@@ -6,6 +6,14 @@ possible to the project's own base-vs-tuned eval.
 **Anchor (base Qwen3-1.7B-4bit, n=9 greedy, judge gpt-5.5-pro):** move_sound 1.00,
 no_engine_speak 0.11 (judge 0.25), truthfulness 0.00, task_quality 0.00,
 spec_adherence 0.875, level_calibration 0.875.
+**Refreshed anchors (v2 + benchmarks, internal):** grounded fabrication OURS-v2
+33–38% (v1 50%) vs frontier ~3% vs 27B open 1–8%; verifier gate → **0%** (ours &
+frontier); grounded council ours 3.68 vs frontier ~2.21 (10-model: best open ~5.2 vs
+GPT-5.5 2.53 vs ours 7.95); tier-differentiation ours 27.5%→39.2% (direction
+corrected) vs frontier 22.7%; gap density 67% of decidable held-out positions;
+self-preference +0.43 (GPT +0.66/Gemini +0.64/Claude −0.01); no-engine-speak 100%
+(all grounded models); rich-grounding A/B ours 40%→56% (backfires). In-flight:
+803-position leaderboard + all-14-model verifier sweep.
 
 ---
 
@@ -84,3 +92,42 @@ spec_adherence 0.875, level_calibration 0.875.
 
 ---
 **Shared project-native disconfirmer** (1/4/6/7/8/12): the base-vs-tuned eval with grounding held constant. SPOVs 5 & 11 need external studies. The ~1.7B affirmative is a candidate bet; variance claims (2,12) need k-sampling at deployment temperature; no SPOV leans on unverified economics.
+
+---
+
+## New candidates (v2 + benchmark + open-model + verifier + gap evidence, 2026-07-07)
+
+**Refinement to SPOV 9 (leveling/faithfulness):** the new evidence SUPERSEDES the
+strong reading "faithfulness is THE hard/sole open axis." Faithfulness is now
+table-stakes (verifier → 0% for all; capacity → 1–8% free). Split "leveling" into
+explanation-leveling (handled) vs MOVE-leveling (weak: ours 39.2%, frontier 22.7%).
+Refined SPOV 9 = "faithfulness is table-stakes; tier-appropriate MOVE SELECTION is
+the hard open axis; polishing the commoditized axes while move-selection stays weak
+is backward." (Logged in `rejected.md`.)
+
+### SPOV 13 — Faithfulness is table-stakes, not a moat
+**Assertion:** A claim-level non-LLM verify-and-regenerate gate drives user-visible
+fabrication to 0% for EVERY model (frontier included), so no coach can win on
+faithfulness — it is a commodity any serious system installs.
+**Core question:** Can any model compete on not-lying-about-the-board once a cheap gate exists?
+**Disconfirmer:** With the gate on, models of very different sizes/families all reach ~0% user-visible fabrication (between-model spread collapses). If some models stay meaningfully higher behind the gate, wrong.
+**Reach:** Any generation task with a cheap external claim-checker + safe fallback → the checked claims stop being a differentiator.
+**Anchor:** verifier eval — ours 40%→0%, gpt-5.5 7%→0%; fallback ours ~10%/frontier ~7%; no raw model self-corrects to 0% (sticky fabrications). Insights 6,7. In-flight: all-14-model sweep. **Strong (own measurement).**
+
+### SPOV 14 — Small-model unfaithfulness is a capacity artifact
+**Assertion:** The 1.7B's fabrication is a capacity artifact, not a data problem; a 27B open base closes most of it for free (1–8% grounded vs ours ~a third) with no special training.
+**Core question:** Is the fix cleaner distillation data, or more capacity?
+**Disconfirmer:** Grounded fabrication falls steadily with base size; a mid-size open model hits low single digits with no faithfulness-specific training. If a much larger open base fabricates ~as much as the 1.7B on identical input, wrong.
+**Reach:** Any grounded-generation task where small-model errors are state-tracking errors, not knowledge gaps.
+**Anchor:** open-model benchmark — Gemma-3-27B 1%, field 1–8%, BASE 13–15%, OURS-v2 33–38%; our data intervention only 50%→33%. Insights 2,7. In-flight: 803-position leaderboard. **Strong (own measurement).**
+
+### SPOV 15 — The only defensible moat is tier-appropriate move selection
+**Assertion:** The one axis that is both a real, DENSE gap the frontier doesn't fill AND deterministically gradeable is tier-appropriate move selection — so it is the only defensible moat, trainable against a mechanical reward and gradeable with no model judge.
+**Core question:** Once faithfulness is table-stakes and explanation is a prompt away, what's left to win?
+**Disconfirmer:** A model trained with a deterministic tier-move reward reaches a clear majority of held-out positions differentiated + correctly directed, beating a prompted frontier on that mechanical rate. If targeted training can't beat the frontier, or the frontier does it once asked precisely, no moat.
+**Reach:** Any leveled recommender gradeable without a model judge (difficulty-tiered hints in a math/coding tutor).
+**Anchor:** gap density 67% of decidable positions discriminate; frontier tier-diff 22.7% / engine-mirror 68.7%; v2 27.5%→39.2% + direction corrected (beginner Maia-match 39%→62%); divergence root cause (0% contrastive data). Insights 4,8. In-flight: 803-position leaderboard + deterministic-reward training. **Strong (own measurement).**
+
+**Tiering honesty:** SPOVs 13–15 rest on the project's OWN measurements, which
+strengthen candidate-validity but are NOT external primary sources → **Strong**, not
+Validated. Do not promote without outside confirmation.
