@@ -22,11 +22,13 @@ export default function TierControl({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-sm font-medium text-ink">Coach at my level</span>
-        <span className="text-xs text-muted">{band.trim()}</span>
+        <span id="tier-control-label" className="text-sm font-medium text-ink">
+          Coach at my level
+        </span>
+        <span className="text-xs text-muted tnum">{band.trim()}</span>
       </div>
       <ToggleButtonGroup
-        aria-label="Rating tier"
+        aria-labelledby="tier-control-label"
         selectionMode="single"
         disallowEmptySelection
         fullWidth
@@ -39,7 +41,14 @@ export default function TierControl({
         }}
       >
         {TIERS.map((t, i) => (
-          <ToggleButton key={t.id} id={t.id} className="min-h-11">
+          <ToggleButton
+            key={t.id}
+            id={t.id}
+            className="min-h-11"
+            // Announce the rating band with the tier so the choice is unambiguous
+            // to a screen reader (the band is only shown visually otherwise).
+            aria-label={`${t.label}, rated ${t.band}`}
+          >
             {i > 0 && <ToggleButtonGroup.Separator />}
             {t.label}
           </ToggleButton>

@@ -266,6 +266,49 @@ body {
     width: 100% !important;
     opacity: 0.6;
   }
+  /* Board arrows / annotations appear instantly (no reveal) under reduced motion. */
+  .rise,
+  .board-settle {
+    animation: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Keyboard focus — a single, consistent, always-visible focus ring for
+   keyboard users on the interactive elements the codebase doesn't already give
+   a custom `focus-visible` ring: plain links and native <details> summaries.
+   Wrapped in :where() so its specificity is 0 — any component that paints its
+   own focus style (HeroUI controls, our role="button" rows) still wins, so this
+   never double-rings them; it only fills the gaps. Amber signal = focus token.
+   Pointer/mouse focus stays quiet (only :focus-visible, not :focus).
+   -------------------------------------------------------------------------- */
+:where(a[href], summary):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Give the accessible-only helper text a real, screen-reader-reachable box
+   (mirror of Tailwind's sr-only) for status announcements like "Copied". */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Responsive: `background-attachment: fixed` is smooth on desktop but janky on
+   mobile (repaints the fixed layer every scroll frame on iOS/Android). Below the
+   sm breakpoint, let the canvas gradient scroll with the page instead. */
+@media (max-width: 640px) {
+  body {
+    background-attachment: scroll;
+  }
 }
 
 /* --------------------------------------------------------------------------

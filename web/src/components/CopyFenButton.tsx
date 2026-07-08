@@ -20,14 +20,21 @@ export default function CopyFenButton({ fen, className }: CopyFenButtonProps) {
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Reset the confirmation if the position changes out from under us, and clear
-  // any pending timer on unmount so we never setState after teardown.
+  // Reset the confirmation when the position changes out from under us. Done at
+  // render time via a previous-value STATE (React's documented "adjust state on
+  // prop change" pattern) rather than a synchronous setState inside an effect.
+  const [prevFen, setPrevFen] = useState(fen);
+  if (prevFen !== fen) {
+    setPrevFen(fen);
+    if (copied) setCopied(false);
+  }
+
+  // Clear any pending timer on unmount so we never setState after teardown.
   useEffect(() => {
-    setCopied(false);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [fen]);
+  }, []);
 
   const copy = useCallback(() => {
     // Clipboard is unavailable in insecure contexts / older browsers — bail
@@ -48,19 +55,26 @@ export default function CopyFenButton({ fen, className }: CopyFenButtonProps) {
   }, [fen]);
 
   return (
-    <Button
-      variant="tertiary"
-      size="sm"
-      className={`gap-1.5 ${className ?? ""}`}
-      aria-label={copied ? "FEN copied to clipboard" : "Copy position FEN to clipboard"}
-      onPress={copy}
-    >
-      {copied ? (
-        <CheckIcon width={14} height={14} className="text-[color:var(--good)]" />
-      ) : (
-        <CopyIcon width={14} height={14} className="text-faint" />
-      )}
-      {copied ? "Copied" : "Copy FEN"}
-    </Button>
+    <>
+      <Button
+        variant="tertiary"
+        size="sm"
+        className={`gap-1.5 ${className ?? ""}`}
+        aria-label={copied ? "FEN copied to clipboard" : "Copy position FEN to clipboard"}
+        onPress={copy}
+      >
+        {copied ? (
+          <CheckIcon width={14} height={14} className="text-[color:var(--good)]" aria-hidden />
+        ) : (
+          <CopyIcon width={14} height={14} className="text-faint" aria-hidden />
+        )}
+        {copied ? "Copied" : "Copy FEN"}
+      </Button>
+      {/* Announce the transient confirmation to screen readers (the button's own
+          label change isn't reliably announced while focus stays put). */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {copied ? "Position FEN copied to clipboard" : ""}
+      </span>
+    </>
   );
 }

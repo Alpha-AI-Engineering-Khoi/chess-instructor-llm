@@ -81,6 +81,16 @@ export default function BoardStage({
     [lastMove],
   );
 
+  // Accessible description of the board for screen readers (the chessground DOM
+  // itself is decorative). States side-to-move, check, and how to interact.
+  const boardLabel = `Interactive chess board — ${
+    turnColor === "white" ? "White" : "Black"
+  } to move${check ? ", in check" : ""}. ${
+    interactive
+      ? "Drag a piece to play your move; right-click and drag to draw arrows."
+      : "Reading the position."
+  }`;
+
   return (
     // No card/bezel/border around the board — it sits clean on the canvas.
     <div className="relative aspect-square w-full select-none">
@@ -95,6 +105,7 @@ export default function BoardStage({
         autoShapes={autoShapes}
         drawable
         coordinates
+        label={boardLabel}
         onMove={(orig, dest) => onMove(`${orig}${dest}`)}
       />
 

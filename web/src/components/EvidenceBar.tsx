@@ -1,0 +1,119 @@
+// EVIDENCE + TRUST BAR
+// A global footer, rendered once in the root layout, that surfaces the ONE
+// deterministic claim this product is built on — tier-appropriate move selection
+// — as a measured, non-hand-wavy proof, next to the artifacts anyone can check:
+// the model weights, the benchmark dataset, the live Space, the source, and the
+// written thesis. On-theme (Bench-Instrument dark tokens, one warm signal accent);
+// no server state, so it's a plain server component. Links open in a new tab and
+// inherit the global pointer + focus-visible affordances from globals.css.
+
+import {
+  BookIcon,
+  DatabaseIcon,
+  ExternalLinkIcon,
+  GitHubIcon,
+  LayersIcon,
+  RocketIcon,
+  ShieldCheckIcon,
+} from "./icons";
+
+type EvidenceLink = {
+  href: string;
+  label: string;
+  hint: string;
+  Icon: (props: React.SVGProps<SVGSVGElement>) => React.ReactElement;
+};
+
+// The verifiable artifacts. Order goes from "the thing itself" (weights) outward
+// to the write-up, so the proof reads left-to-right as: here is the model, here is
+// what it was measured on, try it, read the code, read the reasoning.
+const LINKS: EvidenceLink[] = [
+  {
+    href: "https://huggingface.co/khoilamalphaai/qwen3-1.7b-chess-coach-mlx",
+    label: "Model",
+    hint: "Qwen3-1.7B chess-coach · Hugging Face",
+    Icon: LayersIcon,
+  },
+  {
+    href: "https://huggingface.co/datasets/khoilamalphaai/chess-coach-benchmark",
+    label: "Dataset",
+    hint: "chess-coach-benchmark · Hugging Face",
+    Icon: DatabaseIcon,
+  },
+  {
+    href: "https://huggingface.co/spaces/khoilamalphaai/chess-coach-benchmark",
+    label: "Space",
+    hint: "Live benchmark demo · Hugging Face",
+    Icon: RocketIcon,
+  },
+  {
+    href: "https://github.com/kimkhoi2202/chess-instructor-llm",
+    label: "GitHub",
+    hint: "Source repository",
+    Icon: GitHubIcon,
+  },
+  {
+    href: "https://github.com/kimkhoi2202/chess-instructor-llm/blob/main/BRAINLIFT.md",
+    label: "BrainLift",
+    hint: "The written thesis behind the model",
+    Icon: BookIcon,
+  },
+];
+
+export default function EvidenceBar() {
+  return (
+    <footer
+      aria-labelledby="evidence-heading"
+      className="relative z-[1] mt-8 border-t border-[color:var(--separator)] bg-[color:var(--surface)]/70 backdrop-blur-sm"
+    >
+      <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-5 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:py-4">
+        {/* The deterministic proof — the honest headline number, stated once. */}
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <h2
+            id="evidence-heading"
+            className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-faint"
+          >
+            <ShieldCheckIcon width={13} height={13} className="text-signal" />
+            Deterministic proof
+          </h2>
+          <p className="max-w-2xl text-pretty text-[13px] leading-relaxed text-muted">
+            Tier-appropriate move selection lifts{" "}
+            <span className="font-mono text-faint tnum">27.8%</span>{" "}
+            <span className="text-faint">base</span> →{" "}
+            <span className="font-mono font-semibold text-signal tnum">82.8%</span>{" "}
+            <span className="text-ink">tuned</span>, past the best frontier at{" "}
+            <span className="font-mono text-ink tnum">48.3%</span>. Across the three tiers OURS gives{" "}
+            <span className="font-mono text-ink tnum">~2.2</span> distinct level-moves vs the frontier&rsquo;s{" "}
+            <span className="font-mono tnum">~1.4</span>.
+          </p>
+        </div>
+
+        {/* The artifacts anyone can check — each opens in a new tab. */}
+        <nav
+          aria-label="Model, dataset, and project links"
+          className="flex shrink-0 flex-wrap items-center gap-2"
+        >
+          {LINKS.map(({ href, label, hint, Icon }) => (
+            <a
+              key={href}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={hint}
+              aria-label={`${label} — ${hint} (opens in a new tab)`}
+              className="group inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border)] bg-[color:var(--surface-secondary)]/60 px-3 py-1.5 text-[13px] font-medium text-muted transition-colors hover:border-[color:var(--field-border)] hover:bg-[color:var(--surface-tertiary)] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
+            >
+              <Icon width={14} height={14} className="text-faint transition-colors group-hover:text-signal" />
+              {label}
+              <ExternalLinkIcon
+                width={11}
+                height={11}
+                className="text-faint/70 transition-colors group-hover:text-muted"
+              />
+            </a>
+          ))}
+        </nav>
+      </div>
+    </footer>
+  );
+}

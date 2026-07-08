@@ -54,7 +54,7 @@ export default function EngineLines({
     <section aria-label="Likely continuations">
       <div className="mb-3 flex items-baseline justify-between gap-2">
         <h3 className="text-sm font-medium text-ink">How it could continue</h3>
-        <span className="text-xs text-faint">Click a line to play it — or a move to go deeper</span>
+        <span className="text-xs text-muted">Click a line to play it — or a move to go deeper</span>
       </div>
 
       <ul className="flex flex-col gap-1.5">
@@ -74,7 +74,13 @@ export default function EngineLines({
               <div
                 role={playable ? "button" : undefined}
                 tabIndex={playable ? 0 : undefined}
-                aria-label={playable ? `Play this line, starting ${m.pv[0]}` : undefined}
+                aria-label={
+                  playable
+                    ? `${isRec ? "Recommended line. " : ""}Play this line, starting ${
+                        m.pv[0]
+                      }, evaluation ${fmtEval(m.cp)}`
+                    : undefined
+                }
                 onClick={playable ? () => playLine(1) : undefined}
                 onKeyDown={
                   playable
