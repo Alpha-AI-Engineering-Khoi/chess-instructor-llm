@@ -22,6 +22,7 @@ import {
   validateFen,
   type Orientation,
 } from "@/lib/chess";
+import { deriveOursLabel } from "@/lib/showcase";
 import { playCapture, playMove } from "@/lib/sound";
 import BoardStage, { type StageArrow } from "./BoardStage";
 import TierControl from "./TierControl";
@@ -119,6 +120,12 @@ export default function Studio() {
   }, [runCoach, loadLibrary]);
 
   const toMove = useMemo(() => sideToMove(fen), [fen]);
+  // OURS identity parsed from the live coach response (never hardcoded), so the
+  // "· vN" chip tracks whatever model the backend is actually serving.
+  const oursLabel = useMemo(
+    () => (result ? deriveOursLabel(result.meta.model) : null),
+    [result],
+  );
   const studentSan = useMemo(
     () => (studentUci ? uciToSan(coachedFen, studentUci) : null),
     [coachedFen, studentUci],
@@ -231,6 +238,16 @@ export default function Studio() {
     runCoach(fen, tier, null);
   };
 
+  // Explicit "re-run through the workflow": send the exact position the current
+  // answer is about back through the coach for a fresh pass (a live generation,
+  // not the cached library text), reusing the same student move so the board and
+  // the answer stay aligned.
+  const rerunWorkflow = useCallback(() => {
+    const su = result?.engine.student_move?.uci ?? (fen === coachedFen ? studentUci : null);
+    setActiveLibId(null);
+    runCoach(coachedFen, tier, su);
+  }, [result, fen, coachedFen, studentUci, tier, runCoach]);
+
   const selectLibraryItem = (e: LibraryEntry) => {
     abortRef.current?.abort();
     const su = e.student_move ? moveToUci(e.fen, e.student_move) : null;
@@ -323,29 +340,36 @@ export default function Studio() {
         </div>
 
         <div className="flex max-w-3xl flex-col gap-2.5">
-          <span className="inline-flex w-fit items-center rounded-full bg-signal/12 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-signal ring-1 ring-signal/30">
-            Behavior from data
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex w-fit items-center rounded-full bg-signal/12 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-signal ring-1 ring-signal/30">
+              Behavior from data
+            </span>
+            {oursLabel?.version && (
+              <span className="rounded-full px-2.5 py-1 font-mono text-[11px] text-signal ring-1 ring-signal/40 tnum">
+                {oursLabel.badge}
+              </span>
+            )}
+          </div>
           <h1 className="text-2xl font-semibold leading-tight tracking-tight text-balance text-ink sm:text-[2rem]">
-            Fine-tuning taught a small local model to coach where its own base can’t.
+            Fine-tuning taught a local model to coach where its own base can’t.
           </h1>
           <p className="text-pretty text-sm leading-relaxed text-muted sm:text-base">
-            This coach is a 1.7B model running locally. Same grounded position, same rating: its untuned
-            base lands <span className="text-ink">last of the field</span> on blinded instructiveness and
-            fails the shippable gate. Fine-tuning the <span className="text-ink">same weights</span> makes it
-            pass clean, climbs it about four ranks, lifts its balanced coaching score{" "}
-            <span className="text-ink tnum">32.5 → 47.9</span>, and takes tier-appropriate move selection{" "}
-            <span className="text-ink tnum">36% → 53%</span> — reliability a prompt on the same model can’t
-            guarantee.{" "}
+            A fine-tuned model running locally. Set a position, mark the move you’re unsure about, and
+            pick your rating — it hands back <span className="text-ink">one move</span> and a plain
+            reason: the <span className="text-ink">idea</span> behind it, the{" "}
+            <span className="text-ink">principle</span> to carry forward, why it works{" "}
+            <span className="text-ink">here</span>, and how to <span className="text-ink">find it</span>{" "}
+            next time. Same grounded position and rating, its untuned base fails the shippable gate;
+            the fine-tune passes clean and adapts its answer to your level.{" "}
             <span className="text-faint">
-              The{" "}
+              See the{" "}
               <Link
                 href="/showcase"
                 className="text-muted underline decoration-dotted underline-offset-2 transition-colors hover:text-ink"
               >
-                multi-model showdown
+                multi-model comparison
               </Link>{" "}
-              against 14 frontier and open models is the bonus comparison, not the headline.
+              — OURS against frontier and open models, with the measured per-model metrics.
             </span>
           </p>
         </div>
@@ -474,6 +498,24 @@ export default function Studio() {
               >
                 {coachLabel}
               </Button>
+
+              {/* Explicit live re-run through the full coaching workflow. */}
+              <div className="flex flex-col gap-1.5">
+                <Button
+                  variant="tertiary"
+                  size="md"
+                  className="min-h-11 w-full gap-2 font-medium"
+                  isDisabled={loading || (status !== "done" && status !== "error")}
+                  onPress={rerunWorkflow}
+                >
+                  <ResetIcon width={16} height={16} />
+                  Re-run through the workflow
+                </Button>
+                <p className="text-[11px] leading-relaxed text-faint">
+                  A fresh live pass over this exact position — re-reads it and rewrites the lesson,
+                  rather than reusing a cached answer.
+                </p>
+              </div>
 
               <Separator />
 

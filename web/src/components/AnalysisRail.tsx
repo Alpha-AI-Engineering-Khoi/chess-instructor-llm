@@ -110,13 +110,13 @@ export default function AnalysisRail({
         )}
         <span className="inline-flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-[color:var(--engine)]" aria-hidden />
-          Engine data
+          Reference
         </span>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <section aria-label="Engine sound moves">
-          <h3 className="mb-3 text-sm font-medium text-ink">Sound moves</h3>
+        <section aria-label="Strong moves">
+          <h3 className="mb-3 text-sm font-medium text-ink">Strong moves</h3>
           <ul className="flex flex-col gap-1.5">
             {pool.map((m) => {
               const tone = toneFor(m.uci);
@@ -127,13 +127,13 @@ export default function AnalysisRail({
           </ul>
         </section>
 
-        <section aria-label="Human move likelihood">
+        <section aria-label="What players usually play">
           <h3 className="mb-3 text-sm font-medium text-ink">
-            Human odds <span className="text-xs font-normal text-muted">· Maia</span>
+            What players usually play
           </h3>
           {maiaTop.length === 0 ? (
             <p className="text-xs leading-relaxed text-muted">
-              Maia only reads standard positions — no human-likelihood data here.
+              No player-frequency data for this position.
             </p>
           ) : (
             <ul className="flex flex-col gap-1.5">

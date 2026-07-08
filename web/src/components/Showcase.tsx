@@ -17,11 +17,12 @@ import {
 import type { Key } from "@heroui/react";
 import { postCoachResilient, type CoachResponse, type CoachWakeStatus } from "@/lib/api";
 import {
+  bestFrontierModel,
   bestOtherModel,
+  computeLeaderboard,
   describeOursOutcome,
   gateBadge,
   loadShowcaseView,
-  MODEL_VERSION,
   orderModels,
   primaryTier,
   representativeTier,
@@ -30,7 +31,10 @@ import {
   TRUTHFULNESS,
   type DuelVerdict,
   type GateBadgeInfo,
+  type Leaderboard,
+  type ModelAggregate,
   type ModelKind,
+  type OursLabel,
   type ShowcaseTier,
   type ShowcaseView,
   type Split,
@@ -44,7 +48,7 @@ import ShowdownBoard from "./ShowdownBoard";
 import { ShieldCheckIcon } from "./icons";
 
 type Status = "loading" | "ready" | "error" | "empty";
-type LibFilter = "differentiates" | "shine" | "wins" | "loses" | "all";
+type LibFilter = "proof" | "differentiates" | "wins" | "loses" | "shine" | "all";
 type PhaseFilter = "all" | "opening" | "middlegame" | "endgame";
 type LiveState = {
   status: "idle" | "loading" | "done" | "error";
@@ -84,7 +88,7 @@ export default function Showcase() {
   const [status, setStatus] = useState<Status>("loading");
 
   const [split, setSplit] = useState<Split>("test");
-  const [libFilter, setLibFilter] = useState<LibFilter>("differentiates");
+  const [libFilter, setLibFilter] = useState<LibFilter>("proof");
   const [phase, setPhase] = useState<PhaseFilter>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tier, setTier] = useState<ShowcaseTier>("beginner");
@@ -127,6 +131,14 @@ export default function Showcase() {
   const meta = view?.meta ?? null;
   const positions = useMemo(() => view?.positions ?? [], [view]);
 
+  // Headline OURS-vs-BASE deltas, computed live from the HELD-OUT test split (the
+  // honest measure — and the leaderboard's default view, so the two agree). No
+  // hardcoded training figures; always consistent with the OURS version on screen.
+  const headline = useMemo(
+    () => (view ? oursBaseHeadline(computeLeaderboard(view, "test")) : null),
+    [view],
+  );
+
   // If showcase.json has no training split at all, keep the toggle on Test.
   useEffect(() => {
     if (meta && !meta.hasTrain && split === "train") setSplit("test");
@@ -141,6 +153,7 @@ export default function Showcase() {
   // the lens tabs and to keep us off empty lenses (items 4 & 5).
   const lensCounts = useMemo(
     () => ({
+      proof: splitPositions.filter((p) => p.isProof).length,
       differentiates: splitPositions.filter((p) => p.oursTierDifferentiates).length,
       shine: splitPositions.filter((p) => p.shine).length,
       wins: splitPositions.filter((p) => p.oursWins).length,
@@ -154,7 +167,7 @@ export default function Showcase() {
   // (so the Shine tab hides when it isn't a distinct, non-empty subset — item 4).
   const availableLenses = useMemo<LibFilter[]>(
     () =>
-      (["differentiates", "shine", "wins", "loses", "all"] as LibFilter[]).filter(
+      (["proof", "differentiates", "wins", "loses", "shine", "all"] as LibFilter[]).filter(
         (f) => f === "all" || lensCounts[f] > 0,
       ),
     [lensCounts],
@@ -170,6 +183,7 @@ export default function Showcase() {
   const filtered = useMemo(() => {
     return splitPositions.filter((p) => {
       if (phase !== "all" && p.phase !== phase) return false;
+      if (effectiveLibFilter === "proof" && !p.isProof) return false;
       if (effectiveLibFilter === "differentiates" && !p.oursTierDifferentiates) return false;
       if (effectiveLibFilter === "shine" && !p.shine) return false;
       if (effectiveLibFilter === "wins" && !p.oursWins) return false;
@@ -277,7 +291,7 @@ export default function Showcase() {
 
   return (
     <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-[1320px] flex-col gap-7 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      <ShowcaseHeader meta={meta} status={status} />
+      <ShowcaseHeader meta={meta} status={status} headline={headline} />
 
       {status === "loading" && <LoadingSkeleton />}
 
@@ -381,28 +395,44 @@ export default function Showcase() {
             </section>
           </div>
 
-          <TruthfulnessPanel />
+          <LeaderboardPanel view={view!} meta={meta} split={split} />
+
+          <TruthfulnessPanel oursLabel={meta.ours} />
         </>
       )}
     </div>
   );
 }
 
+/** The OURS row + its own BASE baseline from the whole-dataset leaderboard — the
+ *  honest before/after that replaces any hardcoded training figures. */
+function oursBaseHeadline(
+  lb: Leaderboard | null,
+): { ours: ModelAggregate; base: ModelAggregate } | null {
+  if (!lb) return null;
+  const ours = lb.rows.find((r) => r.kind === "ours") ?? null;
+  const base = lb.rows.find((r) => r.kind === "base") ?? null;
+  return ours && base ? { ours, base } : null;
+}
+
 const LIB_TITLE: Record<LibFilter, string> = {
+  proof: "The proof — adapts by level AND diverges from the frontier",
   differentiates: "Where OURS adapts by level",
   shine: "Where our model shines",
-  wins: "Where OURS wins",
-  loses: "Where OURS loses",
+  wins: "Where OURS beats the frontier",
+  loses: "Where OURS trails the frontier",
   all: "All positions",
 };
 
 /** Honest empty-state copy per filter — tells the grader exactly why a lens is
  *  empty and what would fill it, without pretending data exists. */
 function emptyLibraryText(libFilter: LibFilter, meta: ShowcaseView["meta"], split: Split): string {
-  if (libFilter === "differentiates") {
+  if (libFilter === "proof" || libFilter === "differentiates") {
     return meta.perTierComplete
-      ? "No position in this split varies OURS’s move across all three tiers."
-      : "The full tier-differentiation set arrives with showcase.json — it needs all three tiers scored per position. Meanwhile, the Shine / OURS wins / All lenses are live from the held-out set.";
+      ? libFilter === "proof"
+        ? "No position in this split has OURS both adapting across all three tiers AND diverging from the best frontier move."
+        : "No position in this split varies OURS’s move across all three tiers."
+      : "The full tier-differentiation set arrives with showcase.json — it needs all three tiers scored per position. Meanwhile, the OURS wins / All lenses are live from the held-out set.";
   }
   if (split === "train" && !meta.hasTrain) {
     return "The training sample arrives with showcase.json.";
@@ -414,7 +444,18 @@ function emptyLibraryText(libFilter: LibFilter, meta: ShowcaseView["meta"], spli
 /* Header                                                              */
 /* ================================================================== */
 
-function ShowcaseHeader({ meta, status }: { meta: ShowcaseView["meta"] | null; status: Status }) {
+function ShowcaseHeader({
+  meta,
+  status,
+  headline,
+}: {
+  meta: ShowcaseView["meta"] | null;
+  status: Status;
+  headline: { ours: ModelAggregate; base: ModelAggregate } | null;
+}) {
+  const ours = meta?.ours ?? null;
+  const sizeLabel = ours?.size ? `${ours.size} ` : "";
+  const modelCount = meta?.modelCount ?? 0;
   return (
     <header className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-3">
@@ -434,7 +475,8 @@ function ShowcaseHeader({ meta, status }: { meta: ShowcaseView["meta"] | null; s
             <span aria-hidden className="text-faint">›</span>
           </Link>
           <span className="rounded-full px-2.5 py-1 font-mono text-xs text-signal ring-1 ring-signal/40 tnum">
-            OURS · {MODEL_VERSION}
+            {ours?.badge ?? "OURS"}
+            {ours?.size ? ` · ${ours.size}` : ""}
           </span>
         </div>
       </div>
@@ -445,35 +487,55 @@ function ShowcaseHeader({ meta, status }: { meta: ShowcaseView["meta"] | null; s
             Behavior from data
           </span>
           <span className="text-[11px] uppercase tracking-wide text-faint">
-            Multi-Model Showcase · bonus comparison
+            Multi-Model Showcase{modelCount ? ` · ${modelCount} models` : ""}
           </span>
         </div>
         <h1 className="text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl">
-          The fine-tune makes this small local model coach where its base can’t.
+          The fine-tune makes this local model coach where its base can’t.
         </h1>
         <p className="max-w-3xl text-sm leading-relaxed text-muted sm:text-base">
-          <span className="text-signal">OURS</span> is a 1.7B model running locally. On the same 803
-          held-out positions with byte-identical grounding, its untuned{" "}
-          <span className="text-ink">base</span> lands last of the field on the blinded cross-family
-          council and fails the shippable gate; fine-tuning the{" "}
-          <span className="text-ink">same weights</span> climbs it about four ranks on instructiveness{" "}
-          <span className="text-ink tnum">(14.18 → 10.26)</span>, lifts its balanced coaching score{" "}
-          <span className="text-ink tnum">32.5 → 47.9</span>, and raises tier-fit{" "}
-          <span className="text-ink tnum">36% → 53%</span> — reliability a prompt on the same model
-          can’t guarantee.
+          <span className="text-signal">OURS</span> is a {sizeLabel}model running locally. On the
+          same held-out positions as its untuned <span className="text-ink">base</span> — same
+          weights, byte-identical input — fine-tuning{" "}
+          {headline ? (
+            <>
+              lifts tier-appropriate move selection{" "}
+              <span className="text-ink tnum">
+                {pct(headline.base.tierFitRate)} → {pct(headline.ours.tierFitRate)}
+              </span>
+              {headline.ours.councilInstr != null && headline.base.councilInstr != null && (
+                <>
+                  {" "}
+                  and the blinded council’s instructiveness grade{" "}
+                  <span className="text-ink tnum">
+                    {trimNum(headline.base.councilInstr)} → {trimNum(headline.ours.councilInstr)}
+                  </span>
+                </>
+              )}
+              {" "}(computed live from {headline.ours.cells.toLocaleString()} held-out cells) —
+              reliability a prompt on the same model can’t guarantee.
+            </>
+          ) : (
+            <>makes it pass the shippable gate and adapt its move to the player’s level — reliability a prompt on the same model can’t guarantee.</>
+          )}
         </p>
         <p className="max-w-3xl text-sm leading-relaxed text-muted">
-          <span className="text-ink">The bonus, below:</span> how OURS stacks up against 14 frontier
-          and open models on the same grounded input. Pick a position, switch the model and the rating
-          tier, and read the recommended move, the objective verdicts, the blinded council grades, and
-          the coaching text side by side. The 14-model comparison is precomputed; only{" "}
-          <span className="text-signal">OURS</span> can be re-run live.
+          <span className="text-ink">The comparison, below:</span> how OURS stacks up against{" "}
+          {modelCount ? `${modelCount} ` : ""}frontier and open models on the same grounded input.
+          Pick a position, switch the model and the rating tier, and read the recommended move, the
+          objective verdicts, the blinded council grades, and the coaching text side by side. The
+          field is precomputed; only <span className="text-signal">OURS</span> can be re-run live.
         </p>
       </div>
 
       {meta && status === "ready" && <ProvenanceNote meta={meta} />}
     </header>
   );
+}
+
+/** X.X% with a single decimal, tabular-friendly. */
+function pct(rate: number): string {
+  return `${(rate * 100).toFixed(1)}%`;
 }
 
 function ProvenanceNote({ meta }: { meta: ShowcaseView["meta"] }) {
@@ -506,7 +568,7 @@ function ProvenanceNote({ meta }: { meta: ShowcaseView["meta"] }) {
         )}
         {source === "interim" && (
           <>
-            showcase.json isn’t here yet. OURS (chess-coach-v2) was re-run locally at{" "}
+            showcase.json isn’t here yet. OURS ({meta.ours.badge}) was re-run locally at{" "}
             <span className="text-ink">all three tiers</span>, so the tier-differentiation moat and
             the per-tier OURS-vs-best duel are live on the held-out set. Rivals stay at their single
             benchmarked tier, and the <span className="text-ink">training sample</span> +{" "}
@@ -532,7 +594,8 @@ function ProvenanceNote({ meta }: { meta: ShowcaseView["meta"] }) {
 /* ================================================================== */
 
 const LENS_LABEL: Record<LibFilter, string> = {
-  differentiates: "Tier diff",
+  proof: "Proof",
+  differentiates: "Distinct-tier",
   shine: "Shine",
   wins: "OURS wins",
   loses: "OURS loses",
@@ -653,15 +716,17 @@ function ControlBar({
       </div>
 
       <p className="max-w-4xl text-xs leading-relaxed text-faint">
-        <span className="font-medium text-muted">Tier diff</span> is the moat — where
-        OURS recommends a genuinely different, level-appropriate move across the three tiers.{" "}
+        <span className="font-medium text-muted">Proof</span> is the headline — where OURS both
+        adapts by level (a different, level-appropriate move across the three tiers) AND diverges
+        from the best frontier model’s move. <span className="font-medium text-muted">Distinct-tier</span>{" "}
+        is the broader adaptation set it’s drawn from.{" "}
         <span className="font-medium text-muted">OURS wins / OURS loses</span> compare OURS to the
         three <span className="text-muted">frontier</span> models only (GPT-5.5 / Claude / Gemini)
         on the sound tier move — OURS’s own <span className="text-muted">BASE</span> baseline and the
-        open field are excluded from win credit, so the banner and these counts use one rule. A 1.7B
-        is expected to trail the frontier here. Every shipped cell is gated, so deterministic
-        board-fact fabrication is <span className="text-muted">0% for all models</span>; the honest
-        semantic-truth gap lives in the residual panel below.
+        open field are excluded from win credit, so the banner and these counts use one rule. Every
+        shipped cell is gated, so deterministic board-fact fabrication is{" "}
+        <span className="text-muted">0% for all models</span>; the measured per-model metrics are in
+        the leaderboard, and the honest semantic-truth gap in the residual panel below.
       </p>
     </section>
   );
@@ -721,18 +786,21 @@ function LensLegend() {
         <Tooltip.Arrow />
         <div className="flex flex-col gap-1.5 leading-relaxed">
           <p>
-            <span className="font-medium text-signal">Tier diff</span> — the moat. Positions where
-            OURS recommends a genuinely different, level-appropriate move across Beginner /
-            Intermediate / Advanced (each move sound and tier-fit; excluded when all three are the
-            same move).
+            <span className="font-medium text-signal">Proof</span> — the headline set. OURS
+            recommends a genuinely different, level-appropriate move across Beginner / Intermediate /
+            Advanced (each sound and tier-fit) AND that move diverges from the best frontier model’s
+            move — the case that the tuned coach adapts by level in a way the frontier doesn’t.
+          </p>
+          <p>
+            <span className="font-medium">Distinct-tier</span> — the broader adaptation set: OURS
+            varies its move across the three tiers (excluded when all three are the same move). Proof
+            is this set intersected with frontier-divergence.
           </p>
           <p>
             <span className="font-medium">OURS wins / OURS loses</span> — head-to-head vs the three
             frontier models only (GPT-5.5 / Claude / Gemini), on the sound tier move.{" "}
             <span className="font-medium">OURS’s own BASE and the open field are excluded</span> from
-            win credit, so the “OURS wins here” banner uses the exact same rule as these counts. A
-            1.7B is <span className="font-medium">expected to trail</span> the frontier here — that
-            is not the axis we claim to win on.
+            win credit, so the “OURS wins here” banner uses the exact same rule as these counts.
           </p>
           <p className="text-muted">
             Faithfulness is a fairness floor, not a ranking axis: after the verify-and-regenerate
@@ -929,7 +997,9 @@ function Explorer({
               )}
               {position.benchmark && (
                 <span className="rounded-full px-2 py-0.5 text-faint ring-1 ring-[color:var(--border)]">
-                  {position.benchmark === "open" ? "+open field · 14 models" : "5-model set"}
+                  {position.benchmark === "open"
+                    ? `+open field · ${meta.modelCount} models`
+                    : "core set"}
                 </span>
               )}
             </div>
@@ -965,7 +1035,10 @@ function Explorer({
         <div className="flex min-w-0 flex-col gap-4">
           <OursVsBest position={position} tier={tier} onTier={onTier} onSelectModel={onModelKey} />
 
-          <ModelPicker models={ordered} value={modelKey} onChange={onModelKey} />
+          <ModelPicker models={ordered} value={modelKey} onChange={onModelKey} total={meta.modelCount} />
+
+          {/* The selected model's recommendation at every tier, side by side. */}
+          <SelectedModelTiers model={selModel} tier={tier} onTier={onTier} />
 
           {tierHasData && selCell && cellEvaluated ? (
             <>
@@ -1027,6 +1100,8 @@ function OursVsBest({
   onSelectModel: (k: string) => void;
 }) {
   const best = bestOtherModel(position);
+  const frontier = bestFrontierModel(position);
+  const bestIsFrontier = Boolean(best && frontier && best.key === frontier.key);
   const rows = useMemo(() => tierDuel(position, position.bestOtherKey), [position]);
   const anyScored = rows.some((r) => r.verdict !== "na");
 
@@ -1048,7 +1123,21 @@ function OursVsBest({
         ) : (
           <span className="text-sm text-muted">no rival scored here</span>
         )}
-        <span className="ml-auto text-[11px] text-faint">best other model</span>
+        {/* When the strongest rival isn't the frontier, point to the frontier
+            reference the win/loss verdict is actually measured against. */}
+        {best && !bestIsFrontier && frontier && (
+          <button
+            type="button"
+            onClick={() => onSelectModel(frontier.key)}
+            className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-[11px] text-faint transition-colors hover:text-engine focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
+            title="Open the best frontier model — the win/loss reference"
+          >
+            frontier ref: {frontier.short}
+          </button>
+        )}
+        <span className="ml-auto text-[11px] text-faint">
+          {bestIsFrontier ? "best frontier · win/loss ref" : "best other model"}
+        </span>
       </div>
 
       {best && (
@@ -1200,10 +1289,12 @@ function ModelPicker({
   models,
   value,
   onChange,
+  total,
 }: {
   models: ViewModel[];
   value: string;
   onChange: (k: string) => void;
+  total: number;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1235,8 +1326,76 @@ function ModelPicker({
         </Select>
       </div>
       <span className="text-[11px] text-faint tnum">
-        {models.length === 14 ? "all 14 models" : `${models.length} models here`}
+        {total > 0 && models.length >= total
+          ? `all ${total} models`
+          : `${models.length}${total > 0 ? ` of ${total}` : ""} models here`}
       </span>
+    </div>
+  );
+}
+
+/* ---- Selected model's per-tier recommendations ------------------- */
+
+/** The picked model's recommended move at Beginner / Intermediate / Advanced,
+ *  side by side — so switching the dropdown shows one model's answer at every
+ *  level at a glance. Each cell doubles as the tier selector. */
+function SelectedModelTiers({
+  model,
+  tier,
+  onTier,
+}: {
+  model: ViewModel;
+  tier: ShowcaseTier;
+  onTier: (t: ShowcaseTier) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-baseline justify-between">
+        <span className="text-xs font-medium uppercase tracking-wide text-faint">
+          {model.short} · move per tier
+        </span>
+        <span className="text-[11px] text-faint">tap a tier to compare below</span>
+      </div>
+      <div className="grid grid-cols-3 gap-1.5">
+        {TIERS.map((t) => {
+          const c = model.byTier[t];
+          const active = t === tier;
+          const evaluated = Boolean(c?.evaluated);
+          return (
+            <button
+              key={t}
+              type="button"
+              onClick={() => onTier(t)}
+              aria-pressed={active}
+              className={`flex flex-col items-start gap-1 rounded-lg border px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal/60 ${
+                active
+                  ? "border-[color:var(--field-border)] bg-[color:var(--surface-tertiary)]"
+                  : "border-[color:var(--border)] hover:bg-[color:var(--surface-tertiary)]/60"
+              }`}
+            >
+              <span className="flex w-full items-baseline justify-between">
+                <span className="text-[11px] font-medium text-muted">{cap(t)}</span>
+                <span className="text-[10px] text-faint tnum">{TIER_BAND[t]}</span>
+              </span>
+              <span
+                className={`font-mono text-base font-semibold tnum ${
+                  model.kind === "ours" ? "text-signal" : "text-ink"
+                }`}
+              >
+                {c?.move ?? "—"}
+              </span>
+              {evaluated ? (
+                <span className="flex flex-wrap items-center gap-1">
+                  <Dot on={c!.tierFit} label="tier" />
+                  <Dot on={!c!.fabricated} label="faithful" />
+                </span>
+              ) : (
+                <span className="text-[10px] text-faint">not scored</span>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -1714,14 +1873,149 @@ function LiveResult({
 }
 
 /* ================================================================== */
+/* Per-model leaderboard — computed live from the loaded cells          */
+/* ================================================================== */
+
+function LeaderboardPanel({
+  view,
+  meta,
+  split,
+}: {
+  view: ShowcaseView;
+  meta: ShowcaseView["meta"];
+  split: Split;
+}) {
+  const board = useMemo(() => computeLeaderboard(view, split), [view, split]);
+  if (board.rows.length === 0) return null;
+
+  const splitLabel = split === "train" ? "training" : "held-out test";
+
+  return (
+    <section aria-label="Per-model metrics" className="flex flex-col gap-3">
+      <Separator />
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <h2 className="text-sm font-semibold text-ink">
+          Per-model metrics — measured on the {splitLabel} split
+        </h2>
+        <span className="text-[11px] text-faint tnum">
+          {board.rows.length} models · council 0–{trimNum(board.councilScale)}
+        </span>
+      </div>
+      <p className="max-w-4xl text-xs leading-relaxed text-muted">
+        Every number here is computed live from the loaded cells — nothing is hardcoded, so it always
+        matches the OURS version on screen. <span className="text-signal">OURS</span> sits next to its
+        own untuned <span className="text-ink">BASE</span> for the honest before/after:{" "}
+        <span className="text-muted">tier-fit</span> = share of moves matching the trained
+        tier-appropriate target; <span className="text-muted">council</span> = blinded cross-family
+        grades for move quality and instructiveness.
+      </p>
+
+      <div className="overflow-hidden rounded-[10px] border border-[color:var(--border)]">
+        {/* Header row */}
+        <div className="grid grid-cols-[minmax(120px,1.5fr)_minmax(0,2fr)_64px_64px_56px] items-center gap-2 border-b border-[color:var(--separator)] bg-[color:var(--surface)] px-3 py-2 text-[10px] uppercase tracking-wide text-faint">
+          <span>Model</span>
+          <span>Tier-fit</span>
+          <span className="text-right">Council&nbsp;move</span>
+          <span className="text-right">Instruct.</span>
+          <span className="text-right">Cells</span>
+        </div>
+        <ul className="divide-y divide-[color:var(--separator)]">
+          {board.rows.map((r) => (
+            <LeaderboardRow key={r.key} row={r} scale={board.councilScale} />
+          ))}
+        </ul>
+      </div>
+      <p className="text-[10px] leading-relaxed text-faint">
+        Deterministic board-fact fabrication is <span className="text-muted">0% for every model</span>{" "}
+        after the verify-and-regenerate gate (the fairness floor), so it isn’t a ranking column here.{" "}
+        <span className="text-[color:var(--caution)]">⚠</span> marks a partial model (fewer cells —
+        provider throttling); its rates are over the cells it does have.
+      </p>
+    </section>
+  );
+}
+
+function LeaderboardRow({ row, scale }: { row: ModelAggregate; scale: number }) {
+  const isOurs = row.kind === "ours";
+  const isBase = row.kind === "base";
+  const fill =
+    row.kind === "ours"
+      ? "var(--signal)"
+      : row.kind === "frontier"
+        ? "var(--engine)"
+        : row.kind === "base"
+          ? "var(--faint)"
+          : "var(--muted)";
+  return (
+    <li
+      className={`grid grid-cols-[minmax(120px,1.5fr)_minmax(0,2fr)_64px_64px_56px] items-center gap-2 px-3 py-2 ${
+        isOurs ? "bg-signal/[0.06]" : isBase ? "bg-[color:var(--surface-tertiary)]/40" : ""
+      }`}
+    >
+      <div className="flex min-w-0 items-center gap-1.5">
+        <span
+          className={`truncate text-xs ${isOurs ? "font-semibold text-signal" : "text-ink"}`}
+          title={row.name}
+        >
+          {row.short}
+        </span>
+        <KindTag kind={row.kind} />
+        {row.partial && (
+          <span
+            className="text-[10px] text-[color:var(--caution)]"
+            title="Partial model — only a subset of cells exist (provider throttling)."
+          >
+            ⚠
+          </span>
+        )}
+      </div>
+
+      {/* Tier-fit bar */}
+      <div className="flex items-center gap-2">
+        <span
+          className="relative h-2 flex-1 overflow-hidden rounded-full bg-[color:var(--surface-tertiary)]"
+          title={`tier-fit ${pct(row.tierFitRate)}`}
+        >
+          <span
+            aria-hidden
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{ width: `${row.tierFitRate * 100}%`, backgroundColor: fill }}
+          />
+        </span>
+        <span
+          className={`w-12 shrink-0 text-right font-mono text-xs tnum ${isOurs ? "font-semibold text-signal" : "text-ink"}`}
+        >
+          {pct(row.tierFitRate)}
+        </span>
+      </div>
+
+      <span className="text-right font-mono text-xs text-ink tnum">
+        {row.councilMove == null ? "—" : trimNum(row.councilMove)}
+      </span>
+      <span className="text-right font-mono text-xs text-ink tnum">
+        {row.councilInstr == null ? "—" : trimNum(row.councilInstr)}
+      </span>
+      <span className="text-right font-mono text-[11px] text-faint tnum">
+        {row.cells.toLocaleString()}
+      </span>
+    </li>
+  );
+}
+
+/* ================================================================== */
 /* Truthfulness residual — two honest layers (per-model, static)       */
 /* ================================================================== */
 
-function TruthfulnessPanel() {
+function TruthfulnessPanel({ oursLabel }: { oursLabel: OursLabel }) {
   const t = TRUTHFULNESS;
+  // Relabel the OURS row with the identity parsed from the loaded data, so the
+  // sampled study is transparent about which OURS version it covers.
   const rows = useMemo(
-    () => [...t.rows].sort((a, b) => b.any.pct - a.any.pct),
-    [t.rows],
+    () =>
+      [...t.rows]
+        .map((r) => (r.kind === "ours" ? { ...r, name: oursLabel.name } : r))
+        .sort((a, b) => b.any.pct - a.any.pct),
+    [t.rows, oursLabel.name],
   );
 
   return (

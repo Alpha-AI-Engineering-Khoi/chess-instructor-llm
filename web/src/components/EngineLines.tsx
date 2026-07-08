@@ -51,9 +51,9 @@ export default function EngineLines({
   const playable = Boolean(onPlayLine) && !disabled;
 
   return (
-    <section aria-label="Engine principal variations">
+    <section aria-label="Likely continuations">
       <div className="mb-3 flex items-baseline justify-between gap-2">
-        <h3 className="text-sm font-medium text-ink">Top engine lines</h3>
+        <h3 className="text-sm font-medium text-ink">How it could continue</h3>
         <span className="text-xs text-faint">Click a line to play it — or a move to go deeper</span>
       </div>
 

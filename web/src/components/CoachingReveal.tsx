@@ -150,9 +150,8 @@ export default function CoachingReveal({
               <Tooltip.Content showArrow className="max-w-[18rem]">
                 <Tooltip.Arrow />
                 <p className="leading-relaxed">
-                  Engine-derived explanation. The model’s wording didn’t pass the board-fact
-                  faithfulness check, so a verified explanation of a sound, engine-approved move
-                  is shown instead.
+                  The model’s wording didn’t pass the board-fact faithfulness check, so a verified
+                  explanation of a sound, approved move is shown instead.
                 </p>
               </Tooltip.Content>
             </Tooltip>

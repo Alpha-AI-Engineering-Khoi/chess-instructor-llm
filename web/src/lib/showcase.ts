@@ -20,9 +20,11 @@ export type ShowcaseTier = Tier; // "beginner" | "intermediate" | "advanced"
 export const TIERS: ShowcaseTier[] = ["beginner", "intermediate", "advanced"];
 
 /**
- * The model version OURS currently points at. The live backend and the
- * precomputed artifacts are v2 today; flip this to "v3" (one place) when the v3
- * pipeline is live so every "OURS · v2" label swaps at once.
+ * Fallback OURS version label, used ONLY when the loaded data carries no OURS
+ * model name to parse. The real label is derived from the data at load time
+ * (see deriveOursLabel + meta.ours), so switching the pipeline from v2 → v4
+ * (1.7B → 32B) updates every "OURS · vN" label automatically — nothing here is
+ * hardcoded to a specific size or version.
  */
 export const MODEL_VERSION = "v2";
 
@@ -80,6 +82,23 @@ export interface ShowcaseContractModel {
   byTier: Partial<Record<ShowcaseTier, ShowcaseCell | null>>;
 }
 
+/**
+ * Pre-aggregated per-model rollup the worker attaches to a position for OURS and
+ * for the best rival (`ours_summary` / `best_other_detail`). Every field is
+ * optional so an older/leaner artifact still parses; the UI derives the same
+ * numbers from the cells when these are absent.
+ */
+export interface ShowcaseModelSummary {
+  key?: string | null;
+  name?: string | null;
+  family?: string | null;
+  council_move?: number | null;
+  council_instr?: number | null;
+  sound_rate?: number | null;
+  tier_fit_rate?: number | null;
+  fabricated_rate?: number | null;
+}
+
 export interface ShowcaseContractPosition {
   id: string;
   fen: string;
@@ -102,6 +121,24 @@ export interface ShowcaseContractPosition {
    * council grades + objective flags. Powers the OURS-vs-best comparison.
    */
   best_other?: string | null;
+  /** Pre-aggregated rollups the worker attaches for OURS and the best rival. */
+  ours_summary?: ShowcaseModelSummary | null;
+  best_other_detail?: ShowcaseModelSummary | null;
+  /** OURS recommends a move MIS-matched to the tier target (honest counter-signal). */
+  ours_misdirected?: boolean;
+  /** How many DISTINCT moves OURS gives across the three tiers (>=2 == adapts). */
+  ours_distinct_moves?: number | null;
+  /** How many distinct SOUND moves OURS gives across the tiers. */
+  ours_distinct_sound_moves?: number | null;
+  /** True when OURS was scored at all three tiers here. */
+  ours_full_3tier_coverage?: boolean;
+  /**
+   * The curated "proof" flag: OURS adapts by level AND diverges from the best
+   * rival — the headline library subset. Optional; derived when absent.
+   */
+  focus?: boolean;
+  /** Which pool the split was drawn from (worker bookkeeping; informational). */
+  split_source?: string | null;
   /**
    * Optional held-out context carried by the interim source so its view matches
    * the showdown one (student's mistake arrow, severity + benchmark chips). The
@@ -181,24 +218,63 @@ export interface ViewPosition {
   shine: boolean;
   /** OURS gives a different, level-appropriate move across all three tiers. */
   oursTierDifferentiates: boolean;
+  /** OURS's move mis-matches the tier target somewhere (honest counter-signal). */
+  oursMisdirected: boolean;
+  /** Distinct OURS moves across the three tiers (>=2 == genuinely adapts). */
+  oursDistinctMoves: number;
   /** Key of the strongest non-OURS model here (from contract or derived); null if none scored. */
   bestOtherKey: string | null;
+  /** Key of the strongest FRONTIER rival (GPT-5.5 / Claude / Gemini); null if none scored. */
+  bestFrontierKey: string | null;
+  /** OURS's recommended move diverges from the best frontier model at some tier. */
+  oursDiffersFromBestFrontier: boolean;
+  /**
+   * The curated proof subset: OURS adapts by level AND diverges from the best
+   * frontier rival — the honest "our model does something the frontier doesn't"
+   * library. Read from the worker's `focus` when present, else derived.
+   */
+  isProof: boolean;
+  /** Pre-aggregated rollups from the worker (informational; may be null). */
+  oursSummary: ShowcaseModelSummary | null;
+  bestOtherDetail: ShowcaseModelSummary | null;
   source: DataSource;
 }
 
 export interface ShowcaseTotals {
   positions: number;
   shine: number;
+  proof: number;
+  differentiates: number;
   oursWins: number;
   oursLoses: number;
   train: number;
   test: number;
 }
 
+/**
+ * The OURS identity, parsed from the loaded data (never hardcoded to a size /
+ * version). `name` is the full model name as written by the worker; `version`
+ * and `size` are pulled out of it when present (e.g. "OURS-v2 (1.7B tuned)" ->
+ * version "v2", size "1.7B"). Everything that used to hardcode "v2" / "1.7B"
+ * reads these instead, so a v4 / 32B artifact relabels the whole app at once.
+ */
+export interface OursLabel {
+  name: string;
+  short: string;
+  version: string | null;
+  size: string | null;
+  /** "OURS · v4" style chip text. */
+  badge: string;
+}
+
 export interface ShowcaseMeta {
   source: DataSource;
   generatedUtc: string | null;
   modelVersion: string;
+  /** OURS identity parsed from the data (name / version / size / chip). */
+  ours: OursLabel;
+  /** Total distinct models seen anywhere in the doc (e.g. 14 with the full field). */
+  modelCount: number;
   /** Observed maximum council grade across the doc (for meter scaling); >= 1. */
   councilScale: number;
   hasCouncil: boolean;
@@ -250,6 +326,20 @@ function deriveKey(name: string, kind: ModelKind): string {
 /** Strip a trailing parenthetical ("Mistral-Large-3 (675B)" -> "Mistral-Large-3"). */
 function shortName(name: string): string {
   return name.replace(/\s*\([^)]*\)\s*/g, " ").trim() || name;
+}
+
+/**
+ * Parse the OURS identity out of the loaded model name — the single place the
+ * app learns its version/size. Handles "OURS-v2 (1.7B tuned)",
+ * "OURS · chess-coach-v4 (32B)", a bare "chess-coach-v2", etc. Never hardcodes a
+ * size or version; falls back to {@link MODEL_VERSION} only when the name is empty.
+ */
+export function deriveOursLabel(name: string | null | undefined): OursLabel {
+  const raw = (name ?? "").trim();
+  const version = raw.match(/v(\d+(?:\.\d+)?)/i)?.[0]?.toLowerCase() ?? null;
+  const size = raw.match(/(\d+(?:\.\d+)?\s?B)\b/i)?.[1]?.replace(/\s+/g, "") ?? null;
+  const badge = `OURS · ${version ?? MODEL_VERSION}`;
+  return { name: raw || "OURS", short: "OURS", version, size, badge };
 }
 
 function sideToMove(fen: string): "white" | "black" {
@@ -491,6 +581,95 @@ export function bestOtherModel(position: ViewPosition): ViewModel | null {
   return position.models.find((m) => m.key === position.bestOtherKey) ?? null;
 }
 
+/** Resolve the best FRONTIER rival (GPT-5.5 / Claude / Gemini) for a position. */
+export function bestFrontierModel(position: ViewPosition): ViewModel | null {
+  if (!position.bestFrontierKey) return null;
+  return position.models.find((m) => m.key === position.bestFrontierKey) ?? null;
+}
+
+/**
+ * Strongest FRONTIER rival only (GPT-5.5 / Claude / Gemini), by mean cell quality
+ * across the tiers it was scored at. This is the reference the headline
+ * OURS-wins / OURS-loses definition uses, and the anchor for the "OURS diverges
+ * from the best frontier" proof signal. Returns null when no frontier model was
+ * scored at this position.
+ */
+function deriveBestFrontierKey(models: ViewModel[]): string | null {
+  let bestKey: string | null = null;
+  let bestScore = -Infinity;
+  let bestShort = "";
+  for (const m of models) {
+    if (m.kind !== "frontier") continue;
+    let sum = 0;
+    let n = 0;
+    for (const t of TIERS) {
+      const c = m.byTier[t];
+      if (c?.evaluated) {
+        sum += cellQuality(c);
+        n += 1;
+      }
+    }
+    if (n === 0) continue;
+    const score = sum / n;
+    const better = score > bestScore || (score === bestScore && m.short.localeCompare(bestShort) < 0);
+    if (better) {
+      bestKey = m.key;
+      bestScore = score;
+      bestShort = m.short;
+    }
+  }
+  return bestKey;
+}
+
+/**
+ * True when OURS recommends a genuinely different move from the best frontier
+ * rival at some tier both were scored at — the "our move isn't just the frontier
+ * move" half of the proof. Only counts tiers where both actually have a move.
+ */
+function deriveDiffersFromBest(
+  oursByTier: Record<ShowcaseTier, ViewCell | null>,
+  frontier: ViewModel | null,
+): boolean {
+  if (!frontier) return false;
+  let comparable = false;
+  for (const t of TIERS) {
+    const oc = oursByTier[t];
+    const fc = frontier.byTier[t];
+    if (oc?.evaluated && oc.move && fc?.evaluated && fc.move) {
+      comparable = true;
+      if (oc.move !== fc.move) return true;
+    }
+  }
+  // No overlapping tier to compare → not a demonstrated divergence.
+  return comparable ? false : false;
+}
+
+/** Distinct recommended moves OURS gives across the tiers it was scored at. */
+function countDistinctOursMoves(oursByTier: Record<ShowcaseTier, ViewCell | null>): number {
+  const moves = new Set<string>();
+  for (const t of TIERS) {
+    const c = oursByTier[t];
+    if (c?.evaluated && c.move) moves.add(c.move);
+  }
+  return moves.size;
+}
+
+/** Normalize an optional worker rollup into the view summary (all fields nullable). */
+function summaryFromContract(raw: ShowcaseModelSummary | null | undefined): ShowcaseModelSummary | null {
+  if (!raw) return null;
+  const num = (v: unknown): number | null => (typeof v === "number" ? v : null);
+  return {
+    key: raw.key ?? null,
+    name: raw.name ?? null,
+    family: raw.family ?? null,
+    council_move: num(raw.council_move),
+    council_instr: num(raw.council_instr),
+    sound_rate: num(raw.sound_rate),
+    tier_fit_rate: num(raw.tier_fit_rate),
+    fabricated_rate: num(raw.fabricated_rate),
+  };
+}
+
 export type DuelVerdict = "beats" | "trails" | "even" | "na";
 
 export interface TierDuelRow {
@@ -606,12 +785,28 @@ function buildFromContract(doc: ShowcaseContract, source: DataSource = "showcase
 
     const oursModel = models.find((m) => m.kind === "ours") ?? null;
     const bestOtherKey = resolveBestOtherKey(p.best_other, models) ?? deriveBestOtherKey(models);
+    const bestFrontierKey = deriveBestFrontierKey(models);
+    const bestFrontier = bestFrontierKey ? models.find((m) => m.key === bestFrontierKey) ?? null : null;
     const oursTierDifferentiates =
       typeof p.ours_tier_differentiates === "boolean"
         ? p.ours_tier_differentiates
         : oursModel
           ? deriveTierDifferentiates(oursModel.byTier)
           : false;
+    const oursDistinctMoves =
+      typeof p.ours_distinct_moves === "number"
+        ? p.ours_distinct_moves
+        : oursModel
+          ? countDistinctOursMoves(oursModel.byTier)
+          : 0;
+    const oursDiffersFromBestFrontier = oursModel
+      ? deriveDiffersFromBest(oursModel.byTier, bestFrontier)
+      : false;
+    // The proof subset (spec definition): OURS adapts by level AND its move
+    // diverges from the best frontier rival. The worker's `focus` flag currently
+    // tracks only the tier-differentiation half, so we compute the frontier-
+    // divergence half here from the cells rather than aliasing `focus`.
+    const isProof = oursTierDifferentiates && oursDiffersFromBestFrontier;
 
     return {
       id: p.id,
@@ -635,16 +830,26 @@ function buildFromContract(doc: ShowcaseContract, source: DataSource = "showcase
       oursLoses: Boolean(p.ours_loses),
       shine: Boolean(p.shine),
       oursTierDifferentiates,
+      oursMisdirected: Boolean(p.ours_misdirected),
+      oursDistinctMoves,
       bestOtherKey,
+      bestFrontierKey,
+      oursDiffersFromBestFrontier,
+      isProof,
+      oursSummary: summaryFromContract(p.ours_summary),
+      bestOtherDetail: summaryFromContract(p.best_other_detail),
       source,
     };
   });
 
+  const info = metaModelInfo(positions);
   return {
     meta: {
       source,
       generatedUtc: null,
-      modelVersion: MODEL_VERSION,
+      modelVersion: info.ours.version ?? MODEL_VERSION,
+      ours: info.ours,
+      modelCount: info.modelCount,
       councilScale: Math.max(1, councilScale),
       hasCouncil,
       hasTrain,
@@ -722,6 +927,7 @@ function buildFromShowdown(doc: ShowdownDoc): ShowcaseView {
     // so it is honestly false until showcase.json supplies all three tiers.
     const oursModel = models.find((m) => m.kind === "ours") ?? null;
     const bestOtherKey = deriveBestOtherKey(models);
+    const bestFrontierKey = deriveBestFrontierKey(models);
     const oursTierDifferentiates = oursModel
       ? deriveTierDifferentiates(oursModel.byTier)
       : false;
@@ -748,16 +954,28 @@ function buildFromShowdown(doc: ShowdownDoc): ShowcaseView {
       // which would make the Shine lens a duplicate of "OURS wins").
       shine: false,
       oursTierDifferentiates,
+      oursMisdirected: false,
+      oursDistinctMoves: oursModel ? countDistinctOursMoves(oursModel.byTier) : 0,
       bestOtherKey,
+      bestFrontierKey,
+      // One tier per position in the fallback, so a cross-tier "proof" can't be
+      // demonstrated — honestly false until showcase.json lands.
+      oursDiffersFromBestFrontier: false,
+      isProof: false,
+      oursSummary: null,
+      bestOtherDetail: null,
       source: "showdown",
     };
   });
 
+  const info = metaModelInfo(positions);
   return {
     meta: {
       source: "showdown",
       generatedUtc: doc.meta.generated_utc ?? null,
-      modelVersion: MODEL_VERSION,
+      modelVersion: info.ours.version ?? MODEL_VERSION,
+      ours: info.ours,
+      modelCount: info.modelCount,
       councilScale: 2, // council.jsonl axis scale, for meter geometry only
       hasCouncil: false,
       hasTrain: false,
@@ -773,6 +991,8 @@ function tally(positions: ViewPosition[]): ShowcaseTotals {
   return {
     positions: positions.length,
     shine: positions.filter((p) => p.shine).length,
+    proof: positions.filter((p) => p.isProof).length,
+    differentiates: positions.filter((p) => p.oursTierDifferentiates).length,
     oursWins: positions.filter((p) => p.oursWins).length,
     oursLoses: positions.filter((p) => p.oursLoses).length,
     train: positions.filter((p) => p.split === "train").length,
@@ -780,7 +1000,22 @@ function tally(positions: ViewPosition[]): ShowcaseTotals {
   };
 }
 
+/** Derive the OURS identity + distinct-model count straight from the built view. */
+function metaModelInfo(positions: ViewPosition[]): { ours: OursLabel; modelCount: number } {
+  const keys = new Set<string>();
+  let oursName: string | null = null;
+  for (const p of positions) {
+    for (const m of p.models) {
+      keys.add(m.key);
+      if (!oursName && m.kind === "ours") oursName = m.name;
+    }
+  }
+  return { ours: deriveOursLabel(oursName), modelCount: keys.size };
+}
+
 const NOTES: Record<string, string> = {
+  proof: "The proof set — positions where OURS gives a genuinely different, level-appropriate move across the three tiers AND diverges from the best frontier model’s move. The one-screen case that the tuned coach adapts by level in a way the frontier doesn’t.",
+  differentiates: "Distinct-tier — every position where OURS recommends a different move across Beginner / Intermediate / Advanced (each move sound and tier-fit). The broader adaptation set the proof subset is drawn from.",
   shine: "Clean tier-differentiators — the subset where OURS gives a different, level-appropriate move across all three tiers, doesn’t lose to the frontier, and isn’t mis-directed.",
   train: "Training sample — positions in-distribution for the tuned model. Expected to be strong; NOT a generalization test.",
   test: "Test sample — held-out positions the model never trained on. This is the honest measure of the coach.",
@@ -789,6 +1024,140 @@ const NOTES: Record<string, string> = {
   fabricated: "Every model ships 0% user-visible fabrication after the verify-and-regenerate gate — a fairness floor applied equally to all, not a per-model differentiator. Where models actually differ is the semantic-judge truthfulness residual below.",
   council: "Blinded council of judges grades each answer for move correctness and instructiveness, models anonymized.",
 };
+
+/* ------------------------------------------------------------------ */
+/* Per-model aggregate leaderboard — computed live from the loaded data */
+/* ------------------------------------------------------------------ */
+
+/**
+ * One model's rolled-up eval metrics over the evaluated cells in scope. Every
+ * number is computed from the loaded showcase data, so it always matches the
+ * OURS version on screen (no hardcoded training figures anywhere).
+ */
+export interface ModelAggregate {
+  key: string;
+  name: string;
+  short: string;
+  kind: ModelKind;
+  /** Evaluated cells counted for this model in scope. */
+  cells: number;
+  tierFitRate: number; // 0..1
+  soundRate: number; // 0..1
+  fabricatedRate: number; // 0..1 (post-gate; 0 across shipped data)
+  councilMove: number | null; // mean 0..scale, or null when uncouncilled
+  councilInstr: number | null; // mean 0..scale
+  /** Fewer cells than the fullest model in scope (a partial / throttled model). */
+  partial: boolean;
+}
+
+export interface Leaderboard {
+  rows: ModelAggregate[];
+  councilScale: number;
+  maxCells: number;
+  hasCouncil: boolean;
+  oursKey: string | null;
+  baseKey: string | null;
+}
+
+interface Accum {
+  key: string;
+  name: string;
+  short: string;
+  kind: ModelKind;
+  n: number;
+  tierFit: number;
+  sound: number;
+  fabricated: number;
+  cmSum: number;
+  cmN: number;
+  ciSum: number;
+  ciN: number;
+}
+
+/**
+ * Aggregate every model's evaluated cells across the positions in scope
+ * (optionally one split) into a comparable leaderboard. Ordered OURS → BASE →
+ * frontier → open by mean council-move then name, so the tuned model and its own
+ * untuned baseline sit adjacent for the honest before/after read.
+ */
+export function computeLeaderboard(view: ShowcaseView, split?: Split): Leaderboard {
+  const acc = new Map<string, Accum>();
+  for (const p of view.positions) {
+    if (split && p.split !== split) continue;
+    for (const m of p.models) {
+      for (const t of TIERS) {
+        const c = m.byTier[t];
+        if (!c || !c.evaluated) continue;
+        let a = acc.get(m.key);
+        if (!a) {
+          a = {
+            key: m.key,
+            name: m.name,
+            short: m.short,
+            kind: m.kind,
+            n: 0,
+            tierFit: 0,
+            sound: 0,
+            fabricated: 0,
+            cmSum: 0,
+            cmN: 0,
+            ciSum: 0,
+            ciN: 0,
+          };
+          acc.set(m.key, a);
+        }
+        a.n += 1;
+        if (c.tierFit) a.tierFit += 1;
+        if (c.sound) a.sound += 1;
+        if (c.fabricated) a.fabricated += 1;
+        if (c.councilMove != null) {
+          a.cmSum += c.councilMove;
+          a.cmN += 1;
+        }
+        if (c.councilInstr != null) {
+          a.ciSum += c.councilInstr;
+          a.ciN += 1;
+        }
+      }
+    }
+  }
+
+  const maxCells = Math.max(0, ...[...acc.values()].map((a) => a.n));
+  let hasCouncil = false;
+  const rows: ModelAggregate[] = [...acc.values()]
+    .filter((a) => a.n > 0)
+    .map((a) => {
+      if (a.cmN > 0 || a.ciN > 0) hasCouncil = true;
+      return {
+        key: a.key,
+        name: a.name,
+        short: a.short,
+        kind: a.kind,
+        cells: a.n,
+        tierFitRate: a.tierFit / a.n,
+        soundRate: a.sound / a.n,
+        fabricatedRate: a.fabricated / a.n,
+        councilMove: a.cmN > 0 ? a.cmSum / a.cmN : null,
+        councilInstr: a.ciN > 0 ? a.ciSum / a.ciN : null,
+        partial: maxCells > 0 && a.n < maxCells,
+      };
+    })
+    .sort(
+      (x, y) =>
+        KIND_RANK[x.kind] - KIND_RANK[y.kind] ||
+        (y.councilMove ?? -1) - (x.councilMove ?? -1) ||
+        x.short.localeCompare(y.short),
+    );
+
+  return {
+    rows,
+    councilScale: view.meta.councilScale,
+    maxCells,
+    hasCouncil,
+    oursKey: rows.find((r) => r.kind === "ours")?.key ?? null,
+    baseKey: rows.find((r) => r.kind === "base")?.key ?? null,
+  };
+}
 
 /* ------------------------------------------------------------------ */
 /* Gate provenance badge (per cell) — honest, from the two-layer gate   */
