@@ -73,6 +73,9 @@ BASE_1P7 = "mlx-community/Qwen3-1.7B-4bit"
 OURS_1P7 = str(settings.MODELS / "mlx" / "chess-coach-v2")
 Q3_32B = "aws-bedrock/qwen.qwen3-32b-v1-0"
 
+BASE_4B = "mlx-community/Qwen3-4B-Instruct-2507-4bit"
+OURS_4B = str(settings.MODELS / "mlx" / "chess-coach-4b-iter1")
+
 MLX_MAX_TOKENS = 640
 
 
@@ -92,6 +95,9 @@ HONEST_MODELS: Dict[str, HModel] = {
     "ours_1p7": HModel("ours_1p7", "OURS-v2 (1.7B tuned, gated)", "mlx", OURS_1P7, True, "default"),
     "base_1p7": HModel("base_1p7", "BASE (1.7B untuned, gated)", "mlx", BASE_1P7, False, "default"),
     "pbase_1p7": HModel("pbase_1p7", "PROMPT-BASE (1.7B engineered, gated)", "mlx", BASE_1P7, False, "best_1p7"),
+    "base_4b": HModel("base_4b", "BASE-4B (Qwen3-4B untuned, gated)", "mlx", BASE_4B, False, "default"),
+    "ours_4b": HModel("ours_4b", "OURS-4B (Qwen3-4B tuned, gated)", "mlx", OURS_4B, True, "default"),
+    "pbase_4b": HModel("pbase_4b", "PROMPT-BASE-4B (Qwen3-4B engineered, gated)", "mlx", BASE_4B, False, "best_4b"),
     "base_32b": HModel("base_32b", "BASE-32B (Qwen3-32B untuned, gated)", "tfy", Q3_32B, False, "default"),
     "pbase_32b": HModel("pbase_32b", "PROMPT-BASE-32B (engineered, gated)", "tfy", Q3_32B, False, "best_32b"),
     "ours_v3": HModel("ours_v3", "OURS-v3 (32B tuned, reused ungated)", "reuse", "ours_v3", True, "default", gated=False),
@@ -101,10 +107,12 @@ HONEST_MODELS: Dict[str, HModel] = {
 }
 
 #: The unified council field (validation ranking) — ordered best→ for display.
+#: 4B iteration field (base-vs-tuned 4B + prompt-base litmus + frontier reuse for
+#: distance-to-frontier; ours_v3 = our 32B tuned as a reference). The prior 1.7B/32B
+#: field is preserved in git history.
 FIELD: Tuple[str, ...] = (
-    "ours_1p7", "base_1p7", "pbase_1p7",
-    "pbase_32b", "base_32b", "ours_v3",
-    "gpt", "claude", "gemini",
+    "ours_4b", "base_4b", "pbase_4b",
+    "ours_v3", "gpt", "claude", "gemini",
 )
 FRONTIER_KEYS: Tuple[str, ...] = ("gpt", "claude", "gemini")
 
@@ -147,7 +155,7 @@ def _resolve_prompt(model: HModel) -> str:
 
     if model.prompt == "default":
         return load_system_prompt()
-    size = "1p7" if model.prompt == "best_1p7" else "32b"
+    size = {"best_1p7": "1p7", "best_32b": "32b", "best_4b": "4b"}[model.prompt]
     p = best_prompt_path(size)
     if not p.exists():
         raise SystemExit(
@@ -253,6 +261,15 @@ def cmd_optimize(a: argparse.Namespace) -> int:
             coach.seed(int(_h.sha256(tag.encode()).hexdigest()[:8], 16))
         gate_on, max_attempts = True, a.max_attempts
         model_key = "pbase_1p7"
+    elif size == "4b":
+        coach = MLXSamplingCoach(BASE_4B, max_tokens=MLX_MAX_TOKENS)
+        run_fn = coach.run
+        import hashlib as _h4
+
+        def seed_hook(tag: str) -> None:  # noqa: ANN001
+            coach.seed(int(_h4.sha256(tag.encode()).hexdigest()[:8], 16))
+        gate_on, max_attempts = True, a.max_attempts
+        model_key = "pbase_4b"
     elif size == "32b":
         chat = _tfy_chat(Q3_32B, max_tokens=4000, reasoning_effort=None)
         run_fn = TFYRunFn(chat).run
@@ -738,7 +755,7 @@ def build_parser() -> argparse.ArgumentParser:
     ps.set_defaults(func=cmd_seed)
 
     po = sub.add_parser("optimize", help="Prompt-iteration loop -> best base prompt.")
-    po.add_argument("--size", choices=["1p7", "32b"], required=True)
+    po.add_argument("--size", choices=["1p7", "32b", "4b"], required=True)
     po.add_argument("--rounds", type=int, default=3)
     po.add_argument("--max-attempts", dest="max_attempts", type=int, default=4)
     po.add_argument("--judge", default="gpt", help="Loop instructiveness judge (default gpt: reliable at low effort).")

@@ -34,6 +34,7 @@ locally (built by ``python -m src.teacher.build_4b_dataset build``).
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -44,21 +45,22 @@ import modal
 # --------------------------------------------------------------------------- #
 # Names / paths (4B iter1)
 # --------------------------------------------------------------------------- #
-APP_NAME: str = "chess-coach-qlora-4b"
+ITER: str = os.environ.get("CHESS_4B_ITER", "iter1")   # "iter1" (default) | "iter2" | ...
+APP_NAME: str = "chess-coach-qlora-4b" if ITER == "iter1" else f"chess-coach-qlora-4b-{ITER}"
 VOLUME_NAME: str = "chess-coach-lora"            # shared volume; 4B uses its own run dir
-RUN_NAME: str = "chess-coach-4b-iter1"           # this run's artifact dir
+RUN_NAME: str = f"chess-coach-4b-{ITER}"         # this run's artifact dir (iter-scoped)
 
 VOL_MOUNT: str = "/vol"
-REMOTE_TRAIN: str = "/data/train_4b_iter1.jsonl"
-REMOTE_VALID: str = "/data/valid_4b_iter1.jsonl"
+REMOTE_TRAIN: str = f"/data/train_4b_{ITER}.jsonl"
+REMOTE_VALID: str = f"/data/valid_4b_{ITER}.jsonl"
 ADAPTER_DIR: str = f"{VOL_MOUNT}/{RUN_NAME}/adapter"
 MERGED_DIR: str = f"{VOL_MOUNT}/{RUN_NAME}/merged_16bit"
 
 if modal.is_local():
     _THIS_DIR = Path(__file__).resolve().parent
     REPO_ROOT: Optional[Path] = _THIS_DIR.parents[1]
-    LOCAL_TRAIN: Optional[Path] = REPO_ROOT / "data" / "dataset" / "train_4b_iter1.jsonl"
-    LOCAL_VALID: Optional[Path] = REPO_ROOT / "data" / "dataset" / "valid_4b_iter1.jsonl"
+    LOCAL_TRAIN: Optional[Path] = REPO_ROOT / "data" / "dataset" / f"train_4b_{ITER}.jsonl"
+    LOCAL_VALID: Optional[Path] = REPO_ROOT / "data" / "dataset" / f"valid_4b_{ITER}.jsonl"
     LOCAL_OUT_DIR: Optional[Path] = REPO_ROOT / "models" / "adapters" / RUN_NAME
 else:
     REPO_ROOT = LOCAL_TRAIN = LOCAL_VALID = LOCAL_OUT_DIR = None
@@ -127,7 +129,12 @@ train_image = (
     modal.Image.from_registry(f"nvidia/cuda:{CUDA_TAG}", add_python=PY_VERSION)
     .apt_install("git")
     .pip_install(*PIP_PACKAGES)
-    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "TOKENIZERS_PARALLELISM": "false"})
+    # Bake ITER into the image so the REMOTE container's module import resolves the
+    # SAME iter-scoped paths as the local build (Modal does NOT propagate local env
+    # vars to the container; without this the remote defaults to iter1 and can't find
+    # the baked iter2 data file).
+    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "TOKENIZERS_PARALLELISM": "false",
+          "CHESS_4B_ITER": ITER})
 )
 
 if modal.is_local():
@@ -328,12 +335,24 @@ def _volume_get(remote_path: str, local_parent: Path) -> None:
 
 
 @app.local_entrypoint()
-def main(smoke: bool = False, merge: bool = False, download: bool = False) -> None:
+def main(smoke: bool = False, merge: bool = False, download: bool = False,
+         spawn: bool = False) -> None:
     print(f"=== {APP_NAME}: {'SMOKE' if smoke else 'FULL'} run ===")
     print(f"base model : {BASE_MODEL}")
     print(f"train data : {LOCAL_TRAIN}")
     print(f"gpu        : {GPU}")
     print(f"run dir    : {VOLUME_NAME}:/{RUN_NAME}")
+
+    # `--spawn` (with `modal run --detach`) submits the training server-side and
+    # returns immediately, so the run survives the local process ending. This is
+    # Modal's recommended primitive for detached/background work (a detached
+    # `.remote()` can be canceled when the local caller disconnects).
+    if spawn and not smoke:
+        call = train.spawn(smoke=smoke, merge_16bit=merge)
+        print(f"[spawn] submitted detached train; FunctionCall id = {call.object_id}")
+        print("[spawn] the run continues on Modal independent of this local process. "
+              "Checkpoints every 40 steps to the Volume; re-run with --spawn to resume.")
+        return
 
     result = train.remote(smoke=smoke, merge_16bit=merge)
     print("\n=== remote train() result ===")
