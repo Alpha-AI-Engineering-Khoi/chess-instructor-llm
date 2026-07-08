@@ -301,24 +301,55 @@ export default function Studio() {
 
   return (
     <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-[1240px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      {/* Slim bar: jump to the cross-model comparison views. */}
-      <div className="flex items-center justify-end gap-2">
-        <Link
-          href="/showdown"
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium text-muted ring-1 ring-[color:var(--border)] transition-colors hover:text-ink hover:ring-[color:var(--field-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
-        >
-          Showdown list
-          <span aria-hidden className="text-faint">›</span>
-        </Link>
-        <Link
-          href="/showcase"
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-signal/12 px-3.5 text-sm font-medium text-signal ring-1 ring-signal/40 transition-colors hover:bg-signal/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
-        >
-          Multi-Model Showcase
-          <span aria-hidden>★</span>
-          <span aria-hidden className="text-signal/70">›</span>
-        </Link>
-      </div>
+      {/* Top-of-page intro. The spec-aligned hero is the base-vs-tuned reliability
+          story (behavior from data); the cross-model views are the bonus comparison. */}
+      <header className="flex flex-col gap-5">
+        <div className="flex items-center justify-end gap-2">
+          <Link
+            href="/showdown"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium text-muted ring-1 ring-[color:var(--border)] transition-colors hover:text-ink hover:ring-[color:var(--field-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
+          >
+            Showdown list
+            <span aria-hidden className="text-faint">›</span>
+          </Link>
+          <Link
+            href="/showcase"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-signal/12 px-3.5 text-sm font-medium text-signal ring-1 ring-signal/40 transition-colors hover:bg-signal/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
+          >
+            Multi-Model Showcase
+            <span aria-hidden>★</span>
+            <span aria-hidden className="text-signal/70">›</span>
+          </Link>
+        </div>
+
+        <div className="flex max-w-3xl flex-col gap-2.5">
+          <span className="inline-flex w-fit items-center rounded-full bg-signal/12 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-signal ring-1 ring-signal/30">
+            Behavior from data
+          </span>
+          <h1 className="text-2xl font-semibold leading-tight tracking-tight text-balance text-ink sm:text-[2rem]">
+            Fine-tuning taught a small local model to coach where its own base can’t.
+          </h1>
+          <p className="text-pretty text-sm leading-relaxed text-muted sm:text-base">
+            This coach is a 1.7B model running locally. Same grounded position, same rating: its untuned
+            base lands <span className="text-ink">last of the field</span> on blinded instructiveness and
+            fails the shippable gate. Fine-tuning the <span className="text-ink">same weights</span> makes it
+            pass clean, climbs it about four ranks, lifts its balanced coaching score{" "}
+            <span className="text-ink tnum">32.5 → 47.9</span>, and takes tier-appropriate move selection{" "}
+            <span className="text-ink tnum">36% → 53%</span> — reliability a prompt on the same model can’t
+            guarantee.{" "}
+            <span className="text-faint">
+              The{" "}
+              <Link
+                href="/showcase"
+                className="text-muted underline decoration-dotted underline-offset-2 transition-colors hover:text-ink"
+              >
+                multi-model showdown
+              </Link>{" "}
+              against 14 frontier and open models is the bonus comparison, not the headline.
+            </span>
+          </p>
+        </div>
+      </header>
 
       {/* Board-centric console. Desktop: board + controls in the left column, the
           coaching console tall on the right. Mobile: board → console → controls. */}

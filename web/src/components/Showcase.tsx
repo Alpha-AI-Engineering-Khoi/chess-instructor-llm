@@ -439,16 +439,35 @@ function ShowcaseHeader({ meta, status }: { meta: ShowcaseView["meta"] | null; s
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-          Multi-Model Showcase
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-full bg-signal/12 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-signal ring-1 ring-signal/30">
+            Behavior from data
+          </span>
+          <span className="text-[11px] uppercase tracking-wide text-faint">
+            Multi-Model Showcase · bonus comparison
+          </span>
+        </div>
+        <h1 className="text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl">
+          The fine-tune makes this small local model coach where its base can’t.
         </h1>
         <p className="max-w-3xl text-sm leading-relaxed text-muted sm:text-base">
-          Every model sees the <span className="text-ink">same grounded input</span>. Pick a
-          position, switch the model and the rating tier, and read the recommended move, the
-          objective verdicts, the blinded council grades, and the coaching text side by side. The
-          14-model comparison is precomputed; only <span className="text-signal">OURS</span> can be
-          re-run live.
+          <span className="text-signal">OURS</span> is a 1.7B model running locally. On the same 803
+          held-out positions with byte-identical grounding, its untuned{" "}
+          <span className="text-ink">base</span> lands last of the field on the blinded cross-family
+          council and fails the shippable gate; fine-tuning the{" "}
+          <span className="text-ink">same weights</span> climbs it about four ranks on instructiveness{" "}
+          <span className="text-ink tnum">(14.18 → 10.26)</span>, lifts its balanced coaching score{" "}
+          <span className="text-ink tnum">32.5 → 47.9</span>, and raises tier-fit{" "}
+          <span className="text-ink tnum">36% → 53%</span> — reliability a prompt on the same model
+          can’t guarantee.
+        </p>
+        <p className="max-w-3xl text-sm leading-relaxed text-muted">
+          <span className="text-ink">The bonus, below:</span> how OURS stacks up against 14 frontier
+          and open models on the same grounded input. Pick a position, switch the model and the rating
+          tier, and read the recommended move, the objective verdicts, the blinded council grades, and
+          the coaching text side by side. The 14-model comparison is precomputed; only{" "}
+          <span className="text-signal">OURS</span> can be re-run live.
         </p>
       </div>
 
