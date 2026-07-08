@@ -123,3 +123,22 @@ export function UndoIcon(props: IconProps) {
     </svg>
   );
 }
+
+// Two stacked sheets — the copy-to-clipboard affordance.
+export function CopyIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="9" y="9" width="11" height="11" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+// A check — confirms the copy landed.
+export function CheckIcon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="m5 12 5 5L20 7" />
+    </svg>
+  );
+}

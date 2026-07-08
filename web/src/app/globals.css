@@ -320,3 +320,43 @@ select:disabled,
 .cg-wrap cg-board square.oc.move-dest:hover {
   background: radial-gradient(transparent 0%, transparent 80%, rgba(20, 85, 0, 0.3) 80%);
 }
+
+/* --------------------------------------------------------------------------
+   Chessground coordinate labels — scale with the board so the rank/file marks
+   stay small and tucked at EVERY board size.
+
+   chessground.base.css sizes and positions the coordinates in FIXED pixels
+   (font-size: 9px; ranks top:-20px/left:4px/width:12px; files
+   bottom:-4px/left:24px/height:16px). Fixed px only look right at one large
+   board width: on the big Coach Studio board they render as clean, tucked
+   Lichess coordinates, but on the much smaller Showcase boards (the ~104px
+   library thumbnails and the ~320px detail board) the same px become a huge
+   fraction of each square and shift off-position, so the labels look enormous
+   and overlap the pieces.
+
+   Fix: make each board a container and express the coord font-size in
+   container-query units, but CAP it at the original 9px via min(), with every
+   offset in `em` so it tracks the font-size. Any board wider than ~450px
+   (desktop Studio — the known-good reference) still resolves to exactly the
+   original 9px / -20px / 4px / 24px values, so Studio is byte-for-byte
+   unchanged; smaller boards scale the whole label set down by the same
+   proportion, so Showcase now matches Studio at every size. The min() cap also
+   makes this strictly non-regressive: coordinates can never render larger than
+   the current 9px, whatever the container resolves to.
+   -------------------------------------------------------------------------- */
+.cg-wrap {
+  container-type: inline-size;
+}
+body .cg-wrap coords {
+  font-size: min(9px, 2cqw);
+}
+body .cg-wrap coords.ranks {
+  top: -2.2222em;
+  left: 0.4444em;
+  width: 1.3333em;
+}
+body .cg-wrap coords.files {
+  bottom: -0.4444em;
+  left: 2.6667em;
+  height: 1.7778em;
+}

@@ -28,6 +28,7 @@ import BoardStage, { type StageArrow } from "./BoardStage";
 import TierControl from "./TierControl";
 import CoachingReveal from "./CoachingReveal";
 import PositionLibrary, { type LibStatus } from "./PositionLibrary";
+import CopyFenButton from "./CopyFenButton";
 import { FlipVerticalIcon, ResetIcon, UndoIcon } from "./icons";
 
 type Status = "idle" | "loading" | "done" | "error";
@@ -411,6 +412,8 @@ export default function Studio() {
               )}
             </div>
             <div className="flex items-center gap-2">
+              {/* Copy the FEN of the position currently on the board. */}
+              <CopyFenButton fen={fen} className="min-h-11" />
               <Tooltip delay={300}>
                 <Button
                   isIconOnly

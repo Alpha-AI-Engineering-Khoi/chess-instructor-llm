@@ -45,6 +45,7 @@ import {
   type ViewPosition,
 } from "@/lib/showcase";
 import ShowdownBoard from "./ShowdownBoard";
+import CopyFenButton from "./CopyFenButton";
 import { ShieldCheckIcon } from "./icons";
 
 type Status = "loading" | "ready" | "error" | "empty";
@@ -957,13 +958,17 @@ function Explorer({
       <Card.Content className="grid grid-cols-1 gap-6 p-4 sm:p-5 lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
         {/* Left: board + position facts + tier switch */}
         <div className="flex flex-col gap-4">
-          <div className="mx-auto w-full max-w-[320px]">
+          <div className="mx-auto flex w-full max-w-[320px] flex-col gap-2">
             <ShowdownBoard
               fen={position.fen}
               orientation={position.sideToMove}
               moveUci={boardMoveUci}
               studentUci={position.studentMove?.uci}
             />
+            {/* Copy the exact FEN of the position currently on the board. */}
+            <div className="flex justify-end">
+              <CopyFenButton fen={position.fen} className="min-h-8" />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1.5 text-xs text-muted">
