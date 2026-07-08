@@ -593,8 +593,8 @@ export default function Studio() {
                   Re-run through the workflow
                 </Button>
                 <p className="text-[11px] leading-relaxed text-faint">
-                  A fresh live pass over this exact position — re-reads it and rewrites the lesson,
-                  rather than reusing a cached answer.
+                  A fresh live pass over this exact position — re-reads it and re-picks the
+                  level-appropriate move, rather than reusing a cached answer.
                 </p>
               </div>
 

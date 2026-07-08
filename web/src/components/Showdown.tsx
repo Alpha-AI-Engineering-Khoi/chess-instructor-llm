@@ -505,6 +505,7 @@ function ModelRow({
 }
 
 function CoachingPanel({ model }: { model: ShowdownModel }) {
+  const hasProse = Boolean(model.coaching?.trim());
   return (
     <div className="flex flex-col gap-2 rounded-[10px] border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3">
       <div className="flex items-center justify-between gap-2">
@@ -533,9 +534,27 @@ function CoachingPanel({ model }: { model: ShowdownModel }) {
         </div>
       )}
 
-      <p className="max-h-56 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-muted">
-        {model.coaching || <span className="text-faint">No coaching text produced.</span>}
-      </p>
+      {/* Coaching prose — a secondary, OPTIONAL layer, collapsed by default so the
+          model's recommended move (in the header above) stays the hero, matching
+          the Studio + Showcase reveal. The fabrication receipts above stay visible. */}
+      {hasProse ? (
+        <details className="group rounded-md border border-[color:var(--border)] bg-[color:var(--surface-tertiary)]/40">
+          <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 px-3 py-2 text-[11px] font-medium text-muted [&::-webkit-details-marker]:hidden">
+            <span aria-hidden className="text-faint transition-transform group-open:rotate-90">
+              ›
+            </span>
+            Show full explanation
+            <span className="text-faint">(optional, engine-assisted)</span>
+          </summary>
+          <div className="px-3 pb-3">
+            <p className="max-h-56 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-muted">
+              {model.coaching}
+            </p>
+          </div>
+        </details>
+      ) : (
+        <p className="text-sm leading-relaxed text-faint">No coaching text produced.</p>
+      )}
     </div>
   );
 }

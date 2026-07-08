@@ -28,7 +28,7 @@ const mono = Spline_Sans_Mono({
 export const metadata: Metadata = {
   title: "AI Chess Instructor",
   description:
-    "An engine-grounded chess coach. Set a position, mark the move you are unsure about, and get one leveled teaching move explained in plain language.",
+    "An engine-grounded chess coach that reliably picks the level-appropriate move for your rating — a move plus a short principle tag, with a full written explanation as an optional layer. Set a position, mark the move you are unsure about, and pick your level.",
 };
 
 export default function RootLayout({
