@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   Button,
@@ -19,6 +19,7 @@ import { postCoachResilient, type CoachResponse, type CoachWakeStatus } from "@/
 import {
   bestFrontierModel,
   bestOtherModel,
+  buildTierMatrix,
   computeLeaderboard,
   describeOursOutcome,
   gateBadge,
@@ -33,6 +34,8 @@ import {
   TRUTHFULNESS,
   type DuelVerdict,
   type GateBadgeInfo,
+  type MatrixCell,
+  type MatrixRow,
   type ModelAggregate,
   type ModelKind,
   type MoveSelectionHeadline,
@@ -41,6 +44,7 @@ import {
   type ShowcaseView,
   type Split,
   type TierDuelRow,
+  type TierMatrix,
   type TruthfulnessRow,
   type ViewCell,
   type ViewModel,
@@ -410,6 +414,20 @@ export default function Showcase() {
               )}
             </section>
           </div>
+
+          {/* HEADLINE: every model's move at every level, side by side — the
+              visceral "OURS adapts by level where the frontier repeats one" grid
+              for the selected position. */}
+          {selected && selModel && (
+            <TierMatrixPanel
+              meta={meta}
+              position={selected}
+              selectedKey={selModel.key}
+              tier={tier}
+              onSelectModel={setModelKey}
+              onTier={setTier}
+            />
+          )}
 
           <LeaderboardPanel view={view!} meta={meta} split={split} />
 
@@ -1369,11 +1387,21 @@ function SelectedModelTiers({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-baseline justify-between">
-        <span className="text-xs font-medium uppercase tracking-wide text-faint">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-faint">
           {model.short} · move per tier
+          <InfoTip label="Distinct moves per level">
+            <p>
+              One model’s recommended move at each rating tier. When these moves differ, the model{" "}
+              <span className="font-medium">adapts the move to the level</span> — the behavior OURS
+              is tuned for. A model that repeats one move across all three isn’t adapting.
+            </p>
+            <p>
+              The full every-model version of this is the side-by-side grid below.
+            </p>
+          </InfoTip>
         </span>
-        <span className="text-[11px] text-faint">tap a tier to compare below</span>
+        <span className="shrink-0 text-[11px] text-faint">tap a tier to compare below</span>
       </div>
       <div className="grid grid-cols-3 gap-1.5">
         {TIERS.map((t) => {
@@ -1436,7 +1464,23 @@ function VerdictRow({ model, cell, tier }: { model: ViewModel; cell: ViewCell; t
         >
           {cell.move ?? "—"}
         </span>
-        {tag && <span className="text-sm text-muted">— {tag}</span>}
+        {tag && (
+          <span className="inline-flex items-center gap-1.5 text-sm text-muted">
+            — {tag}
+            <InfoTip label="What the principle tag is">
+              <p>
+                The <span className="font-medium">principle tag</span> is the one-line “why this
+                move”, derived deterministically from the objective verdict — whether the move is
+                the <span className="font-medium">tier-appropriate</span> target and whether it is{" "}
+                <span className="font-medium">sound</span> — not from the coaching prose.
+              </p>
+              <p>
+                The move (and this tag) is the trained behavior; the full explanation below is a
+                secondary, optional layer.
+              </p>
+            </InfoTip>
+          </span>
+        )}
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <span className={`text-sm font-semibold ${isOurs ? "text-signal" : "text-ink"}`}>
@@ -1454,6 +1498,22 @@ function VerdictRow({ model, cell, tier }: { model: ViewModel; cell: ViewCell; t
           tone={cell.fabricated ? "danger" : "good"}
           label={cell.fabricated ? `fabricated${cell.nViolations ? ` ×${cell.nViolations}` : ""}` : "faithful"}
         />
+        <InfoTip label="What the verdict chips mean">
+          <p>
+            <span className="font-medium text-signal">tier-fit</span> — the move matches the
+            canonical tier-appropriate target OURS is trained to produce for that rating band (a
+            trained-target match, not an emergent judgment).
+          </p>
+          <p>
+            <span className="font-medium">sound move</span> — an objectively sound choice for the
+            position (doesn’t drop material or the thread), per the engine.
+          </p>
+          <p>
+            <span className="font-medium">faithful</span> — the explanation passed the deterministic
+            board-fact gate. That gate is a fairness floor (0% fabrication for every shipped cell);
+            the honest semantic-truth gap is in the residual panel below.
+          </p>
+        </InfoTip>
       </div>
     </div>
   );
@@ -1936,6 +1996,365 @@ function LiveResult({
 }
 
 /* ================================================================== */
+/* Side-by-side tier matrix — every model's move at every level         */
+/* ================================================================== */
+
+/** Shared column template so the header row and every model row line up: model
+ *  name, the three tier columns, then the per-model adaptation indicator. The
+ *  grid is wrapped in an x-scroller with a min width so it stays legible (and
+ *  swipeable) on narrow screens while ~14 rows scroll vertically. */
+const MATRIX_COLS =
+  "grid grid-cols-[minmax(116px,1.4fr)_repeat(3,minmax(72px,1fr))_minmax(84px,auto)] items-stretch";
+
+/**
+ * The HEADLINE side-by-side: rows = every model (OURS distinct + pinned first),
+ * columns = Beginner / Intermediate / Advanced, each cell = that model's move for
+ * that tier. Changed moves pop and the ⇅ badge counts distinct moves, so the point
+ * is visceral at a glance — OURS varies its move by level where the frontier
+ * repeats one. Cells are live: tapping one drives the explorer above (model + tier).
+ */
+function TierMatrixPanel({
+  meta,
+  position,
+  selectedKey,
+  tier,
+  onSelectModel,
+  onTier,
+}: {
+  meta: ShowcaseView["meta"];
+  position: ViewPosition;
+  selectedKey: string;
+  tier: ShowcaseTier;
+  onSelectModel: (k: string) => void;
+  onTier: (t: ShowcaseTier) => void;
+}) {
+  const matrix = useMemo(() => buildTierMatrix(position), [position]);
+
+  return (
+    <section aria-label="Every model's move at every level" className="flex flex-col gap-3">
+      <Separator />
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <div className="flex items-center gap-1.5">
+          <h2 className="text-sm font-semibold text-ink">
+            Every model’s move, every level — side by side
+          </h2>
+          <InfoTip label="What this side-by-side grid shows">
+            <p>
+              Rows are models; columns are the three rating tiers; each cell is the move that
+              model recommends for that level.
+            </p>
+            <p>
+              <span className="font-medium text-signal">OURS</span> gives a{" "}
+              <span className="font-medium">different, level-appropriate move</span> as the rating
+              rises, while the frontier models tend to repeat a single engine move at every level.
+              A move that differs from a model’s own first-level pick is highlighted, and the{" "}
+              <span className="font-medium">⇅ N</span> badge counts the distinct moves each model
+              gives across the tiers.
+            </p>
+          </InfoTip>
+        </div>
+        <span className="text-[11px] text-faint tnum">
+          {matrix.rows.length} models × {TIERS.length} levels
+        </span>
+      </div>
+
+      <MatrixCaption matrix={matrix} source={meta.source} />
+
+      {matrix.anyEvaluated ? (
+        <div className="rise overflow-hidden rounded-[10px] border border-[color:var(--border)]">
+          <div className="overflow-x-auto">
+            <div className="min-w-[560px]">
+              {/* Header — the tier columns double as tier selectors. */}
+              <div
+                className={`${MATRIX_COLS} border-b border-[color:var(--separator)] bg-[color:var(--surface)] px-1 py-2 text-[10px] uppercase tracking-wide text-faint`}
+              >
+                <span className="flex items-center px-2">Model</span>
+                {TIERS.map((t) => {
+                  const active = t === tier;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => onTier(t)}
+                      aria-pressed={active}
+                      className={`flex flex-col items-center rounded-md py-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal/60 ${
+                        active ? "text-signal" : "text-faint hover:text-muted"
+                      }`}
+                      title={
+                        matrix.tierEvaluated[t]
+                          ? `Focus ${cap(t)} in the explorer above`
+                          : "Not scored at this tier"
+                      }
+                    >
+                      <span className="font-medium">{cap(t)}</span>
+                      <span className="text-[9px] normal-case text-faint tnum">{TIER_BAND[t]}</span>
+                    </button>
+                  );
+                })}
+                <span className="flex items-center justify-end px-2 text-right">Adapts</span>
+              </div>
+
+              {/* Body — scrolls vertically for the full field (~14 rows). */}
+              <div className="max-h-[440px] divide-y divide-[color:var(--separator)] overflow-y-auto">
+                {matrix.rows.map((row) => (
+                  <MatrixRowView
+                    key={row.key}
+                    row={row}
+                    activeModel={row.key === selectedKey}
+                    activeTier={tier}
+                    onSelect={(t) => {
+                      onSelectModel(row.key);
+                      onTier(t);
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-[10px] border border-dashed border-[color:var(--border)] px-4 py-10 text-center text-sm leading-relaxed text-muted">
+          No model was scored at any tier for this position yet.{" "}
+          {meta.source === "showdown"
+            ? "The preview data scores each held-out position at a single tier — the full three-level grid arrives with showcase.json."
+            : "Re-run OURS live in the explorer above to score it now."}
+        </div>
+      )}
+
+      {/* Legend — the same objective flags used everywhere, spelled out once. */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-[10px] text-faint">
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            aria-hidden
+            className="inline-block size-2.5 rounded-[3px] bg-signal/25 ring-1 ring-signal/40"
+          />
+          changed move (adapts by level)
+        </span>
+        <Dot on label="tier-fit" />
+        <span className="inline-flex items-center gap-1.5">
+          <span
+            aria-hidden
+            className="inline-block size-1.5 rounded-full"
+            style={{ backgroundColor: "color-mix(in oklab, var(--danger) 80%, transparent)" }}
+          />
+          off-target / unsound
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <span aria-hidden>—</span> not scored at that level
+        </span>
+      </div>
+    </section>
+  );
+}
+
+/** Honest one-line read of the matrix for the selected position — computed live
+ *  from the rows, never asserting a frontier "repeats one" it doesn't measure. */
+function MatrixCaption({
+  matrix,
+  source,
+}: {
+  matrix: TierMatrix;
+  source: ShowcaseView["meta"]["source"];
+}) {
+  const oursRow = matrix.rows.find((r) => r.kind === "ours");
+  if (!oursRow || oursRow.scoredTiers === 0) {
+    return (
+      <p className="max-w-4xl text-xs leading-relaxed text-muted">
+        Read each model’s move at Beginner, Intermediate and Advanced at a glance.{" "}
+        {source === "showdown"
+          ? "The preview data scores one tier per position; all three levels fill in with showcase.json."
+          : "Tap any cell to focus that model and level in the explorer above."}
+      </p>
+    );
+  }
+  return (
+    <p className="max-w-4xl text-xs leading-relaxed text-muted">
+      {oursRow.adapts ? (
+        <>
+          Here, <span className="text-signal">OURS</span> recommends{" "}
+          <span className="text-ink tnum">{oursRow.distinctMoves}</span> distinct{" "}
+          {oursRow.distinctMoves === 1 ? "move" : "moves"} across the three levels
+          {matrix.flatFrontier > 0 && matrix.frontierFull > 0 ? (
+            <>
+              , while <span className="text-ink tnum">{matrix.flatFrontier}</span> of{" "}
+              <span className="tnum">{matrix.frontierFull}</span> frontier{" "}
+              {matrix.frontierFull === 1 ? "model" : "models"} repeat a single move.{" "}
+            </>
+          ) : (
+            ". "
+          )}
+        </>
+      ) : (
+        <>
+          On this position OURS gives{" "}
+          <span className="text-ink tnum">{oursRow.distinctMoves}</span>{" "}
+          {oursRow.distinctMoves === 1 ? "move" : "moves"} across the scored levels — the
+          per-level adaptation moat lives in the Proof / Distinct-tier lenses above.{" "}
+        </>
+      )}
+      <span className="text-faint">
+        “Distinct” counts raw moves; the tier-fit dots show whether each varied move is actually
+        appropriate for the level.
+      </span>
+    </p>
+  );
+}
+
+/** One model's row: name + kind, its move at each tier, and an adaptation badge. */
+function MatrixRowView({
+  row,
+  activeModel,
+  activeTier,
+  onSelect,
+}: {
+  row: MatrixRow;
+  activeModel: boolean;
+  activeTier: ShowcaseTier;
+  onSelect: (t: ShowcaseTier) => void;
+}) {
+  const isOurs = row.kind === "ours";
+  return (
+    <div
+      className={`${MATRIX_COLS} px-1 py-1 transition-colors ${
+        isOurs
+          ? "sticky top-0 z-[1] shadow-[inset_3px_0_0_0_var(--signal)]"
+          : activeModel
+            ? "bg-[color:var(--surface-tertiary)]/60"
+            : "hover:bg-[color:var(--surface-tertiary)]/30"
+      }`}
+      // OURS is pinned to the top of the scroller and gets a SOLID tinted fill so
+      // it stays visibly distinct (and never bleeds) while ~14 rows scroll beneath.
+      style={
+        isOurs
+          ? { backgroundColor: "color-mix(in oklab, var(--signal) 9%, var(--surface))" }
+          : undefined
+      }
+    >
+      <div className="flex min-w-0 items-center gap-1.5 px-2">
+        <span
+          className={`truncate text-xs ${isOurs ? "font-semibold text-signal" : "text-ink"}`}
+          title={row.name}
+        >
+          {row.short}
+        </span>
+        <KindTag kind={row.kind} />
+      </div>
+
+      {row.cells.map((cell) => (
+        <MatrixMoveCell
+          key={cell.tier}
+          row={row}
+          cell={cell}
+          active={cell.tier === activeTier}
+          onSelect={() => onSelect(cell.tier)}
+        />
+      ))}
+
+      <div className="flex items-center justify-end px-2">
+        <AdaptBadge row={row} />
+      </div>
+    </div>
+  );
+}
+
+/** One move cell. A changed move (differs from the model's first-level pick) pops
+ *  — signal for OURS, ink for rivals — while a repeated move on a flat row stays
+ *  muted, so "repeats one move" reads visually flat. A dash marks a missing tier. */
+function MatrixMoveCell({
+  row,
+  cell,
+  active,
+  onSelect,
+}: {
+  row: MatrixRow;
+  cell: MatrixCell;
+  active: boolean;
+  onSelect: () => void;
+}) {
+  if (!cell.evaluated || !cell.move) {
+    return (
+      <div
+        className="flex items-center justify-center py-1 text-sm text-faint"
+        title="Not scored at this level"
+      >
+        —
+      </div>
+    );
+  }
+
+  const isOurs = row.kind === "ours";
+  const highlight = cell.changed && !row.flat;
+  const moveColor = row.flat
+    ? "text-muted"
+    : isOurs
+      ? "text-signal"
+      : highlight
+        ? "text-ink"
+        : "text-muted";
+  const bg = highlight ? (isOurs ? "bg-signal/12" : "bg-[color:var(--surface-tertiary)]") : "";
+  const dotColor = cell.fabricated
+    ? "color-mix(in oklab, var(--danger) 80%, transparent)"
+    : cell.tierFit
+      ? "var(--good)"
+      : cell.sound
+        ? "var(--muted)"
+        : "color-mix(in oklab, var(--danger) 80%, transparent)";
+
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={active}
+      title={`${row.short} · ${cap(cell.tier)}: ${cell.move}${
+        cell.tierFit ? " · tier-fit" : cell.sound ? " · sound" : cell.fabricated ? " · fabricated" : ""
+      }`}
+      className={`flex flex-col items-center justify-center gap-1 rounded-md py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal/60 ${bg} ${
+        active ? "ring-1 ring-[color:var(--field-border)]" : ""
+      }`}
+    >
+      <span className={`font-mono text-sm font-semibold tnum ${moveColor}`}>{cell.move}</span>
+      <span aria-hidden className="inline-block size-1.5 rounded-full" style={{ backgroundColor: dotColor }} />
+    </button>
+  );
+}
+
+/** Per-model adaptation indicator: ⇅ N distinct moves (signal for OURS), "= 1"
+ *  when it repeats one move across all three levels, or an N/3 partial marker. */
+function AdaptBadge({ row }: { row: MatrixRow }) {
+  const isOurs = row.kind === "ours";
+  if (row.scoredTiers === 0) {
+    return <span className="text-[10px] text-faint">—</span>;
+  }
+  if (row.adapts) {
+    return (
+      <span
+        className={`inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold tnum ${
+          isOurs ? "bg-signal/15 text-signal" : "text-ink ring-1 ring-[color:var(--border)]"
+        }`}
+        title={`${row.distinctMoves} distinct moves across the levels`}
+      >
+        <span aria-hidden>⇅</span> {row.distinctMoves}
+      </span>
+    );
+  }
+  if (row.flat) {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium text-faint ring-1 ring-[color:var(--border)]"
+        title="Repeats a single move across all three levels"
+      >
+        <span aria-hidden>=</span> 1
+      </span>
+    );
+  }
+  return (
+    <span className="text-[10px] text-faint tnum" title={`${row.scoredTiers} of 3 levels scored`}>
+      {row.scoredTiers}/3
+    </span>
+  );
+}
+
+/* ================================================================== */
 /* Per-model leaderboard — computed live from the loaded cells          */
 /* ================================================================== */
 
@@ -2232,6 +2651,25 @@ function TruthBar({ row }: { row: TruthfulnessRow }) {
 /* ================================================================== */
 /* Small shared pieces                                                 */
 /* ================================================================== */
+
+/** A hoverable "?" that opens a HeroUI Tooltip with the given explanation.
+ *  Reused for the polish tooltips (distinct-moves-per-level, the principle tag,
+ *  the sound / faithful / tier-fit chips) so they read consistently. */
+function InfoTip({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <Tooltip delay={200}>
+      <Tooltip.Trigger aria-label={label}>
+        <span className="inline-flex size-4 cursor-help items-center justify-center rounded-full text-[10px] text-faint ring-1 ring-[color:var(--border)] transition-colors hover:text-muted">
+          ?
+        </span>
+      </Tooltip.Trigger>
+      <Tooltip.Content showArrow className="max-w-[22rem]">
+        <Tooltip.Arrow />
+        <div className="flex flex-col gap-1.5 leading-relaxed">{children}</div>
+      </Tooltip.Content>
+    </Tooltip>
+  );
+}
 
 function KindTag({ kind }: { kind: ModelKind }) {
   const map: Record<ModelKind, { label: string; cls: string }> = {

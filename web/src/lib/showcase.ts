@@ -721,6 +721,132 @@ export function tierDuel(position: ViewPosition, otherKey: string | null): TierD
 }
 
 /* ------------------------------------------------------------------ */
+/* Side-by-side tier matrix — every model's move at every level         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * One model's recommended move at one tier, decorated for the side-by-side grid.
+ * `changed` is true when this move differs from the model's REFERENCE move (the
+ * first tier it was scored at) — the deterministic "the model picked a different
+ * move at this level" signal that makes per-level adaptation visible at a glance.
+ */
+export interface MatrixCell {
+  tier: ShowcaseTier;
+  move: string | null; // SAN, or null when this model/tier has no data
+  moveUci: string | null;
+  evaluated: boolean;
+  tierFit: boolean;
+  sound: boolean;
+  fabricated: boolean;
+  changed: boolean;
+}
+
+/** One model's whole row in the side-by-side matrix (a cell per tier + rollups). */
+export interface MatrixRow {
+  key: string;
+  name: string;
+  short: string;
+  kind: ModelKind;
+  /** Cells in TIERS order (beginner → intermediate → advanced). */
+  cells: MatrixCell[];
+  /** Distinct non-null moves across the tiers this model was scored at. */
+  distinctMoves: number;
+  /** How many of the three tiers this model was actually scored at. */
+  scoredTiers: number;
+  /** ≥2 distinct moves across the scored tiers — the model adapts the move by level. */
+  adapts: boolean;
+  /** Scored at all three tiers yet repeats a single move — the flat / "one move" case. */
+  flat: boolean;
+}
+
+/**
+ * The full every-model × every-tier grid for one position — the headline
+ * side-by-side. Rows are ordered OURS → frontier → open → BASE (see orderModels),
+ * so the tuned model leads and the visceral contrast (OURS varies its move by
+ * level where the frontier repeats one) reads top-down. Purely a re-shaping of
+ * the position's existing cells — no numbers are invented.
+ */
+export interface TierMatrix {
+  rows: MatrixRow[];
+  tierEvaluated: Record<ShowcaseTier, boolean>;
+  /** Distinct moves OURS gives here (0 when OURS isn't scored). */
+  oursDistinct: number;
+  /** OURS was scored at all three tiers here. */
+  oursFull: boolean;
+  /** Frontier rows that repeat a single move across all three tiers. */
+  flatFrontier: number;
+  /** Frontier rows scored at all three tiers (the fair denominator for flatFrontier). */
+  frontierFull: number;
+  /** Total frontier rows present. */
+  frontierCount: number;
+  /** Any evaluated cell exists at all (false ⇒ show the honest empty state). */
+  anyEvaluated: boolean;
+}
+
+export function buildTierMatrix(position: ViewPosition): TierMatrix {
+  const rows: MatrixRow[] = orderModels(position.models).map((m) => {
+    // Reference = the move at the first tier this model was actually scored at;
+    // every other tier's move is "changed" relative to it.
+    let reference: string | null = null;
+    for (const t of TIERS) {
+      const c = m.byTier[t];
+      if (c?.evaluated && c.move) {
+        reference = c.move;
+        break;
+      }
+    }
+
+    const cells: MatrixCell[] = TIERS.map((t) => {
+      const c = m.byTier[t];
+      const evaluated = Boolean(c?.evaluated);
+      const move = evaluated ? c!.move : null;
+      return {
+        tier: t,
+        move,
+        moveUci: c?.moveUci ?? null,
+        evaluated,
+        tierFit: Boolean(c?.tierFit),
+        sound: Boolean(c?.sound),
+        fabricated: Boolean(c?.fabricated),
+        changed: evaluated && move != null && reference != null && move !== reference,
+      };
+    });
+
+    const scored = cells.filter((c) => c.evaluated && c.move);
+    const distinctMoves = new Set(scored.map((c) => c.move as string)).size;
+    return {
+      key: m.key,
+      name: m.name,
+      short: m.short,
+      kind: m.kind,
+      cells,
+      distinctMoves,
+      scoredTiers: scored.length,
+      adapts: distinctMoves >= 2,
+      flat: scored.length === TIERS.length && distinctMoves === 1,
+    };
+  });
+
+  const tierEvaluated = emptyTierRecord(false);
+  for (const t of TIERS) {
+    tierEvaluated[t] = position.models.some((m) => m.byTier[t]?.evaluated);
+  }
+
+  const oursRow = rows.find((r) => r.kind === "ours") ?? null;
+  const frontierRows = rows.filter((r) => r.kind === "frontier");
+  return {
+    rows,
+    tierEvaluated,
+    oursDistinct: oursRow?.distinctMoves ?? 0,
+    oursFull: oursRow?.scoredTiers === TIERS.length,
+    flatFrontier: frontierRows.filter((r) => r.flat).length,
+    frontierFull: frontierRows.filter((r) => r.scoredTiers === TIERS.length).length,
+    frontierCount: frontierRows.length,
+    anyEvaluated: rows.some((r) => r.cells.some((c) => c.evaluated)),
+  };
+}
+
+/* ------------------------------------------------------------------ */
 /* Build from the real contract (showcase.json)                        */
 /* ------------------------------------------------------------------ */
 
