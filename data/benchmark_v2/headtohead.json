@@ -1,0 +1,365 @@
+[
+{
+"scenario_id": "WV60r7W7_20",
+"fen": "rn2kb1r/ppp2ppp/8/3p4/1q1P2P1/5N2/PPPQBPP1/RN3RK1 b kq - 2 10",
+"tier": "beginner",
+"phase": "opening",
+"severity": "inaccuracy",
+"student_move_san": "Qxb2",
+"side_to_move": "Black",
+"board_ascii": "8  r n . . k b . r\n7  p p p . . p p p\n6  . . . . . . . .\n5  . . . p . . . .\n4  . q . P . . P .\n3  . . . . . N . .\n2  P P P Q B P P .\n1  R N . . . R K .\n   a b c d e f g h",
+"facts_full": "VERIFIED FACTS — use ONLY these. Never mention a piece, square, capture, or threat that is not listed here.\n- Side to move: Black.\n- Pieces on the board — White: Kg1, Qd2, Ra1, Rf1, Nb1, Be2, Nf3, Pa2, Pb2, Pc2, Pf2, Pg2, Pd4, Pg4 | Black: Ke8, Qb4, Ra8, Rh8, Nb8, Bf8, Pd5, Pa7, Pb7, Pc7, Pf7, Pg7, Ph7\n- Undefended / attacked pieces: White pawn on b2.\n- What each candidate move concretely does:\n    * Nd7 — knight to d7; develops a minor piece; defends the bishop on f8.\n    * Nc6 — knight to c6; develops a minor piece; attacks the pawn on d4; defends the pawn on a7, the queen on b4.\n    * Qxd2 — queen captures the queen on d2; attacks the pawn on c2, the pawn on d4, the bishop on e2.\n    * h5 — pawn to h5; attacks the pawn on g4.\n    * a6 — pawn to a6.\n    * c6 — pawn to c6; defends the pawn on d5.",
+"facts_summary": "Black to move · sound moves: Nd7, Nc6, Qxd2, h5, a6, c6 · undefended: White pawn on b2",
+"models": {
+"ours": {
+"name": "OURS-v2",
+"rec_san": "Qxd2",
+"move_sound": true,
+"fabricated": true,
+"output": "I'd play Qxd2. Your Qxb2 idea is understandable because it captures the queen on b2, but it misses the more forcing queen move: Qxd2 removes White’s queen right away and also defends your pawn on d5. That is the kind of active queen move you want to try before making a slower capture. How to find it: When your queen is available, do not only ask, “Can I capture?” First ask, “Can my queen capture something more valuable?” Here, Qxd2 wins the queen on d2 and defends your d5 pawn in one move. Takeaway: Before choosing a capture, look for a queen capture that wins a piece and defends something at the same time.",
+"violations": [
+{
+"sentence": "Your Qxb2 idea is understandable because it captures the queen on b2, but it misses the more forcing queen move: Qxd2 removes White’s queen right away and also defends your pawn on d5.",
+"reason": "no queen on b2"
+}
+]
+},
+"gpt": {
+"name": "GPT-5.5",
+"rec_san": "Qxd2",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Qxd2. Instead of grabbing the b2 pawn, take the white queen while you can; it is forcing and much more important than a side pawn. If White recaptures, you have simplified the position and avoided leaving your queen chasing material. Takeaway: When you can make a forcing queen trade, prefer that over grabbing pawns.",
+"violations": []
+},
+"claude": {
+"name": "Claude Opus 4.8",
+"rec_san": "Qxd2",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Qxd2. You're already in a strong position, so grabbing that b2-pawn with your queen sends her wandering off to the side of the board where she can get chased or cut off from the action. Instead, trade queens right where they stand — after White recaptures, you're up material and can develop calmly with a move like Bd6, bringing your bishop out and getting ready to castle. When you're ahead, simplifying by trading pieces makes your advantage easier to convert. Takeaway: When you're winning, trade queens and simplify rather than sending your queen off hunting stray pawns.",
+"violations": []
+},
+"gemini": {
+"name": "Gemini 3.1 Pro",
+"rec_san": "Qxd2",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Qxd2. When you are already up a full piece, trading queens is the simplest and safest way to secure your victory. Grabbing the pawn on b2 is tempting, but keeping queens on the board gives your opponent unnecessary chances for counterplay. By forcing the queen trade with Qxd2, you eliminate White's most dangerous attacking piece, making it much easier to finish development and win the endgame. Takeaway: When you have a large material advantage, trade queens to simplify the game and reduce your opponent's chances of a comeback.",
+"violations": []
+},
+"base": {
+"name": "BASE",
+"rec_san": "Qxd2",
+"move_sound": true,
+"fabricated": true,
+"output": "I'd play Qxd2. The student's move Qxb2 was a mistake because it left the queen vulnerable and didn't develop a strong local attack. Qxd2 is a good move because it attacks the queen on d2, which is undefended, and also develops the queen to d2, putting pressure on the position. After this, the queen is on d2, and the knight is on c6, which is a good development. The key idea is that after Qxd2, the queen is on d2, and the knight is on c6, which is a good position to support the center and attack the pawn on d4. The student missed an opportunity to control the center and attack the key square d4. Takeaway: Focus on controlling the center and attacking key squares with your pieces.",
+"violations": [
+{
+"sentence": "After this, the queen is on d2, and the knight is on c6, which is a good development.",
+"reason": "no knight on c6"
+},
+{
+"sentence": "The key idea is that after Qxd2, the queen is on d2, and the knight is on c6, which is a good position to support the center and attack the pawn on d4.",
+"reason": "no knight on c6"
+}
+]
+}
+}
+},
+{
+"scenario_id": "9M8bagRc_36",
+"fen": "r2q1rk1/pp3ppp/2p4B/3b4/8/2Q5/PP3PPP/R2R2K1 b - - 1 18",
+"tier": "beginner",
+"phase": "middlegame",
+"severity": "blunder",
+"student_move_san": "Qf6",
+"side_to_move": "Black",
+"board_ascii": "8  r . . q . r k .\n7  p p . . . p p p\n6  . . p . . . . B\n5  . . . b . . . .\n4  . . . . . . . .\n3  . . Q . . . . .\n2  P P . . . P P P\n1  R . . R . . K .\n   a b c d e f g h",
+"facts_full": "VERIFIED FACTS — use ONLY these. Never mention a piece, square, capture, or threat that is not listed here.\n- Side to move: Black.\n- Pieces on the board — White: Kg1, Qc3, Ra1, Rd1, Bh6, Pa2, Pb2, Pf2, Pg2, Ph2 | Black: Kg8, Qd8, Ra8, Rf8, Bd5, Pc6, Pa7, Pb7, Pf7, Pg7, Ph7\n- Undefended / attacked pieces: Black pawn on g7, White bishop on h6.\n- What each candidate move concretely does:\n    * gxh6 — pawn captures the bishop on h6.",
+"facts_summary": "Black to move · sound moves: gxh6 · undefended: Black pawn on g7, White bishop on h6",
+"models": {
+"ours": {
+"name": "OURS-v2",
+"rec_san": "gxh6",
+"move_sound": true,
+"fabricated": true,
+"output": "I'd play gxh6. Your Qf6 move missed the simple chance to take the undefended bishop on h6. Why it is good: gxh6 removes that hanging piece right now, and after the capture your rook on d1 attacks the rook on f1. So this is not just a pawn capture — it also defends your queen on d8 and your rook on f8. Takeaway: When you see an undefended piece, look at it before making a queen move or pawn move.",
+"violations": [
+{
+"sentence": "Why it is good: gxh6 removes that hanging piece right now, and after the capture your rook on d1 attacks the rook on f1.",
+"reason": "no rook on d1"
+}
+]
+},
+"gpt": {
+"name": "GPT-5.5",
+"rec_san": "gxh6",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play gxh6. Black should simply take the undefended bishop instead of moving the queen. This fixes the mistake in Qf6: before making a fancy move, check whether you can safely win a piece right now. After gxh6, your concrete plan is to play with the extra material rather than leave White’s bishop on the board. Takeaway: When an opponent’s piece is undefended, first ask, “Can I just take it?”",
+"violations": []
+},
+"claude": {
+"name": "Claude Opus 4.8",
+"rec_san": "gxh6",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play gxh6. The bishop sitting on h6 is simply hanging, and your pawn on g7 can capture it for free — grabbing a whole piece for nothing is a great deal! With Qf6 you left that free bishop on the board and moved your queen out where it could get chased around, so you missed a straightforward material win. Before making a fancy queen move, always scan the board and ask \"is anything just hanging that I can take?\" Takeaway: When an enemy piece is undefended and you can safely capture it, take the free material first.",
+"violations": []
+},
+"gemini": {
+"name": "Gemini 3.1 Pro",
+"rec_san": "gxh6",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play gxh6. White is threatening an immediate checkmate on g7 using their queen and bishop. Your move, Qf6, tries to block this threat, but unfortunately it just gives your queen away since White can capture it for free. Instead, you can simply capture the bishop with your pawn, which instantly neutralizes the checkmate threat and wins a piece at the same time. Takeaway: When your opponent sets up a dangerous threat, check first if you can simply capture one of the attacking pieces to solve the problem!",
+"violations": []
+},
+"base": {
+"name": "BASE",
+"rec_san": "f6",
+"move_sound": false,
+"fabricated": false,
+"output": "I'd play f6. The student's move Qf6 was a mistake because it left the king in a vulnerable position and gave the opponent a clear attack on the king. Instead, f6 is a solid move that prepares to support the king and creates a threat on the g6 square. After f6, the king is safer, and the bishop on h6 becomes a real threat. This move also sets up a good plan for future play. Takeaway: Always look for ways to support the king and create threats that can be used in the future.",
+"violations": []
+}
+}
+},
+{
+"scenario_id": "bWwdtmJb_18",
+"fen": "r1bq1rk1/1pp2ppp/p1pb1n2/4p3/3PP3/2P1BN2/PP1N1PPP/R2Q1RK1 b - - 3 9",
+"tier": "intermediate",
+"phase": "opening",
+"severity": "inaccuracy",
+"student_move_san": "Bg4",
+"side_to_move": "Black",
+"board_ascii": "8  r . b q . r k .\n7  . p p . . p p p\n6  p . p b . n . .\n5  . . . . p . . .\n4  . . . P P . . .\n3  . . P . B N . .\n2  P P . N . P P P\n1  R . . Q . R K .\n   a b c d e f g h",
+"facts_full": "VERIFIED FACTS — use ONLY these. Never mention a piece, square, capture, or threat that is not listed here.\n- Side to move: Black.\n- Pieces on the board — White: Kg1, Qd1, Ra1, Rf1, Nd2, Be3, Nf3, Pa2, Pb2, Pf2, Pg2, Ph2, Pc3, Pd4, Pe4 | Black: Kg8, Qd8, Ra8, Rf8, Bd6, Nf6, Bc8, Pe5, Pa6, Pc6, Pb7, Pc7, Pf7, Pg7, Ph7\n- Undefended / attacked pieces: Black pawn on e5.\n- What each candidate move concretely does:\n    * exd4 — pawn captures the pawn on d4; attacks the pawn on c3, the bishop on e3.\n    * Ng4 — knight to g4; attacks the bishop on e3, the pawn on f2, the pawn on h2; defends the pawn on e5.\n    * Nd7 — knight to d7; defends the pawn on e5, the rook on f8.\n    * Qe8 — queen to e8; defends the pawn on c6, the bishop on c8.\n    * Qe7 — queen to e7; defends the pawn on c7, the bishop on d6.\n    * Bg4 — bishop to g4; develops a minor piece; attacks the knight on f3.",
+"facts_summary": "Black to move · sound moves: exd4, Ng4, Nd7, Qe8, Qe7, Bg4 · undefended: Black pawn on e5",
+"models": {
+"ours": {
+"name": "OURS-v2",
+"rec_san": "exd4",
+"move_sound": true,
+"fabricated": true,
+"output": "I'd play exd4. Your Bg4 idea is understandable because it develops a bishop and defends e5, but it misses the more direct central capture. Why it is good: the pawn on d4 is undefended, so you can simply take it and remove that loose piece before you spend another move on development. After exd4, your pawn on c3 is attacked, so you have to deal with that too. This is a clean conversion move: use the loose pawn, make your queen safer, and then choose whether to develop or continue with activity. Takeaway: When you have a loose pawn, take it before spending another move on development.",
+"violations": [
+{
+"sentence": "After exd4, your pawn on c3 is attacked, so you have to deal with that too.",
+"reason": "no pawn on c3"
+}
+]
+},
+"gpt": {
+"name": "GPT-5.5",
+"rec_san": "exd4",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play exd4. Your Bg4 is natural development, but it leaves the attacked e5 pawn as the main issue; exd4 solves that immediately by moving it with tempo. After cxd4, you have clarified the center instead of letting White choose when to take on e5. Takeaway: When a central pawn is attacked, first look for a useful capture or advance before making a routine developing move.",
+"violations": []
+},
+"claude": {
+"name": "Claude Opus 4.8",
+"rec_san": "exd4",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play exd4. The trouble with Bg4 is that you developed a piece while ignoring the real tension in the center — White could simply grab your e5 pawn, and then your bishop pin doesn't win anything back. By capturing on d4 first you resolve that tension in your favor: after cxd4 you've traded off the center and freed your position, and your pieces (like that same bishop on c8) get better squares to aim at afterward. Settle the center before you go hunting with your bishops. Takeaway: When a central pawn is hanging and there's tension, resolve the center first rather than developing into a tactic that loses the pawn.",
+"violations": []
+},
+"gemini": {
+"name": "Gemini 3.1 Pro",
+"rec_san": "exd4",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play exd4. While developing your bishop with Bg4 looks active, it ignores the central tension where White's d4 pawn is attacking your undefended pawn on e5. By simply capturing with exd4, you resolve that tension safely and force White to spend time recapturing, keeping your position solid. Takeaway: Always check if your central pawns are adequately defended before making a developing move elsewhere on the board.",
+"violations": []
+},
+"base": {
+"name": "BASE",
+"rec_san": "Bg4",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Bg4. The student's move was a bit off, but Bg4 is a solid, strategic move. It develops the bishop, attacks the knight on f3, and prepares to take the pawn on e5. After Bg4, the position becomes more balanced, and the bishop is now on a strong square. The key is to follow up with a move that continues the attack on e5 and prepares for a strong follow-up. The mistake here is that the student didn't fully commit to the attack on e5. After Bg4, the best follow-up is to play e5, which is a strong, direct threat. From there, the knight can be pushed to f3, and the queen can support the attack. Takeaway: Focus on committing to the e5 square and using the knight to support that attack.",
+"violations": []
+}
+}
+},
+{
+"scenario_id": "TiMre7nm_43",
+"fen": "4k2r/4npp1/1n2q2p/B3p3/P1p1P3/5N1P/1PQ2PP1/3R2K1 w k - 1 22",
+"tier": "intermediate",
+"phase": "middlegame",
+"severity": "inaccuracy",
+"student_move_san": "Nd2",
+"side_to_move": "White",
+"board_ascii": "8  . . . . k . . r\n7  . . . . n p p .\n6  . n . . q . . p\n5  B . . . p . . .\n4  P . p . P . . .\n3  . . . . . N . P\n2  . P Q . . P P .\n1  . . . R . . K .\n   a b c d e f g h",
+"facts_full": "VERIFIED FACTS — use ONLY these. Never mention a piece, square, capture, or threat that is not listed here.\n- Side to move: White.\n- Pieces on the board — White: Kg1, Qc2, Rd1, Nf3, Ba5, Pb2, Pf2, Pg2, Ph3, Pa4, Pe4 | Black: Ke8, Qe6, Rh8, Nb6, Ne7, Pc4, Pe5, Ph6, Pf7, Pg7\n- Undefended / attacked pieces: none.\n- What each candidate move concretely does:\n    * Bxb6 — bishop captures the knight on b6; defends the pawn on f2.\n    * Bb4 — bishop to b4; attacks the knight on e7.\n    * Qc3 — queen to c3; attacks the pawn on c4, the pawn on e5; defends the bishop on a5, the pawn on b2.\n    * Nxe5 — knight captures the pawn on e5; attacks the pawn on c4, the pawn on f7.\n    * Rd2 — rook to d2; defends the queen on c2, the pawn on f2.\n    * Bc3 — bishop to c3; attacks the pawn on e5; defends the pawn on b2.",
+"facts_summary": "White to move · sound moves: Bxb6, Bb4, Qc3, Nxe5, Rd2, Bc3 · undefended: none",
+"models": {
+"ours": {
+"name": "OURS-v2",
+"rec_san": "Bxb6",
+"move_sound": true,
+"fabricated": true,
+"output": "I'd play Bxb6. Your Nd2 idea is understandable because it defends the queen on c2, but it misses the more direct improvement: your bishop on c3 can take the undefended knight on b6. That is a clean intermediate move because it wins a loose piece while also defending your pawn on f2. How to find it: When there is no loose piece hanging, do not automatically defend your queen or bishop. First run this checklist: 1) Which of my pieces is undefended? 2) Can one of my active pieces capture it? 3) After the capture, does that piece also defend something? Here, the knight on b6 is undefended, and Bxb6 wins it while defending f2. Takeaway: Before defending passively, look for an active piece that can win an undefended piece and defend something at the same time.",
+"violations": [
+{
+"sentence": "Your Nd2 idea is understandable because it defends the queen on c2, but it misses the more direct improvement: your bishop on c3 can take the undefended knight on b6.",
+"reason": "no bishop on c3"
+}
+]
+},
+"gpt": {
+"name": "GPT-5.5",
+"rec_san": "Bxb6",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Bxb6. Rather than moving the knight to d2, grab the chance to remove Black’s knight on b6 while also improving the safety of your f2-pawn. If Black replies Qxb6, you have Nxe5, putting your knight on an active square and attacking both c4 and f7. This is a good intermediate habit: use your active pieces to make forcing, useful moves before making slower rearrangements. Takeaway: When you can trade an active piece and improve your own threats, do that before making a quiet regrouping move.",
+"violations": []
+},
+"claude": {
+"name": "Claude Opus 4.8",
+"rec_san": "Bxb6",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Bxb6. Your move, Nd2, retreated a good piece and gave up your active center; instead, notice that your bishop on a5 and the pinned setup let you win material cleanly. After Bxb6, if Black recaptures with the queen, your knight can grab the loose e5 pawn, so you come out ahead. The key is that a well-placed piece should look for a favorable trade or capture before it drifts backward. Takeaway: Before retreating a piece, check whether it can capture or trade favorably right where it stands.",
+"violations": []
+},
+"gemini": {
+"name": "Gemini 3.1 Pro",
+"rec_san": "Bxb6",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Bxb6. Your move Nd2 is a bit passive and steps backward, giving Black time to coordinate. Instead, look for tactical opportunities to win material by removing defenders. If you play Bxb6, Black will likely recapture with their queen, but that queen is currently busy defending the pawn on e5. Once the queen is forced over to b6, you can simply scoop up the undefended e5 pawn with your knight. Takeaway: When you trade pieces, look at what the opponent's recapturing piece was leaving behind—you might just uncover a free pawn.",
+"violations": []
+},
+"base": {
+"name": "BASE",
+"rec_san": "Qc3",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Qc3. The student's move Nd2 was a mistake because it left the queen undefended and gave the opponent a clear attack on the queen. Qc3 is a strong, proactive move that both attacks the central pawn on c4 and prepares to take the e5 pawn. After Qc3, the queen is now in a good position to follow up with a check or a forced win. The key is to bring the queen into the center and create pressure on the center pawns. Qc3 is a solid move that sets up a strong follow-up and keeps the queen in a good position to continue attacking. Takeaway: Position the queen in the center to control the key squares and create pressure on the center pawns.",
+"violations": []
+}
+}
+},
+{
+"scenario_id": "VsykaIN0_82",
+"fen": "8/5p2/r2p2k1/3R1p2/5P2/5NKP/8/8 b - - 9 41",
+"tier": "advanced",
+"phase": "endgame",
+"severity": "inaccuracy",
+"student_move_san": "f6",
+"side_to_move": "Black",
+"board_ascii": "8  . . . . . . . .\n7  . . . . . p . .\n6  r . . p . . k .\n5  . . . R . p . .\n4  . . . . . P . .\n3  . . . . . N K P\n2  . . . . . . . .\n1  . . . . . . . .\n   a b c d e f g h",
+"facts_full": "VERIFIED FACTS — use ONLY these. Never mention a piece, square, capture, or threat that is not listed here.\n- Side to move: Black.\n- Pieces on the board — White: Kg3, Rd5, Nf3, Ph3, Pf4 | Black: Kg6, Ra6, Pf5, Pd6, Pf7\n- Undefended / attacked pieces: none.\n- What each candidate move concretely does:\n    * Ra3 — rook to a3; attacks the knight on f3.\n    * Ra1 — rook to a1.\n    * Rc6 — rook to c6; defends the pawn on d6.\n    * Ra8 — rook to a8.\n    * Kf6 — king to f6; defends the pawn on f5, the pawn on f7.\n    * Ra2 — rook to a2.",
+"facts_summary": "Black to move · sound moves: Ra3, Ra1, Rc6, Ra8, Kf6, Ra2 · undefended: none",
+"models": {
+"ours": {
+"name": "OURS-v2",
+"rec_san": "Ra3",
+"move_sound": true,
+"fabricated": true,
+"output": "I'd play Ra3. Your f6 move is understandable because it defends f5, but it is a bit too cautious: it defends while leaving your rook on a8 still undeveloped. Ra3 is more active: it attacks the knight on f3, so White has to solve that problem instead of letting you continue with a quiet defense. After that, you can look for a forcing move like ...Ra1, where the rook defends d6 while attacking the knight on f3. Takeaway: When you have a choice between defending and attacking, prefer the active move that creates a concrete problem for the opponent.",
+"violations": [
+{
+"sentence": "Your f6 move is understandable because it defends f5, but it is a bit too cautious: it defends while leaving your rook on a8 still undeveloped.",
+"reason": "no rook on a8"
+}
+]
+},
+"gpt": {
+"name": "GPT-5.5",
+"rec_san": "Ra3",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Ra3. This is the active choice: your rook goes to a3 and attacks the knight on f3, making White respond to your idea instead of letting your f6 move spend a tempo without pressure. If White plays Rxd6+, you have Kh5, and you’ve kept the position coordinated while using the rook aggressively. Takeaway: In rook endgames, look first for active rook moves that create a concrete problem for the opponent.",
+"violations": []
+},
+"claude": {
+"name": "Claude Opus 4.8",
+"rec_san": "Ra3",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Ra3. In this rook endgame you're a pawn down, so passive defense of d6 with your king only lets White keep pressing — instead grab activity with your rook. From a3 your rook eyes the knight and, more importantly, gets behind and beside White's pieces so that even after Rxd6+ your rook stays active and your king can step to h5 with counterplay. The problem with f6 is that it commits a pawn and does nothing to improve your worst-placed asset; when you're defending a pawn-down rook ending, the rook must be the busy piece. Takeaway: In rook endgames, active pieces save the day far more often than clinging to a pawn.",
+"violations": []
+},
+"gemini": {
+"name": "Gemini 3.1 Pro",
+"rec_san": "Ra3",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Ra3. Pushing your pawn to f6 is a bit passive and creates unnecessary structural weaknesses. In these types of endgames, the activity of your rook is often your most powerful asset. By playing Ra3, you immediately seize the initiative by attacking the knight on f3, forcing White to react. Even if White decides to grab your d6 pawn with a check, your king can safely step up to h5, and your highly active rook ensures you maintain excellent counterplay. Takeaway: In endgames, prioritize active piece play and creating immediate threats over slow, defensive pawn moves.",
+"violations": []
+},
+"base": {
+"name": "BASE",
+"rec_san": "Kf6",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Kf6. The student's move f6 was a mistake because it didn't address the critical weakness at f5. By moving the king to f6, you're defending that key square and putting pressure on the opponent's pieces. This move also sets up a good follow-up with the rook to a3 or c6. Kf6 is a solid, strategic move that prepares for future play and creates a strong defensive shape. The error was not addressing the f5 pawn, which is a big weakness for Black. Moving the king to f6 fixes that and opens up the f5 square for a potential attack. Now you can focus on developing the queen and preparing for a counterattack. Takeaway: Always look for ways to fix the most critical weakness on the board.",
+"violations": []
+}
+}
+},
+{
+"scenario_id": "uHDsJlF3_24",
+"fen": "r1bk1bBr/pppp1QBp/n2q4/8/8/8/P3NP1P/RN2K1R1 b Q - 0 12",
+"tier": "advanced",
+"phase": "opening",
+"severity": "mistake",
+"student_move_san": "Qb4+",
+"side_to_move": "Black",
+"board_ascii": "8  r . b k . b B r\n7  p p p p . Q B p\n6  n . . q . . . .\n5  . . . . . . . .\n4  . . . . . . . .\n3  . . . . . . . .\n2  P . . . N P . P\n1  R N . . K . R .\n   a b c d e f g h",
+"facts_full": "VERIFIED FACTS — use ONLY these. Never mention a piece, square, capture, or threat that is not listed here.\n- Side to move: Black.\n- Pieces on the board — White: Ke1, Qf7, Ra1, Rg1, Nb1, Ne2, Bg7, Bg8, Pa2, Pf2, Ph2 | Black: Kd8, Qd6, Ra8, Rh8, Na6, Bc8, Bf8, Pa7, Pb7, Pc7, Pd7, Ph7\n- Undefended / attacked pieces: Black rook on h8, Black bishop on f8, White pawn on h2.\n- What each candidate move concretely does:\n    * Bxg7 — bishop captures the bishop on g7; develops a minor piece; attacks the rook on a1; defends the rook on h8.",
+"facts_summary": "Black to move · sound moves: Bxg7 · undefended: Black rook on h8, Black bishop on f8, White pawn on h2",
+"models": {
+"ours": {
+"name": "OURS-v2",
+"rec_san": "Bxg7",
+"move_sound": true,
+"fabricated": true,
+"output": "I'd play Bxg7. Your Qb4+ is understandable because it uses check, but it misses the more forcing capture on g7. Bxg7 removes White’s active bishop on g7, attacks the rook on a1, and defends your rook on h8. So instead of just giving check, you use your queen to make a concrete win while improving coordination. How to find it: When you have a queen on g4 and White has an active piece on g7, pause before playing a queen check and ask: ‘Can my queen capture that piece while also defending something?’ Here, Bxg7 is the move because it wins a bishop, attacks the rook on a1, and defends your rook on h8. Takeaway: Before playing a queen check, look for a capture that wins a piece and defends your own piece at the same time.",
+"violations": [
+{
+"sentence": "How to find it: When you have a queen on g4 and White has an active piece on g7, pause before playing a queen check and ask: ‘Can my queen capture that piece while also defending something?’ Here, Bxg7 is the move because it wins a bishop, attacks the rook on a1, and defends your rook on h8.",
+"reason": "no queen on g4"
+}
+]
+},
+"gpt": {
+"name": "GPT-5.5",
+"rec_san": "Bxg7",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Bxg7. Instead of looking for an immediate queen check with Qb4+, clean up the most urgent problem: your bishop captures the bishop on g7 while also defending the rook on h8. Even better, that developed bishop now attacks the rook on a1, so you solve a defensive issue and create a clear follow-up plan at the same time. Takeaway: When under pressure, prefer a move that improves a piece while fixing a loose piece.",
+"violations": []
+},
+"claude": {
+"name": "Claude Opus 4.8",
+"rec_san": "Bxg7",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Bxg7. The check with Qb4+ looks tempting, but it doesn't address the real problem: that bishop sitting on g7 is forking your rook on h8 and eyeing your position, and your own bishop on f8 is loose. By capturing on g7 you snap off White's active bishop, defend your rook on h8, and even hit the rook on a1 — solving your problems while creating a threat of your own. After White recaptures, notice you have Nb4, bringing your knight into the game with tempo. Takeaway: Before playing a flashy check, first deal with the pieces that are actually hanging or attacking you — solving the concrete problem usually beats chasing the enemy king.",
+"violations": []
+},
+"gemini": {
+"name": "Gemini 3.1 Pro",
+"rec_san": "Bxg7",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Bxg7. Your move, Qb4+, throws in a check, but it ignores the massive problems on your kingside where White's bishops are causing havoc. By simply capturing the bishop with Bxg7, you eliminate one of White's most dangerous attacking pieces, defend your h8 rook, and start untangling your position. When you have severe threats to address, don't get distracted by a check that doesn't improve your overall coordination. Takeaway: Always address immediate threats and eliminate dangerous enemy pieces before giving in to the temptation of a random check.",
+"violations": []
+},
+"base": {
+"name": "BASE",
+"rec_san": "Bxg7",
+"move_sound": true,
+"fabricated": false,
+"output": "I'd play Bxg7. The student missed a critical threat that could win the game. By capturing the bishop on g7, you remove a big piece from the board and put pressure on the king. The move also opens up a way to attack the rook on a1. After this, you can follow up with Qxg7 or Nb4 to continue the attack. The mistake was not seeing that capturing the bishop gives a big advantage and sets up a strong follow-up. Instead of focusing on the queen move, you should prioritize the immediate threat and set up for future wins. Takeaway: Capturing a bishop can be a powerful first move that opens up multiple attacking lines.",
+"violations": []
+}
+}
+}
+]

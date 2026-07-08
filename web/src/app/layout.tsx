@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import { Archivo, Spline_Sans_Mono } from "next/font/google";
 import "./globals.css";
+// Chessground (Lichess board) styles loaded GLOBALLY in the root layout so the
+// board is always styled on first paint — not dependent on the client-component
+// bundle loading first (which could briefly render an unstyled board).
+// base = board layout, brown = square theme, cburnett = embedded piece sprites.
+import "chessground/assets/chessground.base.css";
+import "chessground/assets/chessground.brown.css";
+import "chessground/assets/chessground.cburnett.css";
 
 // UI + display + coaching prose. One technical grotesque, hierarchy via weight +
 // tracking + size (no serif — the chess-serif cliché is deliberately avoided).

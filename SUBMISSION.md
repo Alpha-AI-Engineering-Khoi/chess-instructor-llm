@@ -9,15 +9,20 @@ level-calibration, and no-engine-speak** — met and exceeded (see the results t
 > **🆕 `v3` (Qwen3-32B) is evaluated — the strongest LOCAL coach yet.** v3 fine-tunes a
 > 20× larger base (Qwen3-32B) on a larger, faithfulness-filtered contrastive dataset (7,128
 > rows, **0% false labels**). On the definitive **803-position** benchmark vs a **15-model**
-> field, v3 is **2nd overall on the balanced score (61.7 — behind only GPT-5.5's 62.4, ahead of
-> Claude, Gemini, and every open model)** and the **best locally-runnable model**. vs v2:
-> instructiveness council rank **10.07 → 7.06** (top-1 **7.5% → 20.3%**), fabrication **30.2% →
-> 5.4%**; tier-fit holds at field-leading **53.2%** (advanced 60.9% → **83.6%**). vs the untuned
-> Qwen3-32B it was tuned from: tier-fit **+16.3 pts**, council **9.07 → 7.06** — the specialist
-> behavior is *trained in*, not emergent. Honest tradeoffs: beginner move-calibration softened
-> (the 32B leans engine-best; beginner tier-fit 47.9% → 29.6%) and ~4–5% malformed raw outputs
-> (safety/no-jargon just below the strict 97% gate; the actual blunder rate is only **1.3%**, and
-> the malformed outputs are neutralized at serve time). **The v2 platform is untouched and still
+> field — blinded council over **all 450 items × 3 judges = 1,350 rankings**,
+> **self-preference-corrected** — v3 **tops the raw balanced score (58.0 — a hair above GPT-5.5's
+> 57.7, ahead of Claude, Gemini, GLM-5 and every open model)** and is the **best locally-runnable
+> model**. vs v2: corrected instructiveness rank **10.26 → 6.93** (top-1 **7.1% → 22.6%**,
+> 2nd-highest in the field); tier-fit holds at field-leading **53.2%** (advanced 60.9% → **83.6%**).
+> vs the untuned Qwen3-32B it was tuned from: tier-fit **+16.3 pts**, corrected council **9.30 →
+> 6.93** — the specialist behavior is *trained in*, not emergent. Faithfulness is a **gated fairness
+> floor** (0% user-visible fabrication for every model), so it is not a scoring axis; the honest
+> truth differentiator is the cross-family semantic-judge residual (any/majority/unanimous + CIs:
+> OURS-v2 **23% / 26% / 31%** vs GPT-5.5 **79% / 97% / 100%**, "any" = strict lower bound). Honest
+> tradeoffs: beginner move-calibration softened (the 32B leans engine-best; beginner tier-fit 47.9%
+> → 29.6%), and OURS-v3 trips the strict 97% safety/no-jargon gate on ~4–5% malformed raw outputs
+> (actual blunder rate only **1.3%**, neutralized at serve time), so GPT-5.5 leads the gate-passing
+> board. **The v2 platform is untouched and still
 > serves v2.** Full detail: [`RESULTS_V3.md`](RESULTS_V3.md),
 > [`RESULTS_FULL_EVAL_803_v3.md`](RESULTS_FULL_EVAL_803_v3.md).
 >

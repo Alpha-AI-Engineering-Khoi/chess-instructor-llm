@@ -1,0 +1,848 @@
+{
+  "method": {
+    "deterministic_checker": "src.engine.faithfulness_ext.verify_text_ext",
+    "judge_panel": [
+      "gpt",
+      "claude",
+      "gemini"
+    ],
+    "aggregation": "any (a single judge's objection => not truthful)",
+    "sample": {
+      "per_priority_per_tier": 13,
+      "per_other_per_tier": 6,
+      "priority_models": [
+        "Claude Opus 4.8",
+        "GPT-5.5",
+        "Gemini 3.1 Pro",
+        "Gemma-3-27B-it",
+        "OURS-v2 (1.7B tuned)",
+        "Qwen3-32B"
+      ],
+      "seed": 20260707
+    }
+  },
+  "deterministic_residual": {
+    "BASE (Qwen3-1.7B-4bit, untuned)": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "Claude Opus 4.8": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "DeepSeek-R1 (reasoning)": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "DeepSeek-V3.2": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "GLM-5": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "GPT-5.5": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "Gemini 3.1 Pro": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "Gemma-3-27B-it": {
+      "n": 623,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "Kimi-K2.5": {
+      "n": 653,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "Llama-3.3-70B": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "Mistral-Large-3 (675B)": {
+      "n": 623,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "OURS-v2 (1.7B tuned)": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "Qwen3-32B": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "Qwen3-Next-80B-A3B": {
+      "n": 1476,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    },
+    "_overall": {
+      "n": 18135,
+      "fabricated": 0,
+      "fab_rate": 0.0
+    }
+  },
+  "judge_residual": {
+    "BASE (Qwen3-1.7B-4bit, untuned)": {
+      "n_sampled": 18,
+      "truthful": 0,
+      "truthful_rate": 0.0,
+      "ci95": [
+        0.0,
+        0.1759
+      ],
+      "untruthful_rate": 1.0,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.889,
+      "flagged_examples": [
+        {
+          "sid": "360:base:beginner",
+          "claim": "The student's move Kc4 was a mistake",
+          "reason": "There is no Kc4 in the facts; the king is on c3 and it is White to move, so this move never happened.",
+          "judge": "claude"
+        },
+        {
+          "sid": "233:base:intermediate",
+          "claim": "you take control of the center and threaten the queen on c2",
+          "reason": "cxd4 attacks the knight on c3 and pawn on e3, not the queen on c2.",
+          "judge": "claude"
+        },
+        {
+          "sid": "297:base:intermediate",
+          "claim": "the pawn on e5 is still under threat",
+          "reason": "Ke6 defends the e5 pawn per verified facts, and no white piece attacks e5, so it is not under threat.",
+          "judge": "claude"
+        }
+      ],
+      "truthful_rate_any": 0.0,
+      "any_ci95": [
+        0.0,
+        0.1759
+      ],
+      "truthful_rate_majority": 0.1667,
+      "majority_ci95": [
+        0.0584,
+        0.3922
+      ],
+      "truthful_rate_unanimous": 0.3333,
+      "unanimous_ci95": [
+        0.1628,
+        0.5625
+      ]
+    },
+    "Claude Opus 4.8": {
+      "n_sampled": 39,
+      "truthful": 10,
+      "truthful_rate": 0.2564,
+      "ci95": [
+        0.1457,
+        0.4108
+      ],
+      "untruthful_rate": 0.7436,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.803,
+      "flagged_examples": [
+        {
+          "sid": "84:claude:advanced",
+          "claim": "it let White reply Nxc6",
+          "reason": "After fxg5 the knight on d4 could play Nxc6, but the claim frames it as saving a fork; more concretely the g5 knight is captured and gone, so 'Nxc6' with the d4 knight is possible but the described 'unravelling the very fork' is unsupported speculation not in the facts.",
+          "judge": "claude"
+        },
+        {
+          "sid": "14:claude:intermediate",
+          "claim": "if Black grabs with cxd4, you simply recapture with the knight",
+          "reason": "After Nc3, cxd4 exd4 (or Nxd4? knight is on c3 not able to recapture on d4 without exd4); recapturing with the knight on c3 isn't possible as it doesn't attack d4, so this is a false concrete claim.",
+          "judge": "claude"
+        },
+        {
+          "sid": "75:claude:advanced",
+          "claim": "Your rook move to c1",
+          "reason": "The verified position has Black's rook on a1 and provides no support for any prior rook move to c1.",
+          "judge": "gpt"
+        }
+      ],
+      "truthful_rate_any": 0.2564,
+      "any_ci95": [
+        0.1457,
+        0.4108
+      ],
+      "truthful_rate_majority": 0.5641,
+      "majority_ci95": [
+        0.4098,
+        0.707
+      ],
+      "truthful_rate_unanimous": 0.8462,
+      "unanimous_ci95": [
+        0.7027,
+        0.9275
+      ]
+    },
+    "DeepSeek-R1 (reasoning)": {
+      "n_sampled": 18,
+      "truthful": 2,
+      "truthful_rate": 0.1111,
+      "ci95": [
+        0.031,
+        0.328
+      ],
+      "untruthful_rate": 0.8889,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.833,
+      "flagged_examples": [
+        {
+          "sid": "31:dsr1:beginner",
+          "claim": "Your b4 move left weaknesses on the queenside",
+          "reason": "There is no pawn on b4; Black's pawn is on b5, so no b4 move occurred in this position.",
+          "judge": "claude"
+        },
+        {
+          "sid": "37:dsr1:advanced",
+          "claim": "could allow dangerous queen infiltration via h4-h2 checks later",
+          "reason": "The verified facts do not list any queen infiltration or h4-h2 checking threat after Kf1, only that Kf1 defends the rook on e1 and pawn on f2.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "300:dsr1:advanced",
+          "claim": "creating a passed pawn after Rxe6",
+          "reason": "Black capturing the e6 pawn with Rxe6 removes a white pawn; it does not create a black passed pawn since Black has no pawns on the board.",
+          "judge": "claude"
+        }
+      ],
+      "truthful_rate_any": 0.1111,
+      "any_ci95": [
+        0.031,
+        0.328
+      ],
+      "truthful_rate_majority": 0.5,
+      "majority_ci95": [
+        0.2903,
+        0.7097
+      ],
+      "truthful_rate_unanimous": 0.6111,
+      "unanimous_ci95": [
+        0.3862,
+        0.797
+      ]
+    },
+    "DeepSeek-V3.2": {
+      "n_sampled": 18,
+      "truthful": 4,
+      "truthful_rate": 0.2222,
+      "ci95": [
+        0.09,
+        0.4522
+      ],
+      "untruthful_rate": 0.7778,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.852,
+      "flagged_examples": [
+        {
+          "sid": "117:dsv32:intermediate",
+          "claim": "Nc7+ lets them safely move their king while hitting the knight",
+          "reason": "The verified facts do not include Nc7+ or any resulting king move or attack on the knight, so this concrete multi-move consequence is unsupported.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "339:dsv32:intermediate",
+          "claim": "When ahead, centralize your king",
+          "reason": "Material is equal (both sides have king plus three pawns), so Black is not ahead.",
+          "judge": "claude"
+        },
+        {
+          "sid": "468:dsv32:intermediate",
+          "claim": "your queen is also defended by your d-pawn",
+          "reason": "Qe3 is defended by the d2 pawn only if... actually d2 pawn does not defend e3; pawns defend diagonally forward, d2 defends c3 and e3 — wait, d2 defends e3, so this is true.",
+          "judge": "claude"
+        }
+      ],
+      "truthful_rate_any": 0.2222,
+      "any_ci95": [
+        0.09,
+        0.4522
+      ],
+      "truthful_rate_majority": 0.3889,
+      "majority_ci95": [
+        0.203,
+        0.6138
+      ],
+      "truthful_rate_unanimous": 0.6667,
+      "unanimous_ci95": [
+        0.4375,
+        0.8372
+      ]
+    },
+    "GLM-5": {
+      "n_sampled": 18,
+      "truthful": 8,
+      "truthful_rate": 0.4444,
+      "ci95": [
+        0.2456,
+        0.6628
+      ],
+      "untruthful_rate": 0.5556,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.852,
+      "flagged_examples": [
+        {
+          "sid": "283:glm5:advanced",
+          "claim": "leaves your d-pawn backward and vulnerable",
+          "reason": "Black has no d-pawn on the board in the verified piece list, so it cannot be backward or vulnerable.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "239:glm5:advanced",
+          "claim": "With d5, you're not just developing",
+          "reason": "The verified facts say d5 is a pawn move that attacks the bishop on c4 and pawn on e4; they do not list it as developing a piece.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "263:glm5:advanced",
+          "claim": "forces them to respond to a real threat",
+          "reason": "The verified facts only say Rh6 attacks h2 and defends e6/h7; they do not show that White is forced to respond.",
+          "judge": "gpt"
+        }
+      ],
+      "truthful_rate_any": 0.4444,
+      "any_ci95": [
+        0.2456,
+        0.6628
+      ],
+      "truthful_rate_majority": 0.6667,
+      "majority_ci95": [
+        0.4375,
+        0.8372
+      ],
+      "truthful_rate_unanimous": 0.8889,
+      "unanimous_ci95": [
+        0.672,
+        0.969
+      ]
+    },
+    "GPT-5.5": {
+      "n_sampled": 39,
+      "truthful": 31,
+      "truthful_rate": 0.7949,
+      "ci95": [
+        0.6447,
+        0.8922
+      ],
+      "untruthful_rate": 0.2051,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.932,
+      "flagged_examples": [
+        {
+          "sid": "235:gpt:intermediate",
+          "claim": "wins material",
+          "reason": "Capturing the bishop on c5 with the queen does not win material, as the queen will be recaptured by the pawn on d4.",
+          "judge": "gemini"
+        },
+        {
+          "sid": "306:gpt:intermediate",
+          "claim": "If White uses the c5-pawn to take the knight on d6",
+          "reason": "The pawn on c5 cannot capture the knight on d6; pawns capture diagonally forward and c5 attacks b6/d6 only for a white pawn moving upward — c5 to d6 is a valid capture direction, but no such capture is supported by facts and the knight on d6 is not adjacent to a capturing white pawn move listed.",
+          "judge": "claude"
+        },
+        {
+          "sid": "76:gpt:intermediate",
+          "claim": "if White plays axb6, you can answer Nxb6",
+          "reason": "The verified facts only state that b5 defends the pawn on c4 and do not support this specific multi-move capture sequence.",
+          "judge": "gpt"
+        }
+      ],
+      "truthful_rate_any": 0.7949,
+      "any_ci95": [
+        0.6447,
+        0.8922
+      ],
+      "truthful_rate_majority": 0.9744,
+      "majority_ci95": [
+        0.8682,
+        0.9955
+      ],
+      "truthful_rate_unanimous": 1.0,
+      "unanimous_ci95": [
+        0.9103,
+        1.0
+      ]
+    },
+    "Gemini 3.1 Pro": {
+      "n_sampled": 39,
+      "truthful": 13,
+      "truthful_rate": 0.3333,
+      "ci95": [
+        0.2063,
+        0.4902
+      ],
+      "untruthful_rate": 0.6667,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.803,
+      "flagged_examples": [
+        {
+          "sid": "154:gemini:advanced",
+          "claim": "This forces White to scramble to defend their weaknesses",
+          "reason": "The verified facts only establish that Rb4 attacks the pawns on a4, b3, and f4 and defends b6; they do not establish any forced defensive response by White.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "151:gemini:advanced",
+          "claim": "it allows White to respond with annoying checks like Qd5+",
+          "reason": "The queen is on e4; Qd5 is not a check as the black king is on g8 and d5 does not attack it.",
+          "judge": "claude"
+        },
+        {
+          "sid": "450:gemini:beginner",
+          "claim": "forcing them to respond to your threat immediately",
+          "reason": "The verified facts only state that Bg5 attacks the queen on d8; an attack on the queen is not a legally forced response like check, and no forced line is provided.",
+          "judge": "gpt"
+        }
+      ],
+      "truthful_rate_any": 0.3333,
+      "any_ci95": [
+        0.2063,
+        0.4902
+      ],
+      "truthful_rate_majority": 0.641,
+      "majority_ci95": [
+        0.4842,
+        0.7726
+      ],
+      "truthful_rate_unanimous": 0.9231,
+      "unanimous_ci95": [
+        0.7968,
+        0.9735
+      ]
+    },
+    "Gemma-3-27B-it": {
+      "n_sampled": 39,
+      "truthful": 10,
+      "truthful_rate": 0.2564,
+      "ci95": [
+        0.1457,
+        0.4108
+      ],
+      "untruthful_rate": 0.7436,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.846,
+      "flagged_examples": [
+        {
+          "sid": "88:gemma3_27b:advanced",
+          "claim": "winning the knight on a4",
+          "reason": "Bxa4 captures the knight but Black loses the bishop after bxa4, so it is an even trade, not winning a knight.",
+          "judge": "claude"
+        },
+        {
+          "sid": "89:gemma3_27b:beginner",
+          "claim": "b4, but it doesn’t really threaten anything immediate",
+          "reason": "The verified facts state that b4 attacks the knight on c3, so it does create an immediate threat.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "477:gemma3_27b:advanced",
+          "claim": "that actually weakens your position and gives Black easy development",
+          "reason": "The verified facts do not provide any line or assessment showing that capturing the undefended knight on e4 weakens White or gives Black easy development.",
+          "judge": "gpt"
+        }
+      ],
+      "truthful_rate_any": 0.2564,
+      "any_ci95": [
+        0.1457,
+        0.4108
+      ],
+      "truthful_rate_majority": 0.5385,
+      "majority_ci95": [
+        0.3857,
+        0.6843
+      ],
+      "truthful_rate_unanimous": 0.7179,
+      "unanimous_ci95": [
+        0.5622,
+        0.8346
+      ]
+    },
+    "Kimi-K2.5": {
+      "n_sampled": 18,
+      "truthful": 8,
+      "truthful_rate": 0.4444,
+      "ci95": [
+        0.2456,
+        0.6628
+      ],
+      "untruthful_rate": 0.5556,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.852,
+      "flagged_examples": [
+        {
+          "sid": "441:kimi25:intermediate",
+          "claim": "it attacks the rook and defends your knight",
+          "reason": "Nf1 attacks the rook on h2 but the facts do not state it defends the knight; Rg1 is the move that defends the knight on g3.",
+          "judge": "claude"
+        },
+        {
+          "sid": "481:kimi25:beginner",
+          "claim": "which makes White spend a tempo defending",
+          "reason": "The verified facts only say Bxd4 attacks the pawn on b2; they do not establish that White is forced to spend a tempo defending it.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "431:kimi25:intermediate",
+          "claim": "creating a discovered attack on the g6 bishop",
+          "reason": "The facts state Ne7 directly attacks the bishop on g6, not a discovered attack.",
+          "judge": "claude"
+        }
+      ],
+      "truthful_rate_any": 0.4444,
+      "any_ci95": [
+        0.2456,
+        0.6628
+      ],
+      "truthful_rate_majority": 0.7222,
+      "majority_ci95": [
+        0.4913,
+        0.875
+      ],
+      "truthful_rate_unanimous": 0.8889,
+      "unanimous_ci95": [
+        0.672,
+        0.969
+      ]
+    },
+    "Llama-3.3-70B": {
+      "n_sampled": 18,
+      "truthful": 13,
+      "truthful_rate": 0.7222,
+      "ci95": [
+        0.4913,
+        0.875
+      ],
+      "untruthful_rate": 0.2778,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.926,
+      "flagged_examples": [
+        {
+          "sid": "258:llama33_70b:beginner",
+          "claim": "Your move, g3, didn't quite achieve this",
+          "reason": "The verified facts provide no information about a move g3 or its consequences, so this concrete comparison is unsupported.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "405:llama33_70b:intermediate",
+          "claim": "bring our king to a safer position on h1",
+          "reason": "The king is already on h1; moving to g1 cannot then relocate to a square it just left as a safer position.",
+          "judge": "claude"
+        },
+        {
+          "sid": "34:llama33_70b:beginner",
+          "claim": "Ng6 was that it didn't address the knight's vulnerability",
+          "reason": "The verified facts identify the vulnerable piece as the black knight on e5, and Ng6 moves that knight away from e5 to g6, so this claim is unsupported/contradicted by the listed facts.",
+          "judge": "gpt"
+        }
+      ],
+      "truthful_rate_any": 0.7222,
+      "any_ci95": [
+        0.4913,
+        0.875
+      ],
+      "truthful_rate_majority": 0.8333,
+      "majority_ci95": [
+        0.6078,
+        0.9416
+      ],
+      "truthful_rate_unanimous": 0.9444,
+      "unanimous_ci95": [
+        0.7424,
+        0.9901
+      ]
+    },
+    "Mistral-Large-3 (675B)": {
+      "n_sampled": 18,
+      "truthful": 7,
+      "truthful_rate": 0.3889,
+      "ci95": [
+        0.203,
+        0.6138
+      ],
+      "untruthful_rate": 0.6111,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.907,
+      "flagged_examples": [
+        {
+          "sid": "413:mistral3:beginner",
+          "claim": "grabbing it right away gave Black time to bring the queen over to defend",
+          "reason": "The verified facts for fxg4 only say the pawn captures the pawn on g4; they do not support any queen-defence consequence.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "82:mistral3:beginner",
+          "claim": "It forces the king to move (only one reply works)",
+          "reason": "Qh3+ pins/attacks the knight on f5, and Black could interpose Nh6 or block otherwise; the claim that only a king move (one reply) works is unsupported by the facts.",
+          "judge": "claude"
+        },
+        {
+          "sid": "342:mistral3:advanced",
+          "claim": "Black’s rook is trapped behind enemy lines",
+          "reason": "The rook on b4 has many escape squares; nothing in the facts indicates it is trapped.",
+          "judge": "claude"
+        }
+      ],
+      "truthful_rate_any": 0.3889,
+      "any_ci95": [
+        0.203,
+        0.6138
+      ],
+      "truthful_rate_majority": 0.5556,
+      "majority_ci95": [
+        0.3372,
+        0.7544
+      ],
+      "truthful_rate_unanimous": 0.6667,
+      "unanimous_ci95": [
+        0.4375,
+        0.8372
+      ]
+    },
+    "OURS-v2 (1.7B tuned)": {
+      "n_sampled": 39,
+      "truthful": 9,
+      "truthful_rate": 0.2308,
+      "ci95": [
+        0.1265,
+        0.3834
+      ],
+      "untruthful_rate": 0.7692,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.974,
+      "flagged_examples": [
+        {
+          "sid": "331:ours:intermediate",
+          "claim": "Your g2 move is understandable because it defends h7",
+          "reason": "The verified facts say g2 only moves the pawn to g2; only Nf8 is listed as defending the pawn on h7.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "148:ours:intermediate",
+          "claim": "Ng2 is easy to find because it attacks h4 and defends e5 and f2 at the same time",
+          "reason": "Facts state Ng2 only attacks the bishop on h4; it does not defend e5 or f2 (that is Ng4).",
+          "judge": "claude"
+        },
+        {
+          "sid": "172:ours:beginner",
+          "claim": "Your Bd4 move is understandable because it defends the rook on f1",
+          "reason": "Bd4 defends the knight on c3, not the rook on f1, per the verified facts.",
+          "judge": "claude"
+        }
+      ],
+      "truthful_rate_any": 0.2308,
+      "any_ci95": [
+        0.1265,
+        0.3834
+      ],
+      "truthful_rate_majority": 0.2564,
+      "majority_ci95": [
+        0.1457,
+        0.4108
+      ],
+      "truthful_rate_unanimous": 0.3077,
+      "unanimous_ci95": [
+        0.1857,
+        0.4642
+      ]
+    },
+    "Qwen3-32B": {
+      "n_sampled": 39,
+      "truthful": 18,
+      "truthful_rate": 0.4615,
+      "ci95": [
+        0.3157,
+        0.6143
+      ],
+      "untruthful_rate": 0.5385,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.906,
+      "flagged_examples": [
+        {
+          "sid": "228:q3_32b:advanced",
+          "claim": "Your move Qf4 allowed White to simplify and reduce tensions, which gives them a clearer path to an advantage.",
+          "reason": "The verified facts provide no information about a move Qf4 or any resulting simplification or advantage, so this concrete assessment is unsupported.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "406:q3_32b:advanced",
+          "claim": "Your move Rxd1 left your queen vulnerable to a tactical反击",
+          "reason": "The verified facts for Rxd1 only state that the rook captures the rook on d1; they do not support any tactical counterattack or queen vulnerability.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "5:q3_32b:beginner",
+          "claim": "which is not well defended",
+          "reason": "The verified facts only state that Rg7 attacks the pawn on g6; they do not support the claim that the g6 pawn is poorly defended.",
+          "judge": "gpt"
+        }
+      ],
+      "truthful_rate_any": 0.4615,
+      "any_ci95": [
+        0.3157,
+        0.6143
+      ],
+      "truthful_rate_majority": 0.641,
+      "majority_ci95": [
+        0.4842,
+        0.7726
+      ],
+      "truthful_rate_unanimous": 0.7436,
+      "unanimous_ci95": [
+        0.5892,
+        0.8543
+      ]
+    },
+    "Qwen3-Next-80B-A3B": {
+      "n_sampled": 18,
+      "truthful": 1,
+      "truthful_rate": 0.0556,
+      "ci95": [
+        0.0099,
+        0.2576
+      ],
+      "untruthful_rate": 0.9444,
+      "avg_judges": 3.0,
+      "avg_agreement": 0.796,
+      "flagged_examples": [
+        {
+          "sid": "414:q3_next80b:intermediate",
+          "claim": "opened up your own dark squares and let Black’s bishop come to h6",
+          "reason": "The verified facts only state that Bxg5 captures the pawn on g5; they do not support this specific consequence.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "140:q3_next80b:intermediate",
+          "claim": "opens lines for your bishop and queen",
+          "reason": "The verified facts for e4 only state that the pawn moves to e4 and attacks the pawn on d5; they do not support any opened lines for White's bishop or queen.",
+          "judge": "gpt"
+        },
+        {
+          "sid": "168:q3_next80b:beginner",
+          "claim": "Your last move, f5",
+          "reason": "Black's f-pawn is on f6, not f5, so the last move could not have been f5.",
+          "judge": "claude"
+        }
+      ],
+      "truthful_rate_any": 0.0556,
+      "any_ci95": [
+        0.0099,
+        0.2576
+      ],
+      "truthful_rate_majority": 0.3333,
+      "majority_ci95": [
+        0.1628,
+        0.5625
+      ],
+      "truthful_rate_unanimous": 0.6667,
+      "unanimous_ci95": [
+        0.4375,
+        0.8372
+      ]
+    },
+    "_overall": {
+      "n_sampled": 378,
+      "truthful": 134,
+      "truthful_rate": 0.3545,
+      "ci95": [
+        0.308,
+        0.404
+      ],
+      "truthful_rate_any": 0.3545,
+      "any_ci95": [
+        0.308,
+        0.404
+      ],
+      "truthful_rate_majority": 0.5714,
+      "majority_ci95": [
+        0.5211,
+        0.6204
+      ],
+      "truthful_rate_unanimous": 0.7381,
+      "unanimous_ci95": [
+        0.6915,
+        0.7799
+      ]
+    }
+  },
+  "judge_calls": 1134,
+  "cost": {
+    "per_judge": {
+      "gpt": {
+        "calls": 378,
+        "prompt_tokens": 339118,
+        "completion_tokens": 130308,
+        "usd": 1.727
+      },
+      "claude": {
+        "calls": 378,
+        "prompt_tokens": 505072,
+        "completion_tokens": 24808,
+        "usd": 9.4367
+      },
+      "gemini": {
+        "calls": 378,
+        "prompt_tokens": 346154,
+        "completion_tokens": 145494,
+        "usd": 1.8876
+      }
+    },
+    "total_usd": 13.0513,
+    "total_calls": 1134
+  },
+  "judge_detail": {
+    "aggregations_note": "Per-model truthful-rate is reported under three nested panel rules (see judge_residual.*_rate_*): `any` (strict lower bound: a single judge's objection sinks the cell), `majority` (>=2 of 3 judges truthful), and `unanimous` (lenient upper bound: only a unanimous 3/3 objection sinks the cell). Each carries a 95% Wilson CI. Truth lies somewhere in the any..unanimous band.",
+    "aggregation_note": "`any` = a single cross-family judge's objection marks the cell not-truthful (strict union). The judge flags concrete FALSE or UNSUPPORTED-by-the-1-ply-verified-facts claims; it is instructed NOT to flag general plans/principles or hedged language. So this is a conservative floor on truthfulness, not a claim that the rest are outright lies.",
+    "per_judge_flag_rate": {
+      "claude": {
+        "calls": 378,
+        "flagged": 160,
+        "flag_rate": 0.4233
+      },
+      "gemini": {
+        "calls": 378,
+        "flagged": 119,
+        "flag_rate": 0.3148
+      },
+      "gpt": {
+        "calls": 378,
+        "flagged": 226,
+        "flag_rate": 0.5979
+      }
+    },
+    "panel_unanimous_frac": 0.6164,
+    "unanimous_untruthful_rate": 0.2619,
+    "unanimous_untruthful_n": 99,
+    "by_cell_origin": {
+      "fallback": {
+        "n": 17,
+        "truthful_rate": 1.0
+      },
+      "raw_clean": {
+        "n": 287,
+        "truthful_rate": 0.3449
+      },
+      "regen": {
+        "n": 74,
+        "truthful_rate": 0.2432
+      }
+    }
+  }
+}

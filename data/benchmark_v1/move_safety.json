@@ -1,0 +1,68 @@
+{
+  "move_safe": {
+    "ours": {
+      "ungrounded": 0.62,
+      "grounded": 0.97
+    },
+    "base": {
+      "ungrounded": 0.43,
+      "grounded": 0.93
+    },
+    "gpt": {
+      "ungrounded": 0.76,
+      "grounded": 0.99
+    },
+    "claude": {
+      "ungrounded": 0.63,
+      "grounded": 0.98
+    },
+    "gemini": {
+      "ungrounded": 0.64,
+      "grounded": 1.0
+    }
+  },
+  "move_safe_of_parseable": {
+    "ours": {
+      "ungrounded": 0.6526,
+      "grounded": 0.97
+    },
+    "base": {
+      "ungrounded": 0.7167,
+      "grounded": 0.93
+    },
+    "gpt": {
+      "ungrounded": 0.76,
+      "grounded": 0.99
+    },
+    "claude": {
+      "ungrounded": 0.6429,
+      "grounded": 0.98
+    },
+    "gemini": {
+      "ungrounded": 0.6598,
+      "grounded": 1.0
+    }
+  },
+  "blunder_rate": {
+    "ours": {
+      "ungrounded": 0.33,
+      "grounded": 0.03
+    },
+    "base": {
+      "ungrounded": 0.17,
+      "grounded": 0.07
+    },
+    "gpt": {
+      "ungrounded": 0.24,
+      "grounded": 0.01
+    },
+    "claude": {
+      "ungrounded": 0.35,
+      "grounded": 0.02
+    },
+    "gemini": {
+      "ungrounded": 0.33,
+      "grounded": 0.0
+    }
+  }
+}

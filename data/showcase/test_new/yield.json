@@ -1,0 +1,9 @@
+{
+  "raw_pulled": 10000,
+  "after_dedup": 9998,
+  "grounded": 9998,
+  "discriminating_eligible": 5862,
+  "selected": 210,
+  "dupe_corpus": 0,
+  "dupe_self": 2
+}

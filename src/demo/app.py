@@ -67,8 +67,19 @@ from config.schema import (  # noqa: E402
     TeacherInput,
     render_user_prompt,
 )
+from src.engine.faithfulness_ext import verify_text_ext  # noqa: E402
 from src.engine.maia_engine import human_moves  # noqa: E402
 from src.engine.stockfish_engine import classify_mistake, sound_pool  # noqa: E402
+
+# Reuse the API's faithfulness-gate helpers so the demo applies the SAME
+# verify-and-regenerate + deterministic-fallback path as ``src/api/server.py``.
+# Importing the server module is side-effect-free here: it builds a FastAPI app
+# object and reads the coach prompt, but loads no model and starts no server.
+from src.api.server import (  # noqa: E402
+    MAX_COACH_ATTEMPTS as COACH_MAX_ATTEMPTS,
+    _pick_fallback_move,
+    _verified_coaching,
+)
 
 try:  # optional: load MODEL_PATH / ADAPTER_PATH etc. from the repo .env
     from dotenv import load_dotenv
@@ -530,9 +541,23 @@ def coach(fen: str, tier: str, student_move: str) -> Tuple[Any, str, str, str]:
         )
 
     user_prompt = render_user_prompt(ti)
+    fen_norm = board.fen()
+    pool = ti["sound_pool"]
+    student_uci_norm = student_uci or ""
 
+    # Faithfulness gate (VERIFY-AND-REGENERATE), mirroring src/api/server.py so the
+    # demo NEVER shows an ungated fabrication. Re-sample the whole reply up to
+    # COACH_MAX_ATTEMPTS and keep the first one whose every board claim verifies
+    # against the real position; if none verify, fall back to a deterministic,
+    # engine-derived explanation of a sound move that is truthful by construction.
     try:
-        reply = run_model(SYSTEM_PROMPT, user_prompt)
+        verified_reply: Optional[str] = None
+        attempts = 0
+        for attempts in range(1, COACH_MAX_ATTEMPTS + 1):
+            candidate = run_model(SYSTEM_PROMPT, user_prompt)
+            if verify_text_ext(candidate, fen_norm).ok:
+                verified_reply = candidate
+                break
     except Exception as exc:
         return (
             render_board_payload(fen, None, student_uci),
@@ -541,9 +566,30 @@ def coach(fen: str, tier: str, student_move: str) -> Tuple[Any, str, str, str]:
             _details_md(ti, notes, None, student_err),
         )
 
-    rec_san, rec_uci, source = extract_recommended(reply, board, ti["sound_pool"])
+    if verified_reply is not None:
+        rec_san, rec_uci, source = extract_recommended(verified_reply, board, pool)
+        coaching_md = verified_reply.strip() or "*(the model returned an empty response)*"
+        if attempts > 1:
+            notes.append(
+                f"The coach's first {attempts - 1} draft(s) stated a false board "
+                f"fact and were re-generated; attempt {attempts} verified clean."
+            )
+    else:
+        fb_move = _pick_fallback_move(board, pool, student_uci_norm)
+        if fb_move is None:  # no sound move to explain — never fabricate
+            rec_san, rec_uci, source = extract_recommended("", board, pool)
+            coaching_md = "*(no verifiable coaching could be produced for this position)*"
+        else:
+            body, takeaway = _verified_coaching(board, fb_move)
+            rec_san, rec_uci, source = board.san(fb_move), fb_move.uci(), "verified fallback"
+            coaching_md = f"{body}\n\n**Takeaway:** {takeaway}"
+            notes.append(
+                f"The model kept stating false board facts across "
+                f"{COACH_MAX_ATTEMPTS} attempts, so a verified, engine-derived "
+                "explanation was used instead."
+            )
+
     board_payload = render_board_payload(fen, rec_uci, student_uci)
-    coaching_md = reply.strip() or "*(the model returned an empty response)*"
     details_md = _details_md(ti, notes, (rec_san, source), student_err)
     return board_payload, rec_san or "(could not parse)", coaching_md, details_md
 

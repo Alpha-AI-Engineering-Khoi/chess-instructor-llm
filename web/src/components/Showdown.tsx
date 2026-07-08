@@ -120,11 +120,21 @@ export default function Showdown() {
             </span>
             Coach studio
           </Link>
-          {doc && (
-            <span className="font-mono text-xs text-faint tnum">
-              grounded · {doc.meta.condition === "grounded" ? "same input for every model" : doc.meta.condition}
-            </span>
-          )}
+          <div className="flex items-center gap-3">
+            {doc && (
+              <span className="hidden font-mono text-xs text-faint tnum sm:inline">
+                grounded · {doc.meta.condition === "grounded" ? "same input for every model" : doc.meta.condition}
+              </span>
+            )}
+            <Link
+              href="/showcase"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-signal/12 px-3.5 text-sm font-medium text-signal ring-1 ring-signal/40 transition-colors hover:bg-signal/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
+            >
+              Showcase
+              <span aria-hidden>★</span>
+              <span aria-hidden className="text-signal/70">›</span>
+            </Link>
+          </div>
         </div>
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">

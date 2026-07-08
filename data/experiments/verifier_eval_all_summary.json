@@ -1,0 +1,439 @@
+{
+  "generated": "2026-07-07T02:48:05.890963+00:00",
+  "gate": {
+    "source": "src/api/server.py verify-and-regenerate (imported verbatim)",
+    "max_attempts": 4,
+    "verifier": "src/engine/faithfulness.py verify_text (deterministic)",
+    "fallback": "src/api/server.py _verified_coaching (engine-derived, true by construction)",
+    "user_visible": "coaching + Takeaway via _split_coaching; scored with verify_text",
+    "grounding": "data/benchmark_v2/scenarios.jsonl (reused; no live engines)"
+  },
+  "sample": {
+    "n_positions": 50,
+    "fabricated_stratum": 33,
+    "clean_stratum": 17,
+    "weighting": "fabrication-weighted on OURS-v2 grounded fabrications (33 fab + 17 clean)"
+  },
+  "models": [
+    {
+      "key": "ours",
+      "display": "OURS-v2 (chess-coach-v2, 1.7B tuned)",
+      "family": "local",
+      "kind": "mlx",
+      "n": 50,
+      "raw_fab_rate": 0.4,
+      "raw_full_fab_rate": 0.4,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.4,
+      "fallback_rate": 0.1,
+      "passed_within_budget_rate": 0.9,
+      "avg_attempts": 1.78,
+      "avg_generations": 1.78,
+      "attempts_dist": {
+        "pass@1": 30,
+        "pass@2": 10,
+        "fallback": 5,
+        "pass@4": 4,
+        "pass@3": 1
+      },
+      "among_raw_fabricated": {
+        "n": 20,
+        "resolved_by_model_regen": 15,
+        "resolved_by_fallback": 5,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "cost_usd": 0.0
+    },
+    {
+      "key": "base",
+      "display": "BASE (Qwen3-1.7B-4bit, untuned)",
+      "family": "local",
+      "kind": "mlx",
+      "n": 50,
+      "raw_fab_rate": 0.02,
+      "raw_full_fab_rate": 0.02,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.02,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.02,
+      "avg_generations": 1.02,
+      "attempts_dist": {
+        "pass@1": 49,
+        "pass@2": 1
+      },
+      "among_raw_fabricated": {
+        "n": 1,
+        "resolved_by_model_regen": 1,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "cost_usd": 0.0
+    },
+    {
+      "key": "gpt",
+      "display": "GPT-5.5",
+      "family": "gpt",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.02,
+      "raw_full_fab_rate": 0.02,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.02,
+      "fallback_rate": 0.02,
+      "passed_within_budget_rate": 0.98,
+      "avg_attempts": 1.06,
+      "avg_generations": 1.06,
+      "attempts_dist": {
+        "pass@1": 49,
+        "fallback": 1
+      },
+      "among_raw_fabricated": {
+        "n": 1,
+        "resolved_by_model_regen": 0,
+        "resolved_by_fallback": 1,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 51773,
+      "completion_tokens": 13344,
+      "cost_usd": 0.1982
+    },
+    {
+      "key": "claude",
+      "display": "Claude Opus 4.8",
+      "family": "claude",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.04,
+      "raw_full_fab_rate": 0.04,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.04,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.06,
+      "avg_generations": 1.06,
+      "attempts_dist": {
+        "pass@1": 48,
+        "pass@2": 1,
+        "pass@3": 1
+      },
+      "among_raw_fabricated": {
+        "n": 2,
+        "resolved_by_model_regen": 2,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 76129,
+      "completion_tokens": 10448,
+      "cost_usd": 1.9255
+    },
+    {
+      "key": "gemini",
+      "display": "Gemini 3.1 Pro",
+      "family": "gemini",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.0,
+      "raw_full_fab_rate": 0.0,
+      "gated_fab_rate": 0.0,
+      "delta_fab": 0,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.0,
+      "avg_generations": 1.0,
+      "attempts_dist": {
+        "pass@1": 50
+      },
+      "among_raw_fabricated": {
+        "n": 0,
+        "resolved_by_model_regen": 0,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 50373,
+      "completion_tokens": 31270,
+      "cost_usd": 0.3757
+    },
+    {
+      "key": "q3_32b",
+      "display": "Qwen3-32B",
+      "family": "open",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.06,
+      "raw_full_fab_rate": 0.06,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.06,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.06,
+      "avg_generations": 1.06,
+      "attempts_dist": {
+        "pass@1": 47,
+        "pass@2": 3
+      },
+      "among_raw_fabricated": {
+        "n": 3,
+        "resolved_by_model_regen": 3,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 53298,
+      "completion_tokens": 5682,
+      "cost_usd": 0.0114
+    },
+    {
+      "key": "q3_next80b",
+      "display": "Qwen3-Next-80B-A3B",
+      "family": "open",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.06,
+      "raw_full_fab_rate": 0.06,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.06,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.06,
+      "avg_generations": 1.06,
+      "attempts_dist": {
+        "pass@1": 47,
+        "pass@2": 3
+      },
+      "among_raw_fabricated": {
+        "n": 3,
+        "resolved_by_model_regen": 3,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 53349,
+      "completion_tokens": 5560,
+      "cost_usd": 0.0151
+    },
+    {
+      "key": "gemma3_27b",
+      "display": "Gemma-3-27B-it",
+      "family": "open",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.04,
+      "raw_full_fab_rate": 0.04,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.04,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.04,
+      "avg_generations": 1.04,
+      "attempts_dist": {
+        "pass@1": 48,
+        "pass@2": 2
+      },
+      "among_raw_fabricated": {
+        "n": 2,
+        "resolved_by_model_regen": 2,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 52757,
+      "completion_tokens": 6479,
+      "cost_usd": 0.0079
+    },
+    {
+      "key": "llama33_70b",
+      "display": "Llama-3.3-70B",
+      "family": "open",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.0,
+      "raw_full_fab_rate": 0.0,
+      "gated_fab_rate": 0.0,
+      "delta_fab": 0,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.0,
+      "avg_generations": 1.0,
+      "attempts_dist": {
+        "pass@1": 50
+      },
+      "among_raw_fabricated": {
+        "n": 0,
+        "resolved_by_model_regen": 0,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 50466,
+      "completion_tokens": 6060,
+      "cost_usd": 0.0407
+    },
+    {
+      "key": "dsv32",
+      "display": "DeepSeek-V3.2",
+      "family": "open",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.06,
+      "raw_full_fab_rate": 0.06,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.06,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.06,
+      "avg_generations": 1.06,
+      "attempts_dist": {
+        "pass@1": 47,
+        "pass@2": 3
+      },
+      "among_raw_fabricated": {
+        "n": 3,
+        "resolved_by_model_regen": 3,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 52183,
+      "completion_tokens": 4787,
+      "cost_usd": 0.018
+    },
+    {
+      "key": "glm5",
+      "display": "GLM-5",
+      "family": "open",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.06,
+      "raw_full_fab_rate": 0.06,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.06,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.08,
+      "avg_generations": 1.08,
+      "attempts_dist": {
+        "pass@1": 47,
+        "pass@2": 2,
+        "pass@3": 1
+      },
+      "among_raw_fabricated": {
+        "n": 3,
+        "resolved_by_model_regen": 3,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 53126,
+      "completion_tokens": 6471,
+      "cost_usd": 0.0316
+    },
+    {
+      "key": "mistral3",
+      "display": "Mistral-Large-3 (675B)",
+      "family": "open",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.14,
+      "raw_full_fab_rate": 0.14,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.14,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.16,
+      "avg_generations": 1.16,
+      "attempts_dist": {
+        "pass@1": 43,
+        "pass@2": 6,
+        "pass@3": 1
+      },
+      "among_raw_fabricated": {
+        "n": 7,
+        "resolved_by_model_regen": 7,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 58713,
+      "completion_tokens": 8210,
+      "cost_usd": 0.1667
+    },
+    {
+      "key": "kimi25",
+      "display": "Kimi-K2.5",
+      "family": "open",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.08,
+      "raw_full_fab_rate": 0.08,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.08,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.08,
+      "avg_generations": 1.08,
+      "attempts_dist": {
+        "pass@1": 46,
+        "pass@2": 4
+      },
+      "among_raw_fabricated": {
+        "n": 4,
+        "resolved_by_model_regen": 4,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 54294,
+      "completion_tokens": 8095,
+      "cost_usd": 0.0528
+    },
+    {
+      "key": "dsr1",
+      "display": "DeepSeek-R1 (reasoning)",
+      "family": "open",
+      "kind": "tfy",
+      "n": 50,
+      "raw_fab_rate": 0.02,
+      "raw_full_fab_rate": 0.02,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.02,
+      "fallback_rate": 0.02,
+      "passed_within_budget_rate": 0.98,
+      "avg_attempts": 1.06,
+      "avg_generations": 1.06,
+      "attempts_dist": {
+        "pass@1": 49,
+        "fallback": 1
+      },
+      "among_raw_fabricated": {
+        "n": 1,
+        "resolved_by_model_regen": 0,
+        "resolved_by_fallback": 1,
+        "still_fabricated_after_gate": 0
+      },
+      "residual_gated_fabrications": [],
+      "prompt_tokens": 52085,
+      "completion_tokens": 39749,
+      "cost_usd": 0.285
+    }
+  ],
+  "n_models_present": 14,
+  "any_nonzero_gated": false,
+  "nonzero_gated_models": [],
+  "independent_audit": {
+    "rows_checked": 700,
+    "gated_fabrications_found": 0,
+    "empty_gated_outputs": 0,
+    "offenders": []
+  },
+  "total_cost_usd": 3.1286
+}

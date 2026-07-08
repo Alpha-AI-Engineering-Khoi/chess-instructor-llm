@@ -1,0 +1,166 @@
+{
+  "generated": "2026-07-07T02:25:42.815638+00:00",
+  "gate": {
+    "source": "src/api/server.py verify-and-regenerate",
+    "max_attempts": 4,
+    "verifier": "src/engine/faithfulness.py verify_text (deterministic)",
+    "fallback": "src/api/server.py _verified_coaching (engine-derived, true by construction)",
+    "user_visible": "coaching + Takeaway via _split_coaching; scored with verify_text"
+  },
+  "config": {
+    "ours_model": "/Users/khoilam/Documents/Crossover/coding-projects/chess-instructor-llm/models/mlx/chess-coach-v2",
+    "ours_decode": {
+      "temp": 0.7,
+      "top_p": 0.8,
+      "top_k": 20,
+      "max_tokens": 640
+    },
+    "frontier_model": "openai-group/gpt-5.5",
+    "frontier_reasoning_effort": "low"
+  },
+  "sample": {
+    "ours_n": 50,
+    "ours_fabricated_stratum": 33,
+    "ours_clean_stratum": 17,
+    "frontier_n": 30
+  },
+  "ours": {
+    "overall": {
+      "n": 50,
+      "raw_fab_rate": 0.4,
+      "raw_full_fab_rate": 0.4,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.4,
+      "fallback_rate": 0.1,
+      "passed_within_budget_rate": 0.9,
+      "avg_attempts": 1.78,
+      "avg_generations": 1.78,
+      "final_from_model": 45,
+      "final_from_fallback": 5,
+      "final_from_model_rate": 0.9,
+      "final_from_fallback_rate": 0.1,
+      "among_raw_fabricated": {
+        "n": 20,
+        "resolved_by_model_regen": 15,
+        "resolved_by_fallback": 5,
+        "still_fabricated_after_gate": 0
+      }
+    },
+    "fabricated_stratum": {
+      "n": 33,
+      "raw_fab_rate": 0.4848,
+      "raw_full_fab_rate": 0.4848,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.4848,
+      "fallback_rate": 0.1212,
+      "passed_within_budget_rate": 0.8788,
+      "avg_attempts": 2.0,
+      "avg_generations": 2.0,
+      "final_from_model": 29,
+      "final_from_fallback": 4,
+      "final_from_model_rate": 0.8788,
+      "final_from_fallback_rate": 0.1212,
+      "among_raw_fabricated": {
+        "n": 16,
+        "resolved_by_model_regen": 12,
+        "resolved_by_fallback": 4,
+        "still_fabricated_after_gate": 0
+      }
+    },
+    "clean_stratum": {
+      "n": 17,
+      "raw_fab_rate": 0.2353,
+      "raw_full_fab_rate": 0.2353,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.2353,
+      "fallback_rate": 0.0588,
+      "passed_within_budget_rate": 0.9412,
+      "avg_attempts": 1.3529,
+      "avg_generations": 1.3529,
+      "final_from_model": 16,
+      "final_from_fallback": 1,
+      "final_from_model_rate": 0.9412,
+      "final_from_fallback_rate": 0.0588,
+      "among_raw_fabricated": {
+        "n": 4,
+        "resolved_by_model_regen": 3,
+        "resolved_by_fallback": 1,
+        "still_fabricated_after_gate": 0
+      }
+    }
+  },
+  "frontier_gpt": {
+    "overall": {
+      "n": 30,
+      "raw_fab_rate": 0.0667,
+      "raw_full_fab_rate": 0.0667,
+      "gated_fab_rate": 0.0,
+      "delta_fab": -0.0667,
+      "fallback_rate": 0.0667,
+      "passed_within_budget_rate": 0.9333,
+      "avg_attempts": 1.2,
+      "avg_generations": 1.2,
+      "final_from_model": 28,
+      "final_from_fallback": 2,
+      "final_from_model_rate": 0.9333,
+      "final_from_fallback_rate": 0.0667,
+      "among_raw_fabricated": {
+        "n": 2,
+        "resolved_by_model_regen": 0,
+        "resolved_by_fallback": 2,
+        "still_fabricated_after_gate": 0
+      }
+    },
+    "fabricated_stratum": {
+      "n": 27,
+      "raw_fab_rate": 0.0,
+      "raw_full_fab_rate": 0.0,
+      "gated_fab_rate": 0.0,
+      "delta_fab": 0,
+      "fallback_rate": 0.0,
+      "passed_within_budget_rate": 1.0,
+      "avg_attempts": 1.0,
+      "avg_generations": 1.0,
+      "final_from_model": 27,
+      "final_from_fallback": 0,
+      "final_from_model_rate": 1.0,
+      "final_from_fallback_rate": 0.0,
+      "among_raw_fabricated": {
+        "n": 0,
+        "resolved_by_model_regen": 0,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      }
+    },
+    "clean_stratum": {
+      "n": 0,
+      "raw_fab_rate": null,
+      "raw_full_fab_rate": null,
+      "gated_fab_rate": null,
+      "delta_fab": null,
+      "fallback_rate": null,
+      "passed_within_budget_rate": null,
+      "avg_attempts": null,
+      "avg_generations": null,
+      "final_from_model": 0,
+      "final_from_fallback": 0,
+      "final_from_model_rate": null,
+      "final_from_fallback_rate": null,
+      "among_raw_fabricated": {
+        "n": 0,
+        "resolved_by_model_regen": 0,
+        "resolved_by_fallback": 0,
+        "still_fabricated_after_gate": 0
+      }
+    }
+  },
+  "cost": {
+    "gpt_prompt_tokens": 35413,
+    "gpt_completion_tokens": 9319,
+    "gpt_cost_usd": 0.1375,
+    "ours_cost_usd": 0.0,
+    "total_cost_usd": 0.1375,
+    "price_in_per_m": 1.25,
+    "price_out_per_m": 10.0
+  }
+}

@@ -70,6 +70,7 @@ from config.schema import (  # noqa: E402
     render_user_prompt,
 )
 from src.engine.faithfulness import verify_text  # noqa: E402
+from src.engine.faithfulness_ext import verify_text_ext  # noqa: E402
 from src.engine.maia_engine import human_moves  # noqa: E402
 from src.engine.position_facts import move_facts, render_pool_facts  # noqa: E402
 from src.engine.stockfish_engine import classify_mistake, sound_pool  # noqa: E402
@@ -110,7 +111,7 @@ GEN_TOP_K: int = 20
 #: budget, we emit a deterministic, engine-derived explanation that is true by
 #: construction. Set ``COACH_FAITHFULNESS_GATE=0`` to disable (used only to
 #: re-measure the ungated fabrication rate); ``COACH_MAX_ATTEMPTS`` caps re-tries.
-MAX_COACH_ATTEMPTS: int = max(1, int(os.environ.get("COACH_MAX_ATTEMPTS", "4")))
+MAX_COACH_ATTEMPTS: int = max(1, int(os.environ.get("COACH_MAX_ATTEMPTS", "6")))
 FAITHFULNESS_GATE: bool = (
     os.environ.get("COACH_FAITHFULNESS_GATE", "1").strip().lower()
     not in ("0", "false", "no", "off")
@@ -357,7 +358,7 @@ def _finalize_verified(
 ) -> Tuple[str, str]:
     """Assert the deterministic text is faithful; if an edge case slipped a false
     claim through, swap in a claim-free template wholesale (never strips a line)."""
-    if verify_text(f"{body} {takeaway}", board.fen()).ok:
+    if verify_text_ext(f"{body} {takeaway}", board.fen()).ok:
         return body, takeaway
     body = (
         f"I'd play {san}. It's a sound, engine-approved move that keeps your "
@@ -722,7 +723,7 @@ def coach(req: CoachRequest) -> CoachResponse:
         if FAITHFULNESS_GATE:
             for attempts in range(1, MAX_COACH_ATTEMPTS + 1):
                 candidate = get_coach().run(SYSTEM_PROMPT, user_prompt)
-                if verify_text(candidate, fen_norm).ok:
+                if verify_text_ext(candidate, fen_norm).ok:
                     verified_reply = candidate
                     break
         else:

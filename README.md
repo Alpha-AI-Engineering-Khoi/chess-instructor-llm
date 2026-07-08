@@ -19,12 +19,17 @@ real position before it reaches you.
 
 > **🆕 `v3` (Qwen3-32B) — evaluated, strongest local coach; v2 still shipped.** v3 fine-tunes a
 > 20× larger base on a larger faithfulness-filtered contrastive dataset (7,128 rows). On the
-> 803-position benchmark vs a 15-model field it is **2nd overall on the balanced score (61.7,
-> behind only GPT-5.5) and the best locally-runnable model**. vs v2: instructiveness council rank
-> **10.07 → 7.06** (top-1 7.5% → 20.3%), fabrication **30.2% → 5.4%**, tier-fit field-leading at
-> **53.2%**; vs the untuned Qwen3-32B, tier-fit **+16.3 pts**. Honest tradeoffs: beginner
-> move-calibration softened (32B leans engine-best) and ~4–5% malformed raw outputs (blunder rate
-> only 1.3%; neutralized at serve time). The live platform still serves **v2** (not auto-switched).
+> 803-position benchmark vs a 15-model field — blinded council over **all 450 items × 3 judges =
+> 1,350 rankings**, **self-preference-corrected** — it **tops the raw balanced score (58.0, a hair
+> above GPT-5.5's 57.7) and is the best locally-runnable model**. vs v2: corrected instructiveness
+> rank **10.26 → 6.93** (top-1 7.1% → 22.6%, 2nd-highest in the field), tier-fit field-leading at
+> **53.2%**; vs the untuned Qwen3-32B, tier-fit **+16.3 pts**. Faithfulness is a **gated fairness
+> floor** (0% user-visible fabrication for every model), so it is not a scoring axis; the honest
+> truth differentiator is the semantic-judge residual (OURS-v2 **23%** vs GPT-5.5 **79%** "any"-of-3
+> truthful, +majority/unanimous & CIs). Honest tradeoffs: beginner move-calibration softened (32B
+> leans engine-best), and OURS-v3 trips the 97% safety/no-jargon gate on ~4–5% malformed raw outputs
+> (blunder rate only 1.3%; neutralized at serve time), so GPT-5.5 leads the gate-passing board. The
+> live platform still serves **v2** (not auto-switched).
 > Detail: [`RESULTS_V3.md`](RESULTS_V3.md) · [`RESULTS_FULL_EVAL_803_v3.md`](RESULTS_FULL_EVAL_803_v3.md).
 > _(HF v3 re-publish prepared but pending an HF write token; local MLX 32B build is disk-blocked —
 > deployable v3 = base-4bit + QLoRA adapter.)_

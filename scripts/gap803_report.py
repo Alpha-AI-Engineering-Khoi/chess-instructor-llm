@@ -43,6 +43,7 @@ import chess  # noqa: E402
 from src.eval.benchmark import config as bcfg  # noqa: E402
 from scripts.divergence_analysis import extract_recommended_mode  # noqa: E402
 from scripts.gap803_common import TIERS  # noqa: E402
+from scripts import gap803_council_stats as cstats  # noqa: E402
 
 BENCH = Path(os.environ["BENCH_DIR"])
 SCN_PATH = BENCH / "scenarios.jsonl"
@@ -345,11 +346,15 @@ def compute_safety() -> Dict[str, float]:
 GATE_SAFE = 0.97
 GATE_NOES = 0.97
 
-# balanced weights (tier + instructiveness highest; fabrication downweighted).
-W_BALANCED = {"tier": 0.40, "instr": 0.40, "fab": 0.10, "practical": 0.10}
+# Fabrication is NOT a scoring axis. After the verify-and-regenerate gate EVERY
+# model ships 0% user-visible fabrication (a fairness floor applied equally to
+# all, not a differentiator), so raw pre-gate fabrication is removed from the
+# weighted score entirely. Weights below sum to 1.0.
+# balanced weights (tier-appropriate move + instructiveness dominate).
+W_BALANCED = {"tier": 0.45, "instr": 0.45, "practical": 0.10}
 # best-base weights (tier-appropriateness is what we FINE-TUNE in -> low; the
-# hard-to-add qualities -> high: instructiveness/capacity, faithfulness, local).
-W_BASE = {"tier": 0.10, "instr": 0.35, "fab": 0.20, "practical": 0.35}
+# hard-to-add qualities -> high: instructiveness/capacity + local-runnability).
+W_BASE = {"tier": 0.10, "instr": 0.45, "practical": 0.45}
 
 
 def _cost_blended(mk: str) -> float:
@@ -358,12 +363,14 @@ def _cost_blended(mk: str) -> float:
 
 
 def build_scores(tier: Dict[str, Any], obj: Dict[str, Any], council: Dict[str, Any],
-                 safety: Dict[str, float]) -> Dict[str, Dict[str, Any]]:
+                 safety: Dict[str, float],
+                 field_stats: Optional[Dict[str, Any]] = None) -> Dict[str, Dict[str, Any]]:
     models = [m for m in MODEL_ORDER if m in obj]
     # cost normalization across present models (local = 0 = best)
     blended = {m: _cost_blended(m) for m in models}
     cmax = max(blended.values()) if blended else 1.0
     cost_score = {m: (1.0 - blended[m] / cmax) if cmax > 0 else 1.0 for m in models}
+    cs_models = (field_stats or {}).get("models", {})
     # instructiveness normalization (norm_rank in [0,1]; lower better)
     scored: Dict[str, Dict[str, Any]] = {}
     for m in models:
@@ -374,9 +381,17 @@ def build_scores(tier: Dict[str, Any], obj: Dict[str, Any], council: Dict[str, A
         tvals = [x for x in (tier_fit, diff, direction) if x is not None]
         tier_score = sum(tvals) / len(tvals) if tvals else None
         c = council.get(m, {})
-        instr_score = (1.0 - c["norm_rank"]) if c else None
-        fab = obj[m].get("fabrication")
-        fab_score = (1.0 - fab) if fab is not None else None
+        # Instructiveness uses the SELF-PREFERENCE-CORRECTED mean rank when
+        # available (frontier competitors are not graded by their own lab); it
+        # falls back to the raw council norm-rank only if stats are absent.
+        cs = cs_models.get(m)
+        instr_score = None
+        if cs and cs.get("corrected_mean_rank") is not None:
+            fld = cs.get("field") or len(MODEL_ORDER)
+            cnorm = (cs["corrected_mean_rank"] - 1) / (fld - 1) if fld > 1 else 0.0
+            instr_score = 1.0 - cnorm
+        elif c:
+            instr_score = 1.0 - c["norm_rank"]
         loc = PRACTICAL.get(m, ("", 0.0, ""))[1]
         practical = 0.6 * loc + 0.4 * cost_score.get(m, 0.0)
         safe = safety.get(m)
@@ -384,11 +399,10 @@ def build_scores(tier: Dict[str, Any], obj: Dict[str, Any], council: Dict[str, A
         gate_ok = (safe is None or safe >= GATE_SAFE) and (noes is None or noes >= GATE_NOES)
 
         def _wsum(weights: Dict[str, float]) -> Optional[float]:
-            parts = {"tier": tier_score, "instr": instr_score, "fab": fab_score,
-                     "practical": practical}
+            parts = {"tier": tier_score, "instr": instr_score, "practical": practical}
             num = den = 0.0
             for k, w in weights.items():
-                v = parts[k]
+                v = parts.get(k)
                 if v is None:
                     continue
                 num += w * v
@@ -397,7 +411,7 @@ def build_scores(tier: Dict[str, Any], obj: Dict[str, Any], council: Dict[str, A
 
         scored[m] = {
             "tier_score": tier_score, "instr_score": instr_score,
-            "fab_score": fab_score, "practical": practical,
+            "practical": practical,
             "cost_score": cost_score.get(m), "local": loc,
             "gate_ok": gate_ok, "safe": safe, "no_engine_speak": noes,
             "balanced": _wsum(W_BALANCED), "base_fit": _wsum(W_BASE),
@@ -447,19 +461,33 @@ def compute_spend() -> Dict[str, Any]:
     return {**groups, "total_usd": round(total, 2)}
 
 
+def _load_truthfulness() -> Dict[str, Any]:
+    """The showcase semantic-judge truthfulness residual (any/majority/unanimous)."""
+    p = _ROOT / "data" / "showcase" / "truthfulness.json"
+    try:
+        return json.loads(p.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
 def cmd_report(_a: argparse.Namespace) -> int:
     scns_by_id = _scenarios_by_id()
     tier = compute_tier_metrics(scns_by_id)
     obj = compute_objective_metrics()
     council = compute_council()
-    safety = compute_safety()
-    scored = build_scores(tier, obj, council, safety)
-    spend = compute_spend()
-
     council_rows = _read_jsonl(COUNCIL_PATH)
-    n_council_items = len({r["scenario_id"] for r in council_rows})
-    n_judges = len({r.get("judge") for r in council_rows}) or 3
+    n_boot = getattr(_a, "n_boot", 2000)
+    council_stats = cstats.compute_council_stats(
+        council_rows, MODEL_ORDER, cstats.FRONTIER, n_boot=n_boot)
+    safety = compute_safety()
+    scored = build_scores(tier, obj, council, safety, council_stats)
+    spend = compute_spend()
+    truthfulness = _load_truthfulness()
+
+    n_council_items = council_stats.get("n_items") or len({r["scenario_id"] for r in council_rows})
+    n_judges = council_stats.get("n_judges") or (len({r.get("judge") for r in council_rows}) or 3)
     bundle = {"tier": tier, "objective": obj, "council": council,
+              "council_stats": council_stats,
               "safety": safety, "scored": scored, "spend": spend,
               "n_council_items": n_council_items, "n_judges": n_judges,
               "n_positions": len({s["pos_id"] for s in scns_by_id.values()})}
@@ -471,7 +499,8 @@ def cmd_report(_a: argparse.Namespace) -> int:
                    tier, obj, council, safety, scored,
                    n_positions=bundle["n_positions"],
                    n_council_items=n_council_items, n_judges=n_judges,
-                   w_balanced=W_BALANCED, w_base=W_BASE, spend=spend)
+                   w_balanced=W_BALANCED, w_base=W_BASE, spend=spend,
+                   council_stats=council_stats, truthfulness=truthfulness)
     print(f"wrote {REPORT_MD}")
     return 0
 
@@ -481,7 +510,10 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("merge").set_defaults(func=cmd_merge)
     sub.add_parser("objective").set_defaults(func=cmd_objective)
-    sub.add_parser("report").set_defaults(func=cmd_report)
+    pr = sub.add_parser("report")
+    pr.add_argument("--n-boot", type=int, default=2000,
+                    help="Bootstrap resamples for council mean-rank 95% CIs.")
+    pr.set_defaults(func=cmd_report)
     return p
 
 

@@ -1,0 +1,120 @@
+{
+  "move_safe": {
+    "base": 0.9647,
+    "claude": 0.9778,
+    "dsr1": 0.9988,
+    "dsv32": 0.9975,
+    "gemini": 0.9911,
+    "gemma3_27b": 1.0,
+    "glm5": 0.9963,
+    "gpt": 0.9911,
+    "kimi25": 0.9988,
+    "llama33_70b": 0.9996,
+    "mistral3": 0.9983,
+    "ours": 0.99,
+    "q3_32b": 0.9975,
+    "q3_next80b": 1.0
+  },
+  "blunder_rate": {
+    "base": 0.0353,
+    "claude": 0.0222,
+    "dsr1": 0.0008,
+    "dsv32": 0.0012,
+    "gemini": 0.0022,
+    "gemma3_27b": 0.0,
+    "glm5": 0.0029,
+    "gpt": 0.0089,
+    "kimi25": 0.0012,
+    "llama33_70b": 0.0004,
+    "mistral3": 0.0017,
+    "ours": 0.01,
+    "q3_32b": 0.0025,
+    "q3_next80b": 0.0
+  },
+  "detail": {
+    "base": {
+      "safe": 2324,
+      "blunder": 85,
+      "n": 2409,
+      "unparseable": 0
+    },
+    "claude": {
+      "safe": 440,
+      "blunder": 10,
+      "n": 450,
+      "unparseable": 0
+    },
+    "dsr1": {
+      "safe": 2406,
+      "blunder": 2,
+      "n": 2409,
+      "unparseable": 1
+    },
+    "dsv32": {
+      "safe": 2403,
+      "blunder": 3,
+      "n": 2409,
+      "unparseable": 3
+    },
+    "gemini": {
+      "safe": 446,
+      "blunder": 1,
+      "n": 450,
+      "unparseable": 3
+    },
+    "gemma3_27b": {
+      "safe": 2409,
+      "blunder": 0,
+      "n": 2409,
+      "unparseable": 0
+    },
+    "glm5": {
+      "safe": 2400,
+      "blunder": 7,
+      "n": 2409,
+      "unparseable": 2
+    },
+    "gpt": {
+      "safe": 446,
+      "blunder": 4,
+      "n": 450,
+      "unparseable": 0
+    },
+    "kimi25": {
+      "safe": 2406,
+      "blunder": 3,
+      "n": 2409,
+      "unparseable": 0
+    },
+    "llama33_70b": {
+      "safe": 2408,
+      "blunder": 1,
+      "n": 2409,
+      "unparseable": 0
+    },
+    "mistral3": {
+      "safe": 2405,
+      "blunder": 4,
+      "n": 2409,
+      "unparseable": 0
+    },
+    "ours": {
+      "safe": 2385,
+      "blunder": 24,
+      "n": 2409,
+      "unparseable": 0
+    },
+    "q3_32b": {
+      "safe": 2403,
+      "blunder": 6,
+      "n": 2409,
+      "unparseable": 0
+    },
+    "q3_next80b": {
+      "safe": 2409,
+      "blunder": 0,
+      "n": 2409,
+      "unparseable": 0
+    }
+  }
+}

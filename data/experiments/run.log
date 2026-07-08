@@ -1,0 +1,7 @@
+[sample] total=50 (fabricated=33, clean=17); frontier=15
+[ours] loading MLX model: /Users/khoilam/Documents/Crossover/coding-projects/chess-instructor-llm/models/mlx/chess-coach-v2
+[ours] loaded in 0.3s
+[ours   1/96] 9M8bagRc_36 A_baseline  fab=1 sound=1 (1.1s)
+[ours   2/96] 9M8bagRc_36 B_rich      fab=0 sound=1 (1.5s)
+[ours   3/96] D6kWitIo_26 A_baseline  fab=0 sound=1 (1.1s)
+[ours   4/96] D6kWitIo_26 B_rich      fab=1 sound=1 (1.6s)

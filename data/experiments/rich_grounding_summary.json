@@ -1,0 +1,143 @@
+{
+  "generated": "2026-07-07T02:00:48.336152+00:00",
+  "sample": {
+    "n_total": 50,
+    "n_fabricated_stratum": 33,
+    "n_clean_stratum": 17,
+    "frontier_n": 15
+  },
+  "config": {
+    "ours_model": "/Users/khoilam/Documents/Crossover/coding-projects/chess-instructor-llm/models/mlx/chess-coach-v2",
+    "ours_decode": {
+      "temp": 0.7,
+      "top_p": 0.8,
+      "top_k": 20,
+      "max_tokens": 640
+    },
+    "frontier_model": "openai-group/gpt-5.5",
+    "frontier_reasoning_effort": "low",
+    "conditions": {
+      "A_baseline": "A — current prose grounding",
+      "B_rich": "B — rich structured grounding"
+    }
+  },
+  "prompt_chars": {
+    "A_baseline_mean": 1468,
+    "B_rich_mean": 1629
+  },
+  "ours": {
+    "overall": {
+      "A_baseline": {
+        "n": 50,
+        "fabrication_rate": 0.4,
+        "avg_violations": 0.52,
+        "move_sound_rate": 1.0,
+        "no_engine_speak_rate": 1.0,
+        "ply_cap_ok_rate": 1.0,
+        "produced_nonempty_rate": 1.0
+      },
+      "B_rich": {
+        "n": 50,
+        "fabrication_rate": 0.56,
+        "avg_violations": 0.9,
+        "move_sound_rate": 0.94,
+        "no_engine_speak_rate": 1.0,
+        "ply_cap_ok_rate": 1.0,
+        "produced_nonempty_rate": 1.0
+      },
+      "delta_fabrication_B_minus_A": 0.16,
+      "delta_move_sound_B_minus_A": -0.06
+    },
+    "fabricated_stratum": {
+      "A_baseline": {
+        "n": 33,
+        "fabrication_rate": 0.4848,
+        "avg_violations": 0.6667,
+        "move_sound_rate": 1.0,
+        "no_engine_speak_rate": 1.0,
+        "ply_cap_ok_rate": 1.0,
+        "produced_nonempty_rate": 1.0
+      },
+      "B_rich": {
+        "n": 33,
+        "fabrication_rate": 0.5152,
+        "avg_violations": 0.8182,
+        "move_sound_rate": 0.9394,
+        "no_engine_speak_rate": 1.0,
+        "ply_cap_ok_rate": 1.0,
+        "produced_nonempty_rate": 1.0
+      },
+      "delta_fabrication_B_minus_A": 0.0304,
+      "delta_move_sound_B_minus_A": -0.0606
+    },
+    "clean_stratum": {
+      "A_baseline": {
+        "n": 17,
+        "fabrication_rate": 0.2353,
+        "avg_violations": 0.2353,
+        "move_sound_rate": 1.0,
+        "no_engine_speak_rate": 1.0,
+        "ply_cap_ok_rate": 1.0,
+        "produced_nonempty_rate": 1.0
+      },
+      "B_rich": {
+        "n": 17,
+        "fabrication_rate": 0.6471,
+        "avg_violations": 1.0588,
+        "move_sound_rate": 0.9412,
+        "no_engine_speak_rate": 1.0,
+        "ply_cap_ok_rate": 1.0,
+        "produced_nonempty_rate": 1.0
+      },
+      "delta_fabrication_B_minus_A": 0.4118,
+      "delta_move_sound_B_minus_A": -0.0588
+    },
+    "paired": {
+      "a_fab_b_clean": 10,
+      "a_clean_b_fab": 18,
+      "both_fab": 10,
+      "both_clean": 12,
+      "n_paired": 50
+    }
+  },
+  "frontier_gpt": {
+    "overall": {
+      "A_baseline": {
+        "n": 15,
+        "fabrication_rate": 0.0,
+        "avg_violations": 0.0,
+        "move_sound_rate": 1.0,
+        "no_engine_speak_rate": 1.0,
+        "ply_cap_ok_rate": 1.0,
+        "produced_nonempty_rate": 1.0
+      },
+      "B_rich": {
+        "n": 15,
+        "fabrication_rate": 0.0667,
+        "avg_violations": 0.0667,
+        "move_sound_rate": 1.0,
+        "no_engine_speak_rate": 1.0,
+        "ply_cap_ok_rate": 1.0,
+        "produced_nonempty_rate": 1.0
+      },
+      "delta_fabrication_B_minus_A": 0.0667,
+      "delta_move_sound_B_minus_A": 0.0
+    },
+    "paired": {
+      "a_fab_b_clean": 0,
+      "a_clean_b_fab": 1,
+      "both_fab": 0,
+      "both_clean": 14,
+      "n_paired": 15
+    }
+  },
+  "cost": {
+    "gpt_prompt_tokens": 29355,
+    "gpt_completion_tokens": 8214,
+    "gpt_cost_usd": 0.1188,
+    "ours_cost_usd": 0.0,
+    "total_cost_usd": 0.1188,
+    "price_in_per_m": 1.25,
+    "price_out_per_m": 10.0
+  }
+}

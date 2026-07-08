@@ -20,6 +20,14 @@ Claude Opus 4.8 + Gemini 3.1 Pro), never same-family as the model under test.
 _Compiled 2026-07-07 (UTC), covering the v2 + open-model + verifier runs and the definitive
 803-position gap eval (§7), which is now complete and folded in._
 
+> **Fabrication-reporting policy (read this first).** Faithfulness is a **fairness floor, not a
+> per-model differentiator**: after the verify-and-regenerate gate, **every model ships 0%
+> user-visible fabrication** (§4). The current leaderboards therefore do **not** rank or compare
+> models on raw pre-gate fabrication. Where models genuinely differ on truth is the **cross-family
+> semantic-judge residual** (any / majority / unanimous truthful-rate + 95% CIs; §4). Any raw
+> pre-gate fabrication numbers that appear in the historical v1→v2 / open-model sections below are
+> *model-capacity signals from those dated experiments*, not a serve-time or current-comparison axis.
+
 ---
 
 ## 0. v3 update (Qwen3-32B) — the capacity bet, tested
@@ -32,21 +40,26 @@ QLoRA fine-tune of **Qwen3-32B** on the larger faithfulness-filtered contrastive
 | Axis | OURS-v2 (1.7B) | untuned Qwen3-32B | **OURS-v3 (32B tuned)** |
 |---|---:|---:|---:|
 | Tier-fit (the moat) | 53.1% | 36.9% | **53.2%** (field-leading; adv 83.6%, beg 29.6%) |
-| Instructiveness (council rank, of 15; lower=better) | 10.07 | 9.07 | **7.06** (best local; top-1 20.3%) |
-| Fabrication | 30.2% | 6.1% | **5.4%** |
-| Balanced score | 51.2 | 53.6 | **61.7** (2nd of 15, behind only GPT-5.5's 62.4) |
+| Instructiveness (**corrected** council rank, of 15; lower=better) | 10.26 | 9.30 | **6.93** (best local; top-1 22.6%) |
+| User-visible fabrication (after gate) | 0% | 0% | **0%** (fairness floor, all models) |
+| Balanced score (fab removed from score) | 47.9 | 47.8 | **58.0** (1st of 15 raw; see gate caveat) |
 
-**Read honestly.** (1) The capacity bet paid off: fabrication fell ~6× (30.2% → 5.4%) with **no
-faithfulness-specific training** — the bigger base removed the deficit, as predicted. (2)
-Instructiveness jumped a full 3 rank positions; v3 is now the **best locally-runnable coach**,
-behind only the three frontier APIs and one ~355B open model. (3) Tier-fit (moat) held
-field-leading, but its *shape* shifted — the 32B's stronger prior made it excellent at the
-advanced/sharpest move (83.6%) and weaker at the beginner/human-findable move (29.6% vs v2's
-47.9%); the deterministic serve-time `tier_select` can enforce the beginner move if wanted. (4)
-~4–5% of raw outputs are malformed (leading rating-range fragment / occasional prompt echo), so
-v3 sits just under the strict 97% safety/no-jargon gate — but its true **blunder rate is 1.3%**
-(≈ v2) and malformed outputs are caught at serve time. Detail: [`RESULTS_V3.md`](RESULTS_V3.md),
-[`RESULTS_FULL_EVAL_803_v3.md`](RESULTS_FULL_EVAL_803_v3.md). The live platform still serves v2.
+**Read honestly.** (1) The capacity bet paid off *pre-gate*: the 32B base essentially removes
+the small-model board-tracking deficit on its own — but note **user-visible fabrication is
+already 0% for every model** behind the verify-and-regenerate gate, so this is a pre-gate
+capacity story, not a serve-time or ranking axis (raw pre-gate fabrication is no longer reported
+as a per-model comparison). (2) Instructiveness (self-preference-corrected council rank on all
+**450 items × 3 judges = 1,350 rankings**) jumped **10.26 → 6.93**; v3 is the **best
+locally-runnable coach**, behind only GPT-5.5, Claude, GLM-5 (~355B) and Gemini, with the
+2nd-highest top-1 in the field (22.6%). (3) Tier-fit (moat) held field-leading, but its *shape*
+shifted — the 32B's stronger prior made it excellent at the advanced/sharpest move (83.6%) and
+weaker at the beginner/human-findable move (29.6% vs v2's 47.9%); serve-time `tier_select` can
+enforce the beginner move if wanted. (4) v3 **tops the raw balanced score (58.0, a hair above
+GPT-5.5's 57.7)** but trips the strict 97% safety/no-jargon gate (94.3% / 95.6%) — ~4–5% of raw
+outputs are malformed (leading rating-range fragment / prompt echo), *not* blunders (true blunder
+rate **1.3%**, ≈ v2), and caught at serve time; among gate-passing models GPT-5.5 leads. Detail:
+[`RESULTS_V3.md`](RESULTS_V3.md), [`RESULTS_FULL_EVAL_803_v3.md`](RESULTS_FULL_EVAL_803_v3.md).
+The live platform still serves v2.
 
 ---
 
@@ -327,76 +340,84 @@ Putting the six findings together:
 
 **Claim.** On the airtight, zero-leakage **803-position** gap set (100% discriminating — every
 position is one where the tier-appropriate move differs from the engine's #1 for at least one tier),
-scored across the **full 14-model field** with byte-identical grounding, **OURS-v2 leads the entire
-field on tier-appropriate move selection** (tier-fit ~50–53%), which is the moat. Its *raw* balanced
-score is only mid-pack, dragged by two things the deployment already neutralizes — 30% raw
-fabrication (the verifier drives it to 0% for every model, §4) and the 1.7B instructiveness ceiling.
-So the **deployed** profile (verifier on) is: **moat leader + 0% user-visible fabrication +
-free/local**, trailing the field only on prose.
+scored across the **full 15-model field** with byte-identical grounding, **OURS-v3 and OURS-v2 lead
+the entire field on tier-appropriate move selection** (tier-fit ~53%), the moat. With fabrication
+removed as a scoring axis (it is a gated fairness floor — 0% user-visible for every model, §4) and
+instructiveness **self-preference-corrected**, **OURS-v3 tops the raw balanced score (58.0)** — a
+hair above GPT-5.5 (57.7); it trips the strict 97% safety/no-jargon gate on *formatting* (not
+blunders), so among gate-passing models GPT-5.5 leads. OURS-v2 (the shipped 1.7B) sits mid-pack,
+held down only by the 1.7B instructiveness ceiling.
 
 **Method (cost-smart, transparent weighting).** Deterministic metrics (tier-fit, tier-diff,
-direction, move-safety, no-jargon, fabrication) are computed on **all 803 × 3 tiers** for the 2
-local models + 9 open models; the 3 frontier references are measured on a balanced **150-position**
-stratified subset × 3 tiers (a reference row, not a deployable base — a full-803 frontier row would
-add ~$55 for no decision-relevant signal). Instructiveness is one blinded cross-family council
-(GPT-5.5 + Claude Opus 4.8 + Gemini 3.1 Pro) on a stratified ~120-item subset. **Balanced score =
-tier-appropriate move selection 40% + instructiveness 40% + faithfulness (1−fab) 10% + practical
-(local + cost) 10%**, with move-safety and no-jargon as pass/fail gates. Total eval spend **$65.45**.
+direction, move-safety, no-jargon) are computed on **all 803 × 3 tiers** for the 12 models with
+full generations (OURS-v2, OURS-v3, BASE + 9 open); the 3 frontier references are measured on a
+balanced **150-position** stratified subset × 3 tiers. Instructiveness is one blinded cross-family
+council (GPT-5.5 + Claude Opus 4.8 + Gemini 3.1 Pro) over **all 450 items where every model has a
+generation — 450 × 3 judges = 1,350 rankings** — reported raw and **self-preference-corrected**
+with 95% CIs (cluster bootstrap by item; §3 of `RESULTS_FULL_EVAL_803_v3.md`). **Balanced score =
+tier-appropriate move selection 45% + self-preference-corrected instructiveness 45% + practical
+(local + cost) 10%**, with move-safety and no-jargon as pass/fail gates. **Fabrication is not a
+scoring axis** — every model ships 0% user-visible fabrication behind the gate (a fairness floor);
+the honest truth differentiator is the semantic-judge residual (§4). Council cost **$62.27**
+(1,350 rankings); full gap803 eval spend (all generations + council) **$112.15**.
 
-### 7a. Balanced leaderboard (all 14 models)
+### 7a. Balanced leaderboard (all 15 models)
 
-`tier-fit` is the moat metric; `instr rank` is council mean rank (lower = better, of 14); `fab` is
-raw fabrication (neutralized to 0% by the verifier at serve time, §4).
+`tier-fit` is the moat metric; `instr rank` is the **self-preference-corrected** council mean rank
+(lower = better, of 15). Faithfulness is a gated fairness floor (0% user-visible fabrication for
+every model), so it is **not** a comparison column here — the truth differentiator is §4.
 
-| # | Model | family | tier-fit ↑ (moat) | instr rank ↓ | fab ↓ | **balanced** ↑ | local |
-|---|---|---|---:|---:|---:|---:|:--:|
-| 1 | GPT-5.5 | frontier | 43% | 3.21 | 3% | **62.3** | no |
-| 2 | Gemini 3.1 Pro | frontier | 48% | 4.96 | 4% | **57.8** | no |
-| 3 | Claude Opus 4.8 | frontier | 46% | 4.28 | 5% | **56.4** | no |
-| 4 | GLM-5 | open | 45% | 6.10 | 7% | **55.3** | no |
-| 5 | Qwen3-32B | open | 37% | 8.58 | 6% | **53.4** | yes |
-| 6 | Kimi-K2.5 | open | 36% | 6.73 | 8% | **53.2** | no |
-| 7 | DeepSeek-R1 | open | 44% | 7.47 | 2% | **51.4** | no |
-| 8 | **OURS-v2 (1.7B tuned)** | ours | **53%** | 9.36 | 30% | **51.4** | yes |
-| 9 | Llama-3.3-70B | open | 40% | 8.02 | 0% | **51.1** | tight |
-| 10 | Gemma-3-27B-it | open | 35% | 8.69 | 2% | **50.1** | yes |
-| 11 | DeepSeek-V3.2 | open | 41% | 7.90 | 5% | **49.7** | no |
-| 12 | Qwen3-Next-80B-A3B | open | 32% | 8.04 | 7% | **49.5** | tight |
-| 13 | Mistral-Large-3 (675B) | open | 37% | 8.30 | 7% | **47.8** | no |
-| 14 | BASE (1.7B untuned) | base | 36% | 13.38 | 15% | **38.1** (gate FAIL) | yes |
+| # | Model | family | tier-fit ↑ (moat) | instr rank ↓ (corrected) | **balanced** ↑ | gate | local |
+|---|---|---|---:|---:|---:|:--:|:--:|
+| 1 | **OURS-v3 (Qwen3-32B tuned)** | ours | **53%** | 6.93 | **58.0** | **FAIL** | yes |
+| 2 | GPT-5.5 | frontier | 43% | 3.72 | **57.7** | pass | no |
+| 3 | Claude Opus 4.8 | frontier | 46% | 4.95 | **51.3** | pass | no |
+| 4 | GLM-5 | open | 45% | 6.52 | **51.1** | pass | no |
+| 5 | Gemini 3.1 Pro | frontier | 48% | 6.70 | **49.2** | pass | no |
+| 6 | Kimi-K2.5 | open | 36% | 7.43 | **48.2** | pass | no |
+| 7 | **OURS-v2 (1.7B tuned)** | ours | **53%** | 10.26 | **47.9** | pass | yes |
+| 8 | Qwen3-32B (untuned v3 base) | open | 37% | 9.30 | **47.8** | pass | yes |
+| 9 | DeepSeek-R1 | open | 44% | 7.98 | **46.3** | pass | no |
+| 10 | Llama-3.3-70B | open | 40% | 8.39 | **45.9** | pass | tight |
+| 11 | Gemma-3-27B-it | open | 35% | 8.88 | **45.5** | pass | yes |
+| 12 | DeepSeek-V3.2 | open | 41% | 8.24 | **45.4** | pass | no |
+| 13 | Qwen3-Next-80B-A3B | open | 32% | 8.53 | **44.5** | pass | tight |
+| 14 | Mistral-Large-3 (675B) | open | 37% | 9.43 | **41.0** | pass | no |
+| 15 | BASE (1.7B untuned) | base | 36% | 14.18 | **32.5** | **FAIL** | yes |
 
-### 7b. The moat — OURS-v2 leads the entire field on tier-appropriate move selection
+**Per-judge self-preference** (Δ own − peers rank; negative ⇒ judge favours its own family): Gemini
+**−2.74**, GPT **−1.10**, Claude **−0.47** (mean −1.44). The correction drops Gemini from raw 5.78
+to corrected 6.70 (below GLM-5), so no model is graded by its own lab.
 
-Ordered by `tier-fit` (pick == the canonical `select_tier_move` move, mean over the 3 tiers):
-**OURS-v2 53% > Gemini 48% > Claude 46% > GLM-5 45% > DeepSeek-R1 44% > GPT-5.5 43% >
-DeepSeek-V3.2 41% > Llama-3.3-70B 40% > Qwen3-32B 37% = Mistral 37% > Kimi 36% = BASE 36% >
-Gemma-3-27B 35% > Qwen3-Next-80B 32%.** OURS-v2 is **#1 of all 14** — above every frontier and every
-bigger open model — and the lead is widest exactly where the moat matters most: its **beginner-tier
-fit (48%) and intermediate-tier fit (50%) are the highest in the field** (next best beginner is 38%,
-next best intermediate 47%), i.e. it is best at steering a weaker student toward the *human-findable*
-move rather than the engine's sharpest line.
+### 7b. The moat — the two OURS models lead the field on tier-appropriate move selection
 
-The whole field is weak here — even the best sits at 53% and most cluster at 32–48% — because
+Ordered by `tier-fit` (pick == the canonical `select_tier_move` move, mean over the 3 tiers): the
+**two OURS models tie at 53% for #1–2 of all 15** — above every frontier and every bigger open model
+(Gemini 48% > Claude 46% > GLM-5 45% > DeepSeek-R1 44% > GPT-5.5 43% > …). The lead is widest exactly
+where the moat matters most: **OURS-v2's beginner-tier fit (48%) and intermediate-tier fit (50%) are
+the highest in the field** (steering a weaker student toward the *human-findable* move), while
+**OURS-v3 dominates the advanced tier (84%)** (the sharpest move, which is correct there). Together
+they own both ends of the tier gradient.
+
+The whole field is weak on the mean — even the best sits at 53% and most cluster at 32–48% — because
 tier-appropriate move selection is a **trained** behavior, not an emergent one. That is precisely
 the §1/§2 thesis confirmed at scale: prompting alone (frontier included) does not reliably deliver
-it, and the one model trained *for* it leads.
+it, and the models trained *for* it lead.
 
 ### 7c. The deployed reading — why raw ≠ shipped
 
-OURS-v2's raw balanced score (51.4, rank 8 of 14) is held down by two components the product does
-not actually ship with:
-- **Fabrication (30% raw).** In the balanced score this costs OURS-v2 the faithfulness component
-  (1−fab ≈ 70 vs 92–100 for everyone else). But the production verifier drives user-visible
-  fabrication to **0% for every one of the 14 models** (§4), at a ~10% fallback rate for OURS-v2.
-  So this penalty is a *raw-model* artifact, not a deployed one.
-- **Instructiveness (council rank 9.36).** The 1.7B prose ceiling is real and is *not* removed by
-  the verifier — this is the one axis where OURS-v2 honestly trails.
+Faithfulness is no longer a scoring penalty: it is a gated fairness floor (0% user-visible
+fabrication for **every** model, §4), so the balanced score no longer docks any model for raw
+pre-gate fabrication. What remains for the shipped **OURS-v2** (balanced 47.9, mid-pack) is the one
+honest gap:
+- **Instructiveness (corrected council rank 10.26).** The 1.7B prose ceiling is real and is *not*
+  removed by the verifier — this is the axis where OURS-v2 honestly trails. **OURS-v3** closes most
+  of it (6.93, best local), at the cost of tripping the formatting gate.
 
-Fold those in and the **deployed** OURS-v2 is the field's **tier-selection leader, at 0%
+So the **deployed** OURS-v2 is the field's **tier-selection leader (with OURS-v3), at 0%
 user-visible fabrication, running free and locally** — trailing only on prose instructiveness. That
 is the honest shape of the product: not the top of the raw balanced leaderboard, but the best at the
-one behavior that is the moat, with faithfulness handed to the verifier and cost/privacy handed to
-locality.
+one behavior that is the moat, with faithfulness handed to the verifier and cost/privacy to locality.
 
 ### 7d. Recommendations (supersedes the 100-position picks in §3)
 

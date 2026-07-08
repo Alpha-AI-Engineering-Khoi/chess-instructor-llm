@@ -1,0 +1,323 @@
+{
+  "n_items": 450,
+  "n_judges": 3,
+  "n_rankings": 1350,
+  "field": 15,
+  "judges": [
+    "claude",
+    "gemini",
+    "gpt"
+  ],
+  "models": {
+    "ours_v3": {
+      "obs": 1350,
+      "mean_rank": 6.935,
+      "ci95": [
+        6.554,
+        7.318
+      ],
+      "top1_pct": 22.6,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 6.935,
+      "corrected_ci95": [
+        6.554,
+        7.318
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.4239,
+      "field": 15,
+      "frontier": false
+    },
+    "ours": {
+      "obs": 1350,
+      "mean_rank": 10.262,
+      "ci95": [
+        9.901,
+        10.609
+      ],
+      "top1_pct": 7.1,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 10.262,
+      "corrected_ci95": [
+        9.901,
+        10.609
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.6616,
+      "field": 15,
+      "frontier": false
+    },
+    "base": {
+      "obs": 1350,
+      "mean_rank": 14.178,
+      "ci95": [
+        14.071,
+        14.281
+      ],
+      "top1_pct": 0.0,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 14.178,
+      "corrected_ci95": [
+        14.071,
+        14.281
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.9413,
+      "field": 15,
+      "frontier": false
+    },
+    "gemma3_27b": {
+      "obs": 1350,
+      "mean_rank": 8.88,
+      "ci95": [
+        8.641,
+        9.124
+      ],
+      "top1_pct": 0.7,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 8.88,
+      "corrected_ci95": [
+        8.641,
+        9.124
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.5629,
+      "field": 15,
+      "frontier": false
+    },
+    "q3_32b": {
+      "obs": 1350,
+      "mean_rank": 9.301,
+      "ci95": [
+        9.068,
+        9.536
+      ],
+      "top1_pct": 0.1,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 9.301,
+      "corrected_ci95": [
+        9.068,
+        9.536
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.593,
+      "field": 15,
+      "frontier": false
+    },
+    "q3_next80b": {
+      "obs": 1350,
+      "mean_rank": 8.526,
+      "ci95": [
+        8.278,
+        8.789
+      ],
+      "top1_pct": 1.3,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 8.526,
+      "corrected_ci95": [
+        8.278,
+        8.789
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.5376,
+      "field": 15,
+      "frontier": false
+    },
+    "llama33_70b": {
+      "obs": 1350,
+      "mean_rank": 8.391,
+      "ci95": [
+        8.174,
+        8.585
+      ],
+      "top1_pct": 0.4,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 8.391,
+      "corrected_ci95": [
+        8.174,
+        8.585
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.5279,
+      "field": 15,
+      "frontier": false
+    },
+    "dsv32": {
+      "obs": 1350,
+      "mean_rank": 8.238,
+      "ci95": [
+        7.96,
+        8.513
+      ],
+      "top1_pct": 1.3,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 8.238,
+      "corrected_ci95": [
+        7.96,
+        8.513
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.517,
+      "field": 15,
+      "frontier": false
+    },
+    "glm5": {
+      "obs": 1350,
+      "mean_rank": 6.522,
+      "ci95": [
+        6.266,
+        6.778
+      ],
+      "top1_pct": 4.0,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 6.522,
+      "corrected_ci95": [
+        6.266,
+        6.778
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.3944,
+      "field": 15,
+      "frontier": false
+    },
+    "mistral3": {
+      "obs": 1350,
+      "mean_rank": 9.427,
+      "ci95": [
+        9.183,
+        9.67
+      ],
+      "top1_pct": 2.1,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 9.427,
+      "corrected_ci95": [
+        9.183,
+        9.67
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.6019,
+      "field": 15,
+      "frontier": false
+    },
+    "kimi25": {
+      "obs": 1350,
+      "mean_rank": 7.43,
+      "ci95": [
+        7.156,
+        7.692
+      ],
+      "top1_pct": 4.4,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 7.43,
+      "corrected_ci95": [
+        7.156,
+        7.692
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.4593,
+      "field": 15,
+      "frontier": false
+    },
+    "dsr1": {
+      "obs": 1350,
+      "mean_rank": 7.979,
+      "ci95": [
+        7.748,
+        8.213
+      ],
+      "top1_pct": 0.8,
+      "corrected_obs": 1350,
+      "corrected_mean_rank": 7.979,
+      "corrected_ci95": [
+        7.748,
+        8.213
+      ],
+      "corrected_dropped_judge": null,
+      "norm_rank": 0.4985,
+      "field": 15,
+      "frontier": false
+    },
+    "gpt": {
+      "obs": 1350,
+      "mean_rank": 3.355,
+      "ci95": [
+        3.181,
+        3.532
+      ],
+      "top1_pct": 23.6,
+      "corrected_obs": 900,
+      "corrected_mean_rank": 3.722,
+      "corrected_ci95": [
+        3.519,
+        3.921
+      ],
+      "corrected_dropped_judge": "gpt",
+      "norm_rank": 0.1682,
+      "field": 15,
+      "frontier": true
+    },
+    "claude": {
+      "obs": 1350,
+      "mean_rank": 4.793,
+      "ci95": [
+        4.543,
+        5.05
+      ],
+      "top1_pct": 19.3,
+      "corrected_obs": 900,
+      "corrected_mean_rank": 4.951,
+      "corrected_ci95": [
+        4.678,
+        5.238
+      ],
+      "corrected_dropped_judge": "claude",
+      "norm_rank": 0.271,
+      "field": 15,
+      "frontier": true
+    },
+    "gemini": {
+      "obs": 1350,
+      "mean_rank": 5.783,
+      "ci95": [
+        5.547,
+        6.041
+      ],
+      "top1_pct": 12.3,
+      "corrected_obs": 900,
+      "corrected_mean_rank": 6.696,
+      "corrected_ci95": [
+        6.431,
+        6.98
+      ],
+      "corrected_dropped_judge": "gemini",
+      "norm_rank": 0.3416,
+      "field": 15,
+      "frontier": true
+    }
+  },
+  "self_preference": {
+    "gpt": {
+      "own_mean_rank": 2.62,
+      "peers_mean_rank": 3.722,
+      "delta_own_minus_peers": -1.102,
+      "n_own": 450,
+      "n_peers": 900
+    },
+    "claude": {
+      "own_mean_rank": 4.478,
+      "peers_mean_rank": 4.951,
+      "delta_own_minus_peers": -0.473,
+      "n_own": 450,
+      "n_peers": 900
+    },
+    "gemini": {
+      "own_mean_rank": 3.958,
+      "peers_mean_rank": 6.696,
+      "delta_own_minus_peers": -2.738,
+      "n_own": 450,
+      "n_peers": 900
+    },
+    "_mean_signed_delta": -1.438,
+    "_mean_abs_delta": 1.438
+  }
+}

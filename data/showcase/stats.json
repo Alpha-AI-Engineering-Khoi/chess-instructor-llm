@@ -1,0 +1,131 @@
+{
+  "positions_total": 492,
+  "train": 132,
+  "test": 360,
+  "test_new": 210,
+  "test_reuse": 150,
+  "ours_wins_total": 380,
+  "ours_loses_total": 390,
+  "ours_wins_train": 88,
+  "ours_loses_train": 103,
+  "ours_wins_test": 292,
+  "ours_loses_test": 287,
+  "shine_total": 50,
+  "focus_total": 226,
+  "tier_diff_train": 50,
+  "tier_diff_test": 176,
+  "tier_diff_test_new": 113,
+  "tier_diff_test_reuse": 63,
+  "tier_diff_total": 226,
+  "misdirected_total": 41,
+  "misdirected_train": 4,
+  "misdirected_test": 37,
+  "ours_full_coverage_positions": 492,
+  "ours_full_coverage_all": true,
+  "n_train": 132,
+  "n_test": 360,
+  "model_coverage": {
+    "OURS-v2 (1.7B tuned)": {
+      "train": 132,
+      "test": 360
+    },
+    "BASE (Qwen3-1.7B-4bit, untuned)": {
+      "train": 132,
+      "test": 360
+    },
+    "GPT-5.5": {
+      "train": 132,
+      "test": 360
+    },
+    "Claude Opus 4.8": {
+      "train": 132,
+      "test": 360
+    },
+    "Gemini 3.1 Pro": {
+      "train": 132,
+      "test": 360
+    },
+    "Qwen3-32B": {
+      "train": 132,
+      "test": 360
+    },
+    "Qwen3-Next-80B-A3B": {
+      "train": 132,
+      "test": 360
+    },
+    "Llama-3.3-70B": {
+      "train": 132,
+      "test": 360
+    },
+    "DeepSeek-V3.2": {
+      "train": 132,
+      "test": 360
+    },
+    "GLM-5": {
+      "train": 132,
+      "test": 360
+    },
+    "Mistral-Large-3 (675B)": {
+      "train": 84,
+      "test": 150
+    },
+    "Kimi-K2.5": {
+      "train": 91,
+      "test": 150
+    },
+    "DeepSeek-R1 (reasoning)": {
+      "train": 132,
+      "test": 360
+    },
+    "Gemma-3-27B-it": {
+      "train": 80,
+      "test": 150
+    }
+  },
+  "yield": {
+    "raw_pulled": 10000,
+    "after_dedup": 9998,
+    "grounded": 9998,
+    "discriminating_eligible": 5862,
+    "selected": 210,
+    "dupe_corpus": 0,
+    "dupe_self": 2
+  },
+  "cost": {
+    "buckets": {
+      "train_gen": {
+        "calls": 4113,
+        "in": 4295072,
+        "out": 1072030,
+        "usd": 23.17
+      },
+      "test_new_gen": {
+        "calls": 5670,
+        "in": 5887242,
+        "out": 1586636,
+        "usd": 35.57
+      },
+      "reused_803_gen": {
+        "calls": 5400,
+        "in": 5559123,
+        "out": 1297152,
+        "usd": 26.96
+      },
+      "council": {
+        "calls": 4428,
+        "in": 11688198,
+        "out": 3190377,
+        "usd": 141.57
+      },
+      "local_gen_free": {
+        "calls": 2952,
+        "in": 0,
+        "out": 0,
+        "usd": 0.0
+      }
+    },
+    "new_spend_usd": 200.31,
+    "reused_803_value_usd": 26.96,
+    "grand_total_incl_reused_usd": 227.27
+  }
+}

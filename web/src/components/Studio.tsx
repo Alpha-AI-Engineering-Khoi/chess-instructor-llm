@@ -282,15 +282,22 @@ export default function Studio() {
 
   return (
     <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-[1240px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      {/* Slim bar: jump to the cross-model comparison view. */}
-      <div className="flex items-center justify-end">
+      {/* Slim bar: jump to the cross-model comparison views. */}
+      <div className="flex items-center justify-end gap-2">
         <Link
           href="/showdown"
           className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium text-muted ring-1 ring-[color:var(--border)] transition-colors hover:text-ink hover:ring-[color:var(--field-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
         >
-          Model Showdown
-          <span aria-hidden className="text-signal">★</span>
+          Showdown list
           <span aria-hidden className="text-faint">›</span>
+        </Link>
+        <Link
+          href="/showcase"
+          className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-signal/12 px-3.5 text-sm font-medium text-signal ring-1 ring-signal/40 transition-colors hover:bg-signal/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
+        >
+          Multi-Model Showcase
+          <span aria-hidden>★</span>
+          <span aria-hidden className="text-signal/70">›</span>
         </Link>
       </div>
 

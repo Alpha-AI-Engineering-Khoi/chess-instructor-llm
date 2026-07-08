@@ -1,0 +1,37 @@
+{
+  "buckets": {
+    "train_gen": {
+      "calls": 4113,
+      "in": 4295072,
+      "out": 1072030,
+      "usd": 23.17
+    },
+    "test_new_gen": {
+      "calls": 5670,
+      "in": 5887242,
+      "out": 1586636,
+      "usd": 35.57
+    },
+    "reused_803_gen": {
+      "calls": 5400,
+      "in": 5559123,
+      "out": 1297152,
+      "usd": 26.96
+    },
+    "council": {
+      "calls": 4428,
+      "in": 11688198,
+      "out": 3190377,
+      "usd": 141.57
+    },
+    "local_gen_free": {
+      "calls": 2952,
+      "in": 0,
+      "out": 0,
+      "usd": 0.0
+    }
+  },
+  "new_spend_usd": 200.31,
+  "reused_803_value_usd": 26.96,
+  "grand_total_incl_reused_usd": 227.27
+}

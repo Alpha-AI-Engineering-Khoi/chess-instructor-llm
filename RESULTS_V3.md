@@ -6,30 +6,43 @@ labels) — and it pays off where the extra capacity matters. On the definitive,
 zero-leakage **803-position** benchmark (each position coached at all 3 tiers with
 byte-identical engine grounding), against a **15-model** field:
 
-- **Instructiveness: a large win.** Blinded cross-family council (GPT-5.5 + Claude
-  Opus 4.8 + Gemini 3.1 Pro) mean rank (1 = best of 15) improved **OURS-v2 10.07 →
-  OURS-v3 7.06**, and top-1 win-rate **7.5% → 20.3%**. v3 is the **best of every
-  locally-runnable model** and 5th of 15 overall — behind only the three frontier
-  APIs and one ~355B open model (GLM-5), ahead of Kimi-K2.5, DeepSeek-V3.2/R1,
-  Llama-3.3-70B, Qwen3-Next-80B, Gemma-3-27B, Mistral-Large-3.
-- **Fabrication: a large win.** False-board-fact rate **30.2% → 5.4%** — the clean
-  faithfulness-filtered data plus the stronger base cut fabrication ~6×, to roughly
-  the level of the untuned 32B (6.1%) and the frontier APIs (3–5%).
-- **Tier-appropriate move selection (the moat): held, and still field-leading.**
-  Overall tier-fit **53.1% → 53.2%** (statistically flat), and OURS-v3 remains the
-  **highest-tier-fit model in the entire field** (higher than GPT-5.5 40%, Claude
-  42%, Gemini 42%). The profile shifted: much stronger at **advanced** (60.9% →
-  **83.6%**) and softer at **beginner** (47.9% → **29.6%**) — see the honest caveats.
-- **Fine-tuning clearly adds value over the raw 32B.** vs the **untuned Qwen3-32B**
-  base it was tuned from: tier-fit **36.9% → 53.2% (+16.3)**, council rank **9.07 →
-  7.06**, top-1 **0.0% → 20.3%** — i.e. the specialist behavior is *trained in*, not
-  emergent in the base.
-- **Balanced score: 2nd of 15, essentially tied with the best frontier model.**
-  The transparent weighted score (tier 40% + instructiveness 40% + faithfulness 10%
-  + practical/local+cost 10%) puts **OURS-v3 at 61.7 — behind only GPT-5.5 (62.4)**
-  and ahead of Gemini (56.6), Claude (55.8), GLM-5 (54.8), the untuned 32B (53.6),
-  and OURS-v2 (51.2). It is the only model near the frontier that also runs locally
-  and free.
+- **Instructiveness: a large win, self-preference-corrected.** One blinded
+  cross-family council (GPT-5.5 + Claude Opus 4.8 + Gemini 3.1 Pro) ranks the unified
+  15-model field on **all 450 (position×tier) items where every model has a generation**
+  — **n = 450 × 3 judges = 1,350 rankings** (the 120-item pilot is reused). Because each
+  judge also grades its own lab's model, we report BOTH **raw** and
+  **self-preference-corrected** mean ranks. Corrected mean rank (1 = best of 15) improved
+  **OURS-v2 10.26 → OURS-v3 6.93**, top-1 win-rate **7.1% → 22.6%** (2nd-highest top-1 in
+  the whole field, behind only GPT-5.5's 23.6%). v3 is the **best of every locally-runnable
+  model** and **5th of 15 overall** — behind only GPT-5.5 (3.72), Claude (4.95),
+  GLM-5 (~355B, 6.52) and Gemini (6.70), ahead of every other open model.
+- **Self-preference is real, and corrected for.** Each judge favours its own lab
+  (Δ own−peers: **Gemini −2.74, GPT −1.10, Claude −0.47**; mean −1.44 rank positions).
+  The correction (drop each frontier competitor's same-lab judge) is what moves Gemini
+  from raw **5.78** to corrected **6.70** — below GLM-5 — so no model is graded by its own
+  family. 95% CIs (cluster bootstrap by item) are in `RESULTS_FULL_EVAL_803_v3.md` §3.
+- **Tier-appropriate move selection (the moat): held, still field-leading.** Overall
+  tier-fit **53.1% → 53.2%** (flat), highest in the field (> GPT 43%, Claude 46%, Gemini
+  48%). Profile shifted: much stronger at **advanced** (60.9% → **83.6%**) and softer at
+  **beginner** (47.9% → **29.6%**) — see the honest caveats.
+- **Fine-tuning clearly adds value over the raw 32B.** vs the **untuned Qwen3-32B** base
+  it was tuned from: tier-fit **36.9% → 53.2% (+16.3)**, corrected council rank **9.30 →
+  6.93**, top-1 **0.1% → 22.6%** — the specialist behavior is *trained in*, not emergent.
+- **Balanced score: tops the raw board, essentially tied with GPT-5.5.** The transparent
+  weighted score (**tier 45% + self-preference-corrected instructiveness 45% + practical
+  /local+cost 10%**) puts **OURS-v3 at 58.0 — 1st of 15, a hair above GPT-5.5 (57.7)**,
+  ahead of Claude (51.3), GLM-5 (51.1), Gemini (49.2) and OURS-v2 (47.9). **Honest
+  caveat:** OURS-v3 currently trips the strict 97% move-safety/no-jargon gate (94.3% /
+  95.6%) — dominated by malformed-output *formatting*, not blunders (actual blunder rate
+  ~1.3%, which the serve-time verifier neutralizes); among gate-passing models GPT-5.5
+  leads. It is the only near-frontier-balanced model that also runs locally and free.
+- **Truthfulness is a fairness floor, not a differentiator.** After the
+  verify-and-regenerate gate **every model ships 0% user-visible fabrication** — raw
+  pre-gate fabrication is intentionally **not** reported as a per-model comparison axis.
+  The honest truth differentiator is the cross-family semantic-judge residual, under three
+  nested rules with 95% CIs (any = strict lower bound / majority / unanimous = lenient
+  upper bound): OURS-v2 **23% / 26% / 31%** vs GPT-5.5 **79% / 97% / 100%** (pooled 35% /
+  57% / 74%). OURS-v3 is a gap803-only model and is not in that showcase sample.
 
 v2 artifacts, the live v2 platform (ports 8000/3000), and `web/src` were not touched.
 Everything is v3-suffixed.
@@ -55,49 +68,59 @@ $141.13**, fully checkpoint/resumed across interruptions.
 ## The 803-position benchmark — the numbers
 
 All local + open models are scored on **all 803 positions × 3 tiers**; the 3 frontier
-APIs on a balanced 150-position subset; instructiveness via a stratified ~120-item,
-15-model blinded council (360 judge calls). Reference points required by the brief are
-**bold**.
+APIs on a balanced 150-position subset; instructiveness via a **15-model blinded council on
+all 450 items where the full field exists (450 × 3 judges = 1,350 rankings)**, reported
+raw and **self-preference-corrected**. `instr rank` below is the corrected rank.
+Faithfulness is a gated fairness floor (0% user-visible fabrication for every model), so
+it is **not** a per-model comparison column — the truth differentiator is the semantic-judge
+residual (headline above). Reference points required by the brief are **bold**.
 
-| Model | tier-fit↑ | instr rank↓ (of 15) | top-1↑ | fabrication↓ | move-sound↑ | no-jargon↑ | balanced↑ | local |
-|---|---:|---:|---:|---:|---:|---:|---:|:--:|
-| **OURS-v3 (Qwen3-32B tuned)** | **53.2%** | **7.06** | **20.3%** | **5.4%** | 93.2% | 95.6% | **61.7** | yes |
-| **OURS-v2 (Qwen3-1.7B tuned)** | **53.1%** | **10.07** | **7.5%** | **30.2%** | 97.5% | 100% | 51.2 | yes |
-| **Qwen3-32B (untuned base of v3)** | **36.9%** | **9.07** | **0.0%** | **6.1%** | 99.6% | 99.4% | 53.6 | yes |
-| BASE (Qwen3-1.7B untuned) | 36.5% | 14.16 | 0.0% | 14.5% | 91.6% | 96.4% | 38.1 | yes |
-| GPT-5.5 | 43.1% | 3.35 | 24.4% | 3.3% | 98% | 100% | 62.4 | no |
-| Claude Opus 4.8 | 45.8% | 4.71 | 19.2% | 4.7% | 97% | 100% | 55.8 | no |
-| Gemini 3.1 Pro | 48.4% | 5.67 | 11.7% | 4.2% | 98% | 100% | 56.6 | no |
-| GLM-5 (~355B, not local) | 44.7% | 6.65 | 5.3% | 7.3% | 99.6% | 100% | 54.8 | no |
+| Model | tier-fit↑ | instr rank↓ (corrected, of 15) | top-1↑ | move-sound↑ | no-jargon↑ | balanced↑ | local |
+|---|---:|---:|---:|---:|---:|---:|:--:|
+| **OURS-v3 (Qwen3-32B tuned)** | **53.2%** | **6.93** | **22.6%** | 93.2% | 95.6% | **58.0** | yes |
+| **OURS-v2 (Qwen3-1.7B tuned)** | **53.1%** | **10.26** | **7.1%** | 97.5% | 100% | 47.9 | yes |
+| **Qwen3-32B (untuned base of v3)** | **36.9%** | **9.30** | **0.1%** | 99.6% | 99.4% | 47.8 | yes |
+| BASE (Qwen3-1.7B untuned) | 36.5% | 14.18 | 0.0% | 91.6% | 96.4% | 32.5 | yes |
+| GPT-5.5 | 43.1% | 3.72 | 23.6% | 98.4% | 100% | 57.7 | no |
+| Claude Opus 4.8 | 45.8% | 4.95 | 19.3% | 96.9% | 100% | 51.3 | no |
+| Gemini 3.1 Pro | 48.4% | 6.70 | 12.3% | 98.4% | 100% | 49.2 | no |
+| GLM-5 (~355B, not local) | 44.7% | 6.52 | 4.0% | 99.6% | 100% | 51.1 | no |
+
+_Balanced weights: tier 45% + self-preference-corrected instructiveness 45% + practical
+(local+cost) 10%. OURS-v3 leads the raw balanced score but trips the 97% safety/no-jargon
+gate (94.3% / 95.6%, formatting-driven — see caveat 2); GPT-5.5 leads the gate-passing
+board._
 
 ### v2 → v3 deltas (apples-to-apples, same 15-model council)
 
 | Metric | v2 | v3 | Δ |
 |---|---:|---:|---:|
-| **Instructiveness** (council rank, lower better) | 10.07 | **7.06** | **−3.0 (better)** |
-| Instructiveness top-1 win-rate | 7.5% | **20.3%** | **+12.8 pts** |
-| **Fabrication** | 30.2% | **5.4%** | **−24.8 pts** |
+| **Instructiveness** (corrected council rank, lower better) | 10.26 | **6.93** | **−3.33 (better)** |
+| Instructiveness top-1 win-rate | 7.1% | **22.6%** | **+15.5 pts** |
 | Tier-fit (moat, mean of 3 tiers) | 53.1% | 53.2% | +0.1 (flat) |
 | — tier-fit @ advanced | 60.9% | **83.6%** | **+22.7 pts** |
 | — tier-fit @ beginner | 47.9% | 29.6% | **−18.3 pts** |
-| Balanced score | 51.2 | **61.7** | **+10.5** |
-| Move-safety (blunder-free) | 98.9% | 94.4% | −4.5 pts |
+| Balanced score (fabrication removed from the score) | 47.9 | **58.0** | **+10.1** |
+| Move-safety (blunder-free) | 98.9% | 94.3% | −4.6 pts |
 | No-engine-jargon | 100% | 95.6% | −4.4 pts |
+
+_Fabrication is no longer a delta row: it is a gated fairness floor (0% user-visible for
+every model). The honest truth axis is the semantic-judge residual (headline)._
 
 ### untuned-32B → v3 deltas (what the fine-tune adds to the raw base)
 
 | Metric | untuned 32B | v3 | Δ |
 |---|---:|---:|---:|
 | **Tier-fit (moat)** | 36.9% | **53.2%** | **+16.3 pts** |
-| Instructiveness (council rank) | 9.07 | **7.06** | **+2.0 (better)** |
-| Instructiveness top-1 | 0.0% | **20.3%** | **+20.3 pts** |
-| Fabrication | 6.1% | 5.4% | −0.7 (held) |
-| Balanced score | 53.6 | **61.7** | **+8.1** |
-| Move-safety | 99.8% | 94.4% | −5.4 pts |
+| Instructiveness (corrected council rank) | 9.30 | **6.93** | **+2.37 (better)** |
+| Instructiveness top-1 | 0.1% | **22.6%** | **+22.5 pts** |
+| Balanced score | 47.8 | **58.0** | **+10.2** |
+| Move-safety | 99.8% | 94.3% | −5.5 pts |
 
 The fine-tune **installs the specialist behavior** (tier-appropriate selection +
-instructive, human coaching) that the raw 32B does not have, while keeping its
-faithfulness — at the cost of some output-formatting stability (below).
+instructive, human coaching) that the raw 32B does not have, while keeping the base's
+capacity — at the cost of some output-formatting stability (below). Faithfulness is a
+gated fairness floor for every model, so it is not a delta axis here.
 
 ---
 
@@ -122,11 +145,11 @@ faithfulness — at the cost of some output-formatting stability (below).
    leading-garble cleanup (applied here, and trivially deployable) recovers most of
    the no-jargon gap; the residual is genuine echo/degeneration.
 
-3. **v3 does not beat the frontier on raw coaching instructiveness.** GPT-5.5 (3.35),
-   Claude (4.71), and Gemini (5.67) still out-coach it (7.06). v3's edge is being the
-   **only near-frontier-balanced model that runs locally and free**, with
-   field-leading tier-appropriate move selection. The claim is "best local coach,"
-   not "beats GPT-5.5."
+3. **v3 does not beat the frontier on raw coaching instructiveness.** On corrected
+   council rank GPT-5.5 (3.72) and Claude (4.95) still out-coach it (6.93), though v3 is
+   now level with Gemini (6.70) and GLM-5 (6.52). v3's edge is being the **only
+   near-frontier-balanced model that runs locally and free**, with field-leading
+   tier-appropriate move selection. The claim is "best local coach," not "beats GPT-5.5."
 
 4. **Council fields differ across versions.** The v2 report's council ranked 14
    models; this one ranks 15 (adds OURS-v3), so the two reports' absolute ranks are
@@ -142,8 +165,8 @@ faithfulness — at the cost of some output-formatting stability (below).
 | Teacher v3 generation (GPT-5.5, 7,266 labels) | $141.13 |
 | Modal QLoRA training (A100-80GB, incl. retries/resumes) | ~$12 |
 | Modal eval generation (A100-80GB, 2,409 coachings, incl. re-run) | ~$8 |
-| 15-model council (3 frontier judges × 120 items) | ~$20 |
-| **v3 increment total** | **~$181** |
+| 15-model council (3 frontier judges × **450 items = 1,350 rankings**) | **$62.27** (~$46 added to expand the 120-item pilot → 450) |
+| **v3 increment total** | **~$223** |
 
 Open-model + frontier *coaching* generations were reused from the v2 803 run (not
 re-billed). Every long stage (teacher gen, training, eval gen, council) is
@@ -158,8 +181,9 @@ checkpoint/resumable and survived multiple interruptions with no lost work.
 - **Dataset:** `data/dataset/train_v3.jsonl` (6,772) · `valid_v3.jsonl` (356) ·
   candidates `data/generated/candidates_v3.jsonl` (7,269) · `cost_v3.json`.
 - **Benchmark:** `data/benchmark_gap803/gen/ours_v3.jsonl`, `leaderboard.json`,
-  `council.jsonl` (15-model), `move_safety.json`; full board in
-  `RESULTS_FULL_EVAL_803_v3.md`.
+  `council.jsonl` (15-model, 1,350 rankings), `council_stats.json` (raw +
+  self-pref-corrected ranks + 95% CIs), `move_safety.json`; truthfulness residual in
+  `data/showcase/truthfulness.json`; full board in `RESULTS_FULL_EVAL_803_v3.md`.
 - **Code:** `src/teacher/generate_v3.py`, `src/train/train_modal_v3.py`,
   `src/eval/eval_modal_v3.py`, `scripts/gap803_*` (ours_v3 registered in
   `src/eval/benchmark/config.py` + `gap803_report.py` + `gap803_council.py`).
