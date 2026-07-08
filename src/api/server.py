@@ -44,7 +44,7 @@ import threading
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 # --------------------------------------------------------------------------- #
 # Path bootstrap: allow `uvicorn src.api.server:app` (and direct execution) to
@@ -69,11 +69,24 @@ from config.schema import (  # noqa: E402
     TeacherInput,
     render_user_prompt,
 )
-from src.engine.faithfulness import verify_text  # noqa: E402
-from src.engine.faithfulness_ext import verify_text_ext  # noqa: E402
 from src.engine.maia_engine import human_moves  # noqa: E402
-from src.engine.position_facts import move_facts, render_pool_facts  # noqa: E402
+from src.engine.position_facts import render_pool_facts  # noqa: E402
 from src.engine.stockfish_engine import classify_mistake, sound_pool  # noqa: E402
+
+# The gate + verified fallback live in a single shared module so the live coach
+# and the HONEST base-vs-tuned eval run byte-identical code (only weights differ).
+from src.teacher.coach_gate import run_gate  # noqa: E402
+
+# Re-export the historical ``_``-prefixed helper names other modules import from
+# here (e.g. ``src.demo.app`` uses ``_pick_fallback_move`` / ``_verified_coaching``);
+# these are intentional re-exports, not dead code.
+from src.teacher.coach_gate import (  # noqa: E402,F401
+    extract_recommended as _extract_recommended,
+    finalize_verified as _finalize_verified,
+    pick_fallback_move as _pick_fallback_move,
+    split_coaching as _split_coaching,
+    verified_coaching as _verified_coaching,
+)
 
 try:  # optional: load COACH_MODEL_PATH / COACH_ADAPTER_PATH etc. from ROOT/.env
     from dotenv import load_dotenv
@@ -141,20 +154,6 @@ CORS_ORIGINS: List[str] = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
-
-#: SAN token (incl. castling / promotion / check markers).
-_SAN_RE = re.compile(r"(O-O-O|O-O|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?)")
-
-#: Phrases that typically precede the coach's recommended move.
-_CUE_RE = re.compile(
-    r"(?:i['\u2019]?d\s+play|i\s+would\s+play|i['\u2019]?ll\s+play|i\s+play|"
-    r"recommend(?:ed)?(?:\s+move)?(?:\s+is)?|best\s+move\s+is|go\s+with|"
-    r"choose|consider|play)\s*[:\-]?\s*",
-    re.IGNORECASE,
-)
-
-#: Splits the coaching body from the trailing "Takeaway:" line.
-_TAKEAWAY_RE = re.compile(r"\b(?:key\s+)?take[-\s]?away\s*:\s*", re.IGNORECASE)
 
 
 # --------------------------------------------------------------------------- #
@@ -263,173 +262,13 @@ def _parse_move(board: chess.Board, text: str) -> chess.Move:
         raise ValueError(f"illegal or unparseable move {text!r}") from exc
 
 
-def _extract_recommended(
-    text: str, board: chess.Board, pool: List[SoundMove], student_uci: str
-) -> Tuple[Optional[str], Optional[str]]:
-    """Extract the recommended move (SAN, UCI) from the coach's free text.
-
-    The recommendation is always a *sound* move that is NOT the student's own
-    move. Strategy: a sound move right after a cue phrase ("I'd play ..."), then
-    the first sound move named anywhere in the prose, and finally the engine's
-    best sound move. We never return the student's move (a coach that phrases the
-    pick as "develop the knight to f3" rather than "Nf3" must not be mis-read as
-    recommending the mistake the student just played).
-    """
-    pool_ucis = {m["uci"] for m in pool}
-
-    def _try(token: str) -> Optional[Tuple[str, str]]:
-        try:
-            move = board.parse_san(token)
-        except ValueError:
-            return None
-        return board.san(move), move.uci()
-
-    # 1) Cue phrase -> a move that is not the student's.
-    for cue in _CUE_RE.finditer(text):
-        window = text[cue.end() : cue.end() + 16]
-        match = _SAN_RE.search(window)
-        if match:
-            parsed = _try(match.group(1))
-            if parsed and parsed[1] != student_uci and parsed[1] in pool_ucis:
-                return parsed
-
-    # 2) First sound move named anywhere in the prose (never the student's).
-    for match in _SAN_RE.finditer(text):
-        parsed = _try(match.group(1))
-        if parsed and parsed[1] != student_uci and parsed[1] in pool_ucis:
-            return parsed
-
-    # 3) Fallback: the engine's best sound move (guaranteed != the mistake).
-    if pool:
-        return pool[0]["san"], pool[0]["uci"]
-    return None, None
-
-
-#: A markdown horizontal rule on its own line (base models sometimes emit these).
-_HR_LINE_RE = re.compile(r"(?m)^[ \t]*[-*_]{3,}[ \t]*$")
-
-
-def _split_coaching(text: str) -> Tuple[str, str]:
-    """Split the reply into (coaching_body, takeaway).
-
-    Splits at the FIRST "Takeaway:" marker: the body is everything before it and
-    the takeaway is the single line after it. Anything past that (small models
-    sometimes repeat the whole answer) is dropped, and stray markdown rules are
-    removed, so the UI never shows duplicated text or a "Takeaway:" inside the
-    body.
-    """
-    text = (text or "").strip()
-    match = _TAKEAWAY_RE.search(text)
-    if not match:
-        body, takeaway = text, ""
-    else:
-        body = text[: match.start()].strip()
-        rest = text[match.end() :].strip()
-        takeaway = rest.split("\n", 1)[0].strip()
-        if not body:
-            body = text
-    body = _HR_LINE_RE.sub("", body).strip()
-    return body, takeaway
-
-
 # --------------------------------------------------------------------------- #
-# Verified fallback (guaranteed-truthful coaching, no LLM)
+# Move parsing + the recommendation extractor, faithfulness gate, and verified
+# fallback all live in :mod:`src.teacher.coach_gate` (imported above as the
+# historical ``_extract_recommended`` / ``_split_coaching`` / ``_pick_fallback_move``
+# / ``_finalize_verified`` / ``_verified_coaching`` names) so the shipped pipeline
+# and the honest eval share one implementation.
 # --------------------------------------------------------------------------- #
-
-
-def _pick_fallback_move(
-    board: chess.Board, pool: List[SoundMove], student_uci: str
-) -> Optional[chess.Move]:
-    """A sound move for the verified fallback — prefer one that isn't the student's."""
-    ordered = [m for m in pool if m.get("uci") and m["uci"] != student_uci]
-    ordered += [m for m in pool if m.get("uci") and m["uci"] == student_uci]
-    for m in ordered:
-        try:
-            mv = chess.Move.from_uci(m["uci"])
-        except ValueError:
-            continue
-        if mv in board.legal_moves:
-            return mv
-    return None
-
-
-def _finalize_verified(
-    board: chess.Board, san: str, body: str, takeaway: str
-) -> Tuple[str, str]:
-    """Assert the deterministic text is faithful; if an edge case slipped a false
-    claim through, swap in a claim-free template wholesale (never strips a line)."""
-    if verify_text_ext(f"{body} {takeaway}", board.fen()).ok:
-        return body, takeaway
-    body = (
-        f"I'd play {san}. It's a sound, engine-approved move that keeps your "
-        "position solid and your king safe."
-    )
-    takeaway = "When unsure, choose a safe developing move and don't leave a piece undefended."
-    return body, takeaway
-
-
-def _verified_coaching(board: chess.Board, move: chess.Move) -> Tuple[str, str]:
-    """Deterministic ``(coaching, takeaway)`` built ONLY from verified move facts.
-
-    Truthful by construction: every concrete claim is derived from
-    :func:`move_facts` (computed from the board with python-chess) and phrased so
-    it also holds on the CURRENT position, so it passes :func:`verify_text`
-    untouched. Used only when the model cannot produce a faithful explanation
-    within the attempt budget — the student still gets a guaranteed-true
-    explanation of a sound move instead of a fabricated one.
-    """
-    f = move_facts(board, move)
-    san = f["san"]
-
-    if f["castle"]:
-        body = (
-            f"I'd play {san}. Castling gets your king to safety and brings a rook "
-            "toward the center where it can help."
-        )
-        takeaway = "Castle early — get your king safe, then start making plans."
-        return _finalize_verified(board, san, body, takeaway)
-
-    # What the piece itself does (each phrase is true on the current board).
-    if f["is_capture"]:
-        if board.is_en_passant(move):
-            lead = "captures a pawn en passant"
-        elif f["captured"]:
-            lead = f"captures the {f['captured']} on {f['to']}"
-        else:
-            lead = f"makes a capture on {f['to']}"
-    elif f["develops"]:
-        lead = f"develops the {f['piece']}"
-    else:
-        lead = f"brings the {f['piece']} to {f['to']}"
-
-    tail: List[str] = []
-    # The king is covered by "gives check"; don't also list it under "pressures".
-    attacks = [(s, n) for s, n in f["attacks"] if n != "king"]
-    if attacks:
-        tgts = ", ".join(f"the {n} on {s}" for s, n in attacks[:2])
-        tail.append(f"and pressures {tgts}")
-    if f["defends"]:
-        tgts = ", ".join(f"the {n} on {s}" for s, n in f["defends"][:1])
-        tail.append(f"while covering {tgts}")
-    if f["is_check"]:
-        tail.append("and gives check")
-
-    sentence = f"It {lead}"
-    if tail:
-        sentence += " " + " ".join(tail)
-    body = f"I'd play {san}. {sentence}."
-
-    if f["is_check"]:
-        takeaway = "A check with a point forces your opponent to react on your terms."
-    elif f["is_capture"]:
-        takeaway = "Look for safe captures that win material or trade in your favor."
-    elif f["develops"]:
-        takeaway = "Develop your pieces toward the center before you attack."
-    elif f["attacks"]:
-        takeaway = "Put your pieces on squares where they do the most work."
-    else:
-        takeaway = "Prefer purposeful moves that improve a piece and keep your king safe."
-    return _finalize_verified(board, san, body, takeaway)
 
 
 # --------------------------------------------------------------------------- #
@@ -709,61 +548,46 @@ def coach(req: CoachRequest) -> CoachResponse:
     facts = render_pool_facts(board.fen(), list(pool))
     user_prompt = f"{facts}\n\n{render_user_prompt(teacher_input)}"
 
-    # 5) Run the coach model behind a VERIFY-AND-REGENERATE faithfulness gate.
-    #    The tuned 1.7B model nails style but sometimes fabricates board facts, so
-    #    we check every board claim against the real position and RE-SAMPLE the
-    #    whole answer whenever any is false — keeping the FIRST reply that verifies
-    #    clean and short-circuiting there. We never strip sentences. The engine
-    #    analysis above is computed once; only generation repeats.
+    # 5) Run the coach model behind a VERIFY-AND-REGENERATE faithfulness gate, then
+    #    turn the (verified) reply into a recommendation + coaching / takeaway. The
+    #    gate + deterministic fallback are the shared :func:`run_gate` unit (see
+    #    :mod:`src.teacher.coach_gate`) — the SAME code the honest base-vs-tuned eval
+    #    runs, so the pipeline is provably identical across models. If nothing
+    #    verifies within the attempt budget, ``run_gate`` returns a deterministic,
+    #    engine-derived explanation that is truthful by construction.
     student_uci = student_schema.get("uci") or ""
-    fen_norm = board.fen()
-    attempts = 0
-    verified_reply: Optional[str] = None
     try:
-        if FAITHFULNESS_GATE:
-            for attempts in range(1, MAX_COACH_ATTEMPTS + 1):
-                candidate = get_coach().run(SYSTEM_PROMPT, user_prompt)
-                if verify_text_ext(candidate, fen_norm).ok:
-                    verified_reply = candidate
-                    break
-        else:
-            attempts = 1
-            verified_reply = get_coach().run(SYSTEM_PROMPT, user_prompt)
+        result = run_gate(
+            lambda system, user: get_coach().run(system, user),
+            SYSTEM_PROMPT, user_prompt, board.fen(), list(pool), student_uci,
+            max_attempts=MAX_COACH_ATTEMPTS, gate_on=FAITHFULNESS_GATE,
+        )
     except HTTPException:
         raise
     except Exception as exc:  # noqa: BLE001
         log.exception("model generation failed")
         raise HTTPException(status_code=500, detail=f"Model error: {exc}") from exc
 
-    # 6) Turn the (verified) reply into a recommendation + coaching / takeaway. If
-    #    NOTHING verified within the budget, emit a deterministic, engine-derived
-    #    explanation of a sound move that is truthful by construction.
-    verified_fallback = False
-    if verified_reply is not None:
-        rec_san, rec_uci = _extract_recommended(verified_reply, board, pool, student_uci)
-        coaching_body, takeaway = _split_coaching(verified_reply)
-        if rec_san is None or rec_uci is None:
-            # Should be impossible (pool is non-empty), but never 500 on a good request.
-            rec_san, rec_uci = best["san"], best["uci"]
-        if FAITHFULNESS_GATE and attempts > 1:
-            notes.append(
-                f"The coach's first {attempts - 1} draft(s) stated a false board "
-                f"fact and were re-generated; attempt {attempts} verified clean."
-            )
-    else:
-        verified_fallback = True
-        fb_move = _pick_fallback_move(board, pool, student_uci) or chess.Move.from_uci(best["uci"])
-        coaching_body, takeaway = _verified_coaching(board, fb_move)
-        rec_san, rec_uci = board.san(fb_move), fb_move.uci()
+    attempts = result.attempts
+    verified_fallback = result.verified_fallback
+    rec_san = result.rec_san or best["san"]
+    rec_uci = result.rec_uci or best["uci"]
+    coaching_body, takeaway = result.body, result.takeaway
+    if verified_fallback:
         notes.append(
             f"The model kept stating false board facts across {MAX_COACH_ATTEMPTS} "
             "attempts, so a verified, engine-derived explanation was used instead."
+        )
+    elif FAITHFULNESS_GATE and attempts > 1:
+        notes.append(
+            f"The coach's first {attempts - 1} draft(s) stated a false board "
+            f"fact and were re-generated; attempt {attempts} verified clean."
         )
 
     return CoachResponse(
         recommended_move_san=rec_san,
         recommended_move_uci=rec_uci,
-        coaching=coaching_body or (verified_reply or "").strip(),
+        coaching=coaching_body or (result.raw or "").strip(),
         takeaway=takeaway,
         concepts_used=[],
         side_to_move="white" if board.turn == chess.WHITE else "black",

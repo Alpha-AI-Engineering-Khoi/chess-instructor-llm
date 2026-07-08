@@ -1,0 +1,1293 @@
+[
+  {
+    "path": "data/dataset/train_v2.jsonl",
+    "raw": 2457,
+    "unique": 2457,
+    "dup_dropped": 0,
+    "overall": {
+      "n": 2457,
+      "E1": 2403,
+      "E2_strat": 2125,
+      "E2_take": 1433,
+      "E2_or_tac": 2315,
+      "E3": 2352,
+      "E4": 2457,
+      "E6_jargon": 0,
+      "takeaway": 2457,
+      "words_med": 173,
+      "words_mean": 173.55270655270655,
+      "ply_over": 0,
+      "rec_engine_best": 1538,
+      "rec_engine_best_known": 2457,
+      "maia_top": 1219,
+      "maia_known": 2215,
+      "forbidden": 20,
+      "all6": 2013
+    },
+    "tiers": {
+      "beginner": {
+        "n": 883,
+        "E1": 841,
+        "E2_strat": 622,
+        "E2_take": 368,
+        "E2_or_tac": 779,
+        "E3": 815,
+        "E4": 883,
+        "E6_jargon": 0,
+        "takeaway": 883,
+        "words_med": 139,
+        "words_mean": 139.33408833522083,
+        "ply_over": 0,
+        "rec_engine_best": 327,
+        "rec_engine_best_known": 883,
+        "maia_top": 618,
+        "maia_known": 868,
+        "forbidden": 20,
+        "all6": 555
+      },
+      "intermediate": {
+        "n": 808,
+        "E1": 798,
+        "E2_strat": 754,
+        "E2_take": 529,
+        "E2_or_tac": 780,
+        "E3": 787,
+        "E4": 808,
+        "E6_jargon": 0,
+        "takeaway": 808,
+        "words_med": 176.0,
+        "words_mean": 176.31559405940595,
+        "ply_over": 0,
+        "rec_engine_best": 469,
+        "rec_engine_best_known": 808,
+        "maia_top": 416,
+        "maia_known": 753,
+        "forbidden": 0,
+        "all6": 727
+      },
+      "advanced": {
+        "n": 766,
+        "E1": 764,
+        "E2_strat": 749,
+        "E2_take": 536,
+        "E2_or_tac": 756,
+        "E3": 750,
+        "E4": 766,
+        "E6_jargon": 0,
+        "takeaway": 766,
+        "words_med": 209.0,
+        "words_mean": 210.0835509138381,
+        "ply_over": 0,
+        "rec_engine_best": 742,
+        "rec_engine_best_known": 766,
+        "maia_top": 185,
+        "maia_known": 594,
+        "forbidden": 0,
+        "all6": 731
+      }
+    },
+    "boards_total": 1821,
+    "boards_multi_tier": 343,
+    "boards_all3": 293,
+    "coherence": {
+      "I=A != B (beginner differs)": 118,
+      "B=I != A (human vs sharp)": 125,
+      "COLLAPSE B=A != I": 10,
+      "full gradient (B!=I!=A)": 40
+    },
+    "intra_inconsistent_boardtier": 0,
+    "collapse_examples": [
+      {
+        "board": "r n b . . r k .\np p Q p n p p p\n. . . . . . . .\n. . . . p . . .\n. b . . . . . .\nq . . P B . P B\nP . . N P P . P\n. . R . K . N R",
+        "B": "Qc2",
+        "I": "Kf1",
+        "A": "Qc2",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": "r . . . . r k .\n. . . . . p p .\np p . . . . . p\n. . . P P n . .\n. . . . N P . .\n. B . . B . . P\nP P . . . K P .\nR . . . . . . R",
+        "B": "d6",
+        "I": "g4",
+        "A": "d6",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": "r . b . k b Q .\np p p p . . B p\nn . . . . . . .\n. . . . . . . .\n. q . . . . . .\n. . . . . . . .\nP . . N N P . P\nR . . . K . R .",
+        "B": "Rg4",
+        "I": "Rg3",
+        "A": "Rg4",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": "r . b . . r k .\np . p . . p p p\n. . p . . n . .\n. . b P . . . .\n. . . . . . . .\n. P Q . . . . .\nP . P . . P P P\nR . B . . R K .",
+        "B": "Ne4",
+        "I": "Bb6",
+        "A": "Ne4",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": ". . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . K . . . . .\n. . . . . . . .\n. k . . . . . .\nq . . . . Q . .",
+        "B": "Qf2+",
+        "I": "Qe2+",
+        "A": "Qf2+",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": ". r . q r b k .\n. b . . . p p .\n. p . . . . . p\np . . p . . . .\n. . . . . . N .\n. . . Q . . P .\nP . . . . P B P\n. . R . . R . K",
+        "B": "d4",
+        "I": "Bc5",
+        "A": "d4",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": "r n . . k . . r\np p . b b . p p\n. q p . . p . .\n. . . . B . . .\n. . P . P . . .\n. . . . . . P .\nP P Q N . P B P\n. R . . . R K .",
+        "B": "Bf4",
+        "I": "Bc3",
+        "A": "Bf4",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": "r . b q . r k .\np . p n . p p p\n. p . . p . . .\n. . . . . . P .\n. b . . p . . P\n. P . . P . . .\nP B P P Q P . .\n. . K R . B N R",
+        "B": "Bb7",
+        "I": "a5",
+        "A": "Bb7",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": ". . . . . . . R\nn . . n . p p .\nk . p . q . . p\nP . . p P . . .\n. . . P . . . .\n. . . . . N . .\n. . . B . P P P\n. . . . . . K .",
+        "B": "h3",
+        "I": "Ra8",
+        "A": "h3",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": "r . b q k . . r\np p . . b . . .\n. . p . p . p .\n. . . p P p P .\n. . . P . P p .\n. . N . B . P .\nP P P . . . . .\nR . . Q . R K .",
+        "B": "Qb6",
+        "I": "Bd7",
+        "A": "Qb6",
+        "tag": "collapse_BA"
+      }
+    ]
+  },
+  {
+    "path": "data/dataset/valid_v2.jsonl",
+    "raw": 129,
+    "unique": 129,
+    "dup_dropped": 0,
+    "overall": {
+      "n": 129,
+      "E1": 127,
+      "E2_strat": 107,
+      "E2_take": 69,
+      "E2_or_tac": 119,
+      "E3": 127,
+      "E4": 129,
+      "E6_jargon": 0,
+      "takeaway": 129,
+      "words_med": 173,
+      "words_mean": 174.45736434108528,
+      "ply_over": 0,
+      "rec_engine_best": 83,
+      "rec_engine_best_known": 129,
+      "maia_top": 69,
+      "maia_known": 119,
+      "forbidden": 2,
+      "all6": 105
+    },
+    "tiers": {
+      "beginner": {
+        "n": 46,
+        "E1": 45,
+        "E2_strat": 30,
+        "E2_take": 15,
+        "E2_or_tac": 39,
+        "E3": 45,
+        "E4": 46,
+        "E6_jargon": 0,
+        "takeaway": 46,
+        "words_med": 139.5,
+        "words_mean": 140.15217391304347,
+        "ply_over": 0,
+        "rec_engine_best": 18,
+        "rec_engine_best_known": 46,
+        "maia_top": 34,
+        "maia_known": 45,
+        "forbidden": 2,
+        "all6": 30
+      },
+      "intermediate": {
+        "n": 45,
+        "E1": 45,
+        "E2_strat": 40,
+        "E2_take": 28,
+        "E2_or_tac": 42,
+        "E3": 44,
+        "E4": 45,
+        "E6_jargon": 0,
+        "takeaway": 45,
+        "words_med": 176,
+        "words_mean": 177.13333333333333,
+        "ply_over": 0,
+        "rec_engine_best": 28,
+        "rec_engine_best_known": 45,
+        "maia_top": 25,
+        "maia_known": 44,
+        "forbidden": 0,
+        "all6": 39
+      },
+      "advanced": {
+        "n": 38,
+        "E1": 37,
+        "E2_strat": 37,
+        "E2_take": 26,
+        "E2_or_tac": 38,
+        "E3": 38,
+        "E4": 38,
+        "E6_jargon": 0,
+        "takeaway": 38,
+        "words_med": 213.5,
+        "words_mean": 212.81578947368422,
+        "ply_over": 0,
+        "rec_engine_best": 37,
+        "rec_engine_best_known": 38,
+        "maia_top": 10,
+        "maia_known": 30,
+        "forbidden": 0,
+        "all6": 36
+      }
+    },
+    "boards_total": 128,
+    "boards_multi_tier": 1,
+    "boards_all3": 0,
+    "coherence": {},
+    "intra_inconsistent_boardtier": 0,
+    "collapse_examples": []
+  },
+  {
+    "path": "data/dataset/train_v3.jsonl",
+    "raw": 6772,
+    "unique": 6772,
+    "dup_dropped": 0,
+    "overall": {
+      "n": 6772,
+      "E1": 6690,
+      "E2_strat": 5809,
+      "E2_take": 3964,
+      "E2_or_tac": 6376,
+      "E3": 6506,
+      "E4": 6772,
+      "E6_jargon": 0,
+      "takeaway": 6772,
+      "words_med": 175.0,
+      "words_mean": 175.81128174837568,
+      "ply_over": 0,
+      "rec_engine_best": 3395,
+      "rec_engine_best_known": 6772,
+      "maia_top": 3296,
+      "maia_known": 6187,
+      "forbidden": 63,
+      "all6": 5551
+    },
+    "tiers": {
+      "beginner": {
+        "n": 2277,
+        "E1": 2212,
+        "E2_strat": 1562,
+        "E2_take": 958,
+        "E2_or_tac": 1991,
+        "E3": 2124,
+        "E4": 2277,
+        "E6_jargon": 0,
+        "takeaway": 2277,
+        "words_med": 140,
+        "words_mean": 141.10364514712342,
+        "ply_over": 0,
+        "rec_engine_best": 300,
+        "rec_engine_best_known": 2277,
+        "maia_top": 1733,
+        "maia_known": 2268,
+        "forbidden": 63,
+        "all6": 1425
+      },
+      "intermediate": {
+        "n": 2254,
+        "E1": 2245,
+        "E2_strat": 2090,
+        "E2_take": 1507,
+        "E2_or_tac": 2186,
+        "E3": 2182,
+        "E4": 2254,
+        "E6_jargon": 0,
+        "takeaway": 2254,
+        "words_med": 177.0,
+        "words_mean": 177.3921916592724,
+        "ply_over": 0,
+        "rec_engine_best": 967,
+        "rec_engine_best_known": 2254,
+        "maia_top": 1195,
+        "maia_known": 2189,
+        "forbidden": 0,
+        "all6": 2016
+      },
+      "advanced": {
+        "n": 2241,
+        "E1": 2233,
+        "E2_strat": 2157,
+        "E2_take": 1499,
+        "E2_or_tac": 2199,
+        "E3": 2200,
+        "E4": 2241,
+        "E6_jargon": 0,
+        "takeaway": 2241,
+        "words_med": 209,
+        "words_mean": 209.4863900044623,
+        "ply_over": 0,
+        "rec_engine_best": 2128,
+        "rec_engine_best_known": 2241,
+        "maia_top": 368,
+        "maia_known": 1730,
+        "forbidden": 0,
+        "all6": 2110
+      }
+    },
+    "boards_total": 2421,
+    "boards_multi_tier": 2385,
+    "boards_all3": 1966,
+    "coherence": {
+      "B=I != A (human vs sharp)": 764,
+      "COLLAPSE B=A != I": 50,
+      "all_same (B=I=A)": 221,
+      "I=A != B (beginner differs)": 641,
+      "full gradient (B!=I!=A)": 290
+    },
+    "intra_inconsistent_boardtier": 0,
+    "collapse_examples": [
+      {
+        "board": ". r . . . . k .\n. . r b . p . .\np . . . . . p .\n. . . p p . P n\n. . p P . . . P\nP . N . . . . R\n. P P . N . . .\n. . K R . . . .",
+        "B": "Nxd5",
+        "I": "Re3",
+        "A": "Nxd5",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": "r . . q . r k .\n. p . . . . p p\np . . p . . . .\n. . . . n . . b\n. . . . . p . .\n. . . . P N . P\nP P P N Q P P .\nR . . R . . K .",
+        "B": "exf4",
+        "I": "exf4",
+        "A": "exf4",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . . r . . k .\np p . . . p . p\n. . . . . . . .\nR . . . . . . .\n. . . . . . . .\n. . . . . . . .\nP P . . . P P P\n. . . q R K . .",
+        "B": "Rxd1",
+        "I": "Rxd1",
+        "A": "Rxd1",
+        "tag": "all_same"
+      },
+      {
+        "board": "r n . q k . n r\np p . . b p p .\n. . p . p . b p\n. . . p P . P .\n. . . P . N . P\n. . P . . P . .\nP P . . . . . .\nR N B Q K B . R",
+        "B": "Bxb1",
+        "I": "Bf5",
+        "A": "Bxb1",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": ". r . . R . k .\np . . P . p p .\n. . . . . . . p\n. . . . . . . .\n. . p . . . . .\nP . P . . . . q\nK P . R . . . .\n. . . . . . . .",
+        "B": "Rxe8",
+        "I": "Rxe8",
+        "A": "Rxe8",
+        "tag": "all_same"
+      },
+      {
+        "board": ". r . . q r k .\n. . . n b p p p\np N . p p . . .\n. . . . . . . .\n. Q . . . B . P\n. . . . . P . .\nP P . . . P . .\nK . R . . . . R",
+        "B": "Rc6",
+        "I": "Rc6",
+        "A": "Rc6",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . r . . . k .\np p . . . . p p\n. . . . . . . .\n. . . . r . . .\n. . . . . . . P\nP K P . p . . .\n. . . . . . . .\n. . . . R . . R",
+        "B": "e2",
+        "I": "e2",
+        "A": "e2",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . k r . . . r\np p p . . p . p\n. . n . q . p .\n. . . p . . . .\n. . . P n Q . N\n. . N . P . P .\nP P P . . P P .\nR . . . . R K .",
+        "B": "Nxe4",
+        "I": "Nxe4",
+        "A": "Nxe4",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . . . r k .\np p p . . . p .\n. b . p . . . p\n. . . P . . Q .\n. . B P . . . .\n. P P . . . . P\nP . . . . . . .\n. . . . . R K .",
+        "B": "Rxf1+",
+        "I": "Rxf1+",
+        "A": "Rxf1+",
+        "tag": "all_same"
+      },
+      {
+        "board": "r n b . k . . r\np p p . . p p p\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . n . B . . .\nP . . . B P P P\n. R . . K . . R",
+        "B": "Rc1",
+        "I": "Rc1",
+        "A": "Rc1",
+        "tag": "all_same"
+      },
+      {
+        "board": "r n . . . r k .\np p p . . p p p\n. . . . . . . .\n. . . p q . . .\n. . . . . . b .\n. B . . . . . .\nP P P P . K P P\nR N B . . R . .",
+        "B": "Kg1",
+        "I": "Kg1",
+        "A": "Kg1",
+        "tag": "all_same"
+      },
+      {
+        "board": "r n . q . r k .\np p p . . p p .\n. . . b p n . p\n. . . p . . B .\n. . . P . . . .\n. . N Q P N . .\nP P P . . P P P\nR . . . K . . R",
+        "B": "Bxf6",
+        "I": "Bh4",
+        "A": "Bxf6",
+        "tag": "collapse_BA"
+      }
+    ]
+  },
+  {
+    "path": "data/dataset/valid_v3.jsonl",
+    "raw": 356,
+    "unique": 356,
+    "dup_dropped": 0,
+    "overall": {
+      "n": 356,
+      "E1": 352,
+      "E2_strat": 314,
+      "E2_take": 220,
+      "E2_or_tac": 337,
+      "E3": 342,
+      "E4": 356,
+      "E6_jargon": 0,
+      "takeaway": 356,
+      "words_med": 174.0,
+      "words_mean": 175.1573033707865,
+      "ply_over": 0,
+      "rec_engine_best": 183,
+      "rec_engine_best_known": 356,
+      "maia_top": 166,
+      "maia_known": 323,
+      "forbidden": 6,
+      "all6": 298
+    },
+    "tiers": {
+      "beginner": {
+        "n": 121,
+        "E1": 119,
+        "E2_strat": 90,
+        "E2_take": 59,
+        "E2_or_tac": 110,
+        "E3": 115,
+        "E4": 121,
+        "E6_jargon": 0,
+        "takeaway": 121,
+        "words_med": 141,
+        "words_mean": 141.34710743801654,
+        "ply_over": 0,
+        "rec_engine_best": 17,
+        "rec_engine_best_known": 121,
+        "maia_top": 93,
+        "maia_known": 121,
+        "forbidden": 6,
+        "all6": 84
+      },
+      "intermediate": {
+        "n": 122,
+        "E1": 121,
+        "E2_strat": 112,
+        "E2_take": 81,
+        "E2_or_tac": 115,
+        "E3": 118,
+        "E4": 122,
+        "E6_jargon": 0,
+        "takeaway": 122,
+        "words_med": 176.0,
+        "words_mean": 176.75409836065575,
+        "ply_over": 0,
+        "rec_engine_best": 55,
+        "rec_engine_best_known": 122,
+        "maia_top": 59,
+        "maia_known": 119,
+        "forbidden": 0,
+        "all6": 107
+      },
+      "advanced": {
+        "n": 113,
+        "E1": 112,
+        "E2_strat": 112,
+        "E2_take": 80,
+        "E2_or_tac": 112,
+        "E3": 109,
+        "E4": 113,
+        "E6_jargon": 0,
+        "takeaway": 113,
+        "words_med": 205,
+        "words_mean": 209.63716814159292,
+        "ply_over": 0,
+        "rec_engine_best": 111,
+        "rec_engine_best_known": 113,
+        "maia_top": 14,
+        "maia_known": 83,
+        "forbidden": 0,
+        "all6": 107
+      }
+    },
+    "boards_total": 340,
+    "boards_multi_tier": 15,
+    "boards_all3": 1,
+    "coherence": {
+      "all_same (B=I=A)": 1
+    },
+    "intra_inconsistent_boardtier": 0,
+    "collapse_examples": [
+      {
+        "board": "r . b q . r k .\np p p . . p p p\n. . n . . . . .\n. . . . . . . .\n. b N P . . . .\nP . . . . N . .\n. P . . . P P P\nR . B Q . R K .",
+        "B": "Bd6",
+        "I": "Bd6",
+        "A": "Bd6",
+        "tag": "all_same"
+      }
+    ]
+  },
+  {
+    "path": "data/dataset/train_v4.jsonl",
+    "raw": 8745,
+    "unique": 6767,
+    "dup_dropped": 1978,
+    "overall": {
+      "n": 6767,
+      "E1": 6685,
+      "E2_strat": 5806,
+      "E2_take": 3953,
+      "E2_or_tac": 6372,
+      "E3": 6500,
+      "E4": 6767,
+      "E6_jargon": 0,
+      "takeaway": 6767,
+      "words_med": 175,
+      "words_mean": 175.7997635584454,
+      "ply_over": 0,
+      "rec_engine_best": 3390,
+      "rec_engine_best_known": 6767,
+      "maia_top": 3281,
+      "maia_known": 6182,
+      "forbidden": 62,
+      "all6": 5545
+    },
+    "tiers": {
+      "beginner": {
+        "n": 2278,
+        "E1": 2214,
+        "E2_strat": 1565,
+        "E2_take": 958,
+        "E2_or_tac": 1997,
+        "E3": 2127,
+        "E4": 2278,
+        "E6_jargon": 0,
+        "takeaway": 2278,
+        "words_med": 140.0,
+        "words_mean": 141.20061457418788,
+        "ply_over": 0,
+        "rec_engine_best": 300,
+        "rec_engine_best_known": 2278,
+        "maia_top": 1740,
+        "maia_known": 2269,
+        "forbidden": 62,
+        "all6": 1429
+      },
+      "intermediate": {
+        "n": 2259,
+        "E1": 2250,
+        "E2_strat": 2093,
+        "E2_take": 1502,
+        "E2_or_tac": 2188,
+        "E3": 2187,
+        "E4": 2259,
+        "E6_jargon": 0,
+        "takeaway": 2259,
+        "words_med": 177,
+        "words_mean": 177.38379814077024,
+        "ply_over": 0,
+        "rec_engine_best": 971,
+        "rec_engine_best_known": 2259,
+        "maia_top": 1186,
+        "maia_known": 2195,
+        "forbidden": 0,
+        "all6": 2019
+      },
+      "advanced": {
+        "n": 2230,
+        "E1": 2221,
+        "E2_strat": 2148,
+        "E2_take": 1493,
+        "E2_or_tac": 2187,
+        "E3": 2186,
+        "E4": 2230,
+        "E6_jargon": 0,
+        "takeaway": 2230,
+        "words_med": 208.5,
+        "words_mean": 209.5390134529148,
+        "ply_over": 0,
+        "rec_engine_best": 2119,
+        "rec_engine_best_known": 2230,
+        "maia_top": 355,
+        "maia_known": 1718,
+        "forbidden": 0,
+        "all6": 2097
+      }
+    },
+    "boards_total": 2301,
+    "boards_multi_tier": 2289,
+    "boards_all3": 2177,
+    "coherence": {
+      "full gradient (B!=I!=A)": 316,
+      "I=A != B (beginner differs)": 723,
+      "B=I != A (human vs sharp)": 844,
+      "all_same (B=I=A)": 239,
+      "COLLAPSE B=A != I": 55
+    },
+    "intra_inconsistent_boardtier": 0,
+    "collapse_examples": [
+      {
+        "board": ". . . . . r k .\np . . . p . . p\n. . . p p . p b\n. . p . . . . .\n. . . . P . P .\n. . . . . P . .\nP . P K . . P .\n. R . . . . . .",
+        "B": "Ke2",
+        "I": "Ke2",
+        "A": "Ke2",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q . r k .\np p . . b p p .\n. . p . b . . p\n. . N p . . . n\n. . . P . . . .\n. . P . . N B .\nP P . . Q P P P\nR . . . R . K .",
+        "B": "Nxg3",
+        "I": "Bxc5",
+        "A": "Nxg3",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": ". . . . . . . .\np k . . . r . .\n. p n . . b p .\n. . N Q . n . .\n. . . p . P . .\n. . . P . . . .\nP P P . . P . .\n. . K . . . . R",
+        "B": "bxc5",
+        "I": "bxc5",
+        "A": "bxc5",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . b . k . . r\np p . q b p p p\n. . . . . n . .\nn P . p p . . .\nP . . . . . . .\nB B N . . N . .\n. . P P . P P P\nR . . Q K . . R",
+        "B": "Nxe5",
+        "I": "Nxe5",
+        "A": "Nxe5",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . . . . . . .\nN b . k . . p p\n. r . . . p . .\n. p K B . r . .\n. . . . . . . .\n. . . . . . . .\nP P P . . n P P\nR N . . . . . .",
+        "B": "Ra6",
+        "I": "Rd6",
+        "A": "Ra6",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": "r . . q . r k .\np . p b . p p p\n. . p . . . . .\n. . b p P . n .\n. . . N . . . .\n. . . . B P . .\nP P P . . . P P\nR N . Q . R K .",
+        "B": "f4",
+        "I": "f4",
+        "A": "f4",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . . . r . k .\n. p p . . . p p\n. p . . . . . .\n. . . N b . . .\n. . . . . p . q\n. P . P . Q . P\n. P P . . P P .\nR . . . . . K .",
+        "B": "Re1",
+        "I": "Re1",
+        "A": "Re1",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q . r k .\n. b . n b p p p\np . . . . . . .\n. p p p P . . .\n. . . . . . . .\n. P P B . Q . P\nP B . N . P P .\nR . . . K . . R",
+        "B": "c4",
+        "I": "c4",
+        "A": "c4",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . . r . k .\np p q . n p b p\n. . p . . n p .\n. . . p . b B .\n. . . P . . . .\n. . P . . N . P\nP P B . . P P .\n. . R Q R N K .",
+        "B": "Bxc2",
+        "I": "Ne4",
+        "A": "Bxc2",
+        "tag": "collapse_BA"
+      },
+      {
+        "board": "r . . . . . k .\np p . . . p p p\n. . . . . . . .\n. . p . . . . .\n. . . . . . . .\n. N . P . q . .\nP P P . . P . P\nR . . . R . K .",
+        "B": "Qg4+",
+        "I": "Qg4+",
+        "A": "Qg4+",
+        "tag": "all_same"
+      },
+      {
+        "board": "r n . . . r k .\np p . . . p p p\n. . . b p . . q\n. . . . . . N .\n. p . P . . . .\n. . . . . . P .\nP B P . B P . .\n. R . Q . R K .",
+        "B": "Bc1",
+        "I": "Bc1",
+        "A": "Bc1",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . b q r . k .\np p . . . p p .\n. . . p . b . p\n. . p P . . . .\n. . . . Q . n .\n. . N . . P . .\nP P . . N K . P\n. . R . R . . .",
+        "B": "fxg4",
+        "I": "fxg4",
+        "A": "fxg4",
+        "tag": "all_same"
+      }
+    ]
+  },
+  {
+    "path": "data/dataset/valid_v4.jsonl",
+    "raw": 353,
+    "unique": 353,
+    "dup_dropped": 0,
+    "overall": {
+      "n": 353,
+      "E1": 349,
+      "E2_strat": 309,
+      "E2_take": 225,
+      "E2_or_tac": 333,
+      "E3": 340,
+      "E4": 353,
+      "E6_jargon": 0,
+      "takeaway": 353,
+      "words_med": 175,
+      "words_mean": 174.6657223796034,
+      "ply_over": 0,
+      "rec_engine_best": 181,
+      "rec_engine_best_known": 353,
+      "maia_top": 178,
+      "maia_known": 322,
+      "forbidden": 7,
+      "all6": 296
+    },
+    "tiers": {
+      "beginner": {
+        "n": 120,
+        "E1": 117,
+        "E2_strat": 87,
+        "E2_take": 59,
+        "E2_or_tac": 104,
+        "E3": 112,
+        "E4": 120,
+        "E6_jargon": 0,
+        "takeaway": 120,
+        "words_med": 139.0,
+        "words_mean": 139.50833333333333,
+        "ply_over": 0,
+        "rec_engine_best": 17,
+        "rec_engine_best_known": 120,
+        "maia_top": 86,
+        "maia_known": 120,
+        "forbidden": 7,
+        "all6": 80
+      },
+      "intermediate": {
+        "n": 115,
+        "E1": 114,
+        "E2_strat": 107,
+        "E2_take": 86,
+        "E2_or_tac": 111,
+        "E3": 111,
+        "E4": 115,
+        "E6_jargon": 0,
+        "takeaway": 115,
+        "words_med": 175,
+        "words_mean": 176.55652173913043,
+        "ply_over": 0,
+        "rec_engine_best": 50,
+        "rec_engine_best_known": 115,
+        "maia_top": 66,
+        "maia_known": 111,
+        "forbidden": 0,
+        "all6": 102
+      },
+      "advanced": {
+        "n": 118,
+        "E1": 118,
+        "E2_strat": 115,
+        "E2_take": 80,
+        "E2_or_tac": 118,
+        "E3": 117,
+        "E4": 118,
+        "E6_jargon": 0,
+        "takeaway": 118,
+        "words_med": 207.0,
+        "words_mean": 208.57627118644066,
+        "ply_over": 0,
+        "rec_engine_best": 114,
+        "rec_engine_best_known": 118,
+        "maia_top": 26,
+        "maia_known": 91,
+        "forbidden": 0,
+        "all6": 114
+      }
+    },
+    "boards_total": 121,
+    "boards_multi_tier": 121,
+    "boards_all3": 111,
+    "coherence": {
+      "B=I != A (human vs sharp)": 42,
+      "full gradient (B!=I!=A)": 17,
+      "I=A != B (beginner differs)": 33,
+      "all_same (B=I=A)": 17,
+      "COLLAPSE B=A != I": 2
+    },
+    "intra_inconsistent_boardtier": 0,
+    "collapse_examples": [
+      {
+        "board": ". . . . . . . .\np . . . . . b .\n. p . . k . . p\nn . . . . . p .\n. . . B P . P .\nP . . P . . P .\n. P . . N . K .\n. . . . . . . .",
+        "B": "Bxd4",
+        "I": "Bxd4",
+        "A": "Bxd4",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q k b . r\np p p . . p p p\n. . . p p . . .\n. . . P n . . .\n. . . . N . . .\n. . . . . B . P\nP P P . . P P .\nR . B Q K . . R",
+        "B": "exd5",
+        "I": "exd5",
+        "A": "exd5",
+        "tag": "all_same"
+      },
+      {
+        "board": ". r . . . . . .\n. r . . p b k .\n. . . . . . p p\n. . P P . . . .\n. p . . P . P .\n. . . . K P . .\n. R . N . . . .\n. R . . . . . .",
+        "B": "c6",
+        "I": "c6",
+        "A": "c6",
+        "tag": "all_same"
+      },
+      {
+        "board": ". k . . . r . .\np p p . . . . .\n. . . . . . . p\n. . q . . . . .\nP . . . P p . .\n. P . P b . . B\n. . P . Q . P P\n. . . . . R . K",
+        "B": "g3",
+        "I": "g3",
+        "A": "g3",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q k . . r\np . . n . p p p\n. p . . p . . .\n. . b n . . . .\nQ . . . . B . .\n. . . . P N . .\nP P . N . P P P\nR . . . . R K .",
+        "B": "Ne5",
+        "I": "Ne5",
+        "A": "Ne5",
+        "tag": "all_same"
+      },
+      {
+        "board": "q . . r . . k .\np . p . . p b p\n. p . p p . p .\nn P . . P n . .\n. . . P . . . .\nP . P . . N . .\n. . . . . P P P\nR N B Q . R K .",
+        "B": "Bg5",
+        "I": "Bg5",
+        "A": "Bg5",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . . . k . . r\n. p . . . . p .\n. p . b p p . p\n. N . p . . . .\n. . . P . . . .\nP . . . P . P .\n. P . . K P P .\n. . R . . . . .",
+        "B": "Ke7",
+        "I": "Ke7",
+        "A": "Ke7",
+        "tag": "all_same"
+      },
+      {
+        "board": ". r . q . r k .\np . p . . . . p\n. n . . . . p .\n. . . p . . b .\n. . . P . . B .\n. P . Q . . P .\nP B P . . P . .\n. . K R . . N R",
+        "B": "f4",
+        "I": "f4",
+        "A": "f4",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . . . . . . .\np . . . k . p p\n. . . . . p . .\n. . . . . . q .\n. . . p . . . .\n. P b . . . . .\nP . . . Q . . P\n. . . R . R . K",
+        "B": "Kf7",
+        "I": "Kf7",
+        "A": "Kf7",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q . k n r\np p . . . p p p\n. . . . p . . .\nb Q . . P . . .\n. . . . . . . .\n. . . . . N . .\nP n . B K P P P\nR N . . . . . R",
+        "B": "Bxa5",
+        "I": "Bxa5",
+        "A": "Bxa5",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . . R . . . .\n. r . . . . . .\n. p . . k . . .\np . . . p . p .\n. . . . . p . .\n. . P . . P . .\nP P . . K B r .\n. . . . . . . .",
+        "B": "Re8+",
+        "I": "Re8+",
+        "A": "Re8+",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q . r k .\n. . p . b p p .\np . n p b . . .\n. p . . p . P p\n. . . . P . . .\n. B . P B N . P\nP P P Q . P . .\nR . . . K . . R",
+        "B": "Bxe6",
+        "I": "Bxe6",
+        "A": "Bxe6",
+        "tag": "all_same"
+      }
+    ]
+  },
+  {
+    "path": "data/dataset/train_4b_iter1.jsonl",
+    "raw": 9183,
+    "unique": 6274,
+    "dup_dropped": 2909,
+    "overall": {
+      "n": 6274,
+      "E1": 6203,
+      "E2_strat": 6267,
+      "E2_take": 6246,
+      "E2_or_tac": 6271,
+      "E3": 6012,
+      "E4": 6274,
+      "E6_jargon": 0,
+      "takeaway": 6274,
+      "words_med": 176.0,
+      "words_mean": 177.47720752311125,
+      "ply_over": 0,
+      "rec_engine_best": 3001,
+      "rec_engine_best_known": 6274,
+      "maia_top": 3024,
+      "maia_known": 5696,
+      "forbidden": 0,
+      "all6": 5954
+    },
+    "tiers": {
+      "beginner": {
+        "n": 2132,
+        "E1": 2077,
+        "E2_strat": 2127,
+        "E2_take": 2114,
+        "E2_or_tac": 2131,
+        "E3": 1983,
+        "E4": 2132,
+        "E6_jargon": 0,
+        "takeaway": 2132,
+        "words_med": 144.0,
+        "words_mean": 144.1890243902439,
+        "ply_over": 0,
+        "rec_engine_best": 171,
+        "rec_engine_best_known": 2132,
+        "maia_top": 1622,
+        "maia_known": 2123,
+        "forbidden": 0,
+        "all6": 1939
+      },
+      "intermediate": {
+        "n": 2058,
+        "E1": 2051,
+        "E2_strat": 2056,
+        "E2_take": 2049,
+        "E2_or_tac": 2056,
+        "E3": 1988,
+        "E4": 2058,
+        "E6_jargon": 0,
+        "takeaway": 2058,
+        "words_med": 177.0,
+        "words_mean": 178.14334305150632,
+        "ply_over": 0,
+        "rec_engine_best": 840,
+        "rec_engine_best_known": 2058,
+        "maia_top": 1077,
+        "maia_known": 1997,
+        "forbidden": 0,
+        "all6": 1982
+      },
+      "advanced": {
+        "n": 2084,
+        "E1": 2075,
+        "E2_strat": 2084,
+        "E2_take": 2083,
+        "E2_or_tac": 2084,
+        "E3": 2041,
+        "E4": 2084,
+        "E6_jargon": 0,
+        "takeaway": 2084,
+        "words_med": 210.0,
+        "words_mean": 210.8742802303263,
+        "ply_over": 0,
+        "rec_engine_best": 1990,
+        "rec_engine_best_known": 2084,
+        "maia_top": 325,
+        "maia_known": 1576,
+        "forbidden": 0,
+        "all6": 2033
+      }
+    },
+    "boards_total": 2155,
+    "boards_multi_tier": 2143,
+    "boards_all3": 1976,
+    "coherence": {
+      "full gradient (B!=I!=A)": 316,
+      "B=I != A (human vs sharp)": 844,
+      "I=A != B (beginner differs)": 723,
+      "all_same (B=I=A)": 93
+    },
+    "intra_inconsistent_boardtier": 0,
+    "collapse_examples": [
+      {
+        "board": ". . . . . . k .\n. p . . . . . p\n. . . . q . . .\n. . . . . . R .\n. . . . r P . P\n. . P . . . P .\nP P . . . Q . K\n. . . . . . . .",
+        "B": "Kf7",
+        "I": "Kf7",
+        "A": "Kf7",
+        "tag": "all_same"
+      },
+      {
+        "board": "r n b q . r k .\np . . . . p p .\n. . p b p n . p\n. p . P . . B .\n. . Q . . . . P\n. . N . . . . .\nP P . . P P P .\n. . K R . B N R",
+        "B": "Qd4",
+        "I": "Qd4",
+        "A": "Qd4",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q r . k .\n. . . n . . . p\n. . . . . n p .\np Q b p . p . .\nP p . . . . . .\n. P . . P N . .\n. B . . . P P P\nR N . . K . . R",
+        "B": "Rb8",
+        "I": "Rb8",
+        "A": "Rb8",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . b . . r k .\np p . . . . b p\n. q . . p n p .\n. . . p . . B .\n. . . N . . . .\n. . P . . . . .\nP P Q . B P P P\n. . . . R R K .",
+        "B": "e5",
+        "I": "e5",
+        "A": "e5",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . . . k n r\np . . . . p . p\n. p . p p q p .\n. B . . b . . .\n. . . . b . . .\n. . . . . P . .\nP P P . . . P P\nR . . Q . R K .",
+        "B": "Bd5",
+        "I": "Bd5",
+        "A": "Bd5",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . k r . . . .\np p . . . . . Q\n. q . . . . p .\n. . p p p . . .\n. . P n . . P .\n. P . P . . . P\nP . . N . . K .\n. . . . . R . .",
+        "B": "dxc4",
+        "I": "dxc4",
+        "A": "dxc4",
+        "tag": "all_same"
+      },
+      {
+        "board": ". r . q . r k .\np p . . p p b .\n. . b . . n . .\n. . p p . P . p\n. . . . P . . .\n. . P P . B . P\nP P . N Q . . .\nR . B . . . R K",
+        "B": "Kh8",
+        "I": "Kh8",
+        "A": "Kh8",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . r . . . k .\np p . . . . p p\n. . . . . . . .\n. . . . r . . .\n. . . . . . . P\nP K P . p . . .\n. . . . . . . .\n. . . . R . . R",
+        "B": "e2",
+        "I": "e2",
+        "A": "e2",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q k . . r\np . p . . p p p\np . . . . n . .\n. . B P p . . .\n. . . . P . b .\nP . N . . . . .\n. P . . . P P P\nR . . Q K . N R",
+        "B": "f3",
+        "I": "f3",
+        "A": "f3",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . . . . . k .\np . p . . p p p\n. . p r . n . .\n. . . . . . . .\n. . b B . . . .\nP . . . P . P .\n. . . . . P . P\n. . K R . . . .",
+        "B": "Bxf6",
+        "I": "Bxf6",
+        "A": "Bxf6",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . k . . . . r\n. b . . . . . .\n. . . p . . . .\n. . . . . . r p\nP Q P . n . . .\n. . . . . . . .\n. . . . . . P .\n. . . . . . K .",
+        "B": "a5",
+        "I": "a5",
+        "A": "a5",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q . r k .\np p . . . p p p\n. n p . p n . .\n. . . . . b B .\n. . P P . . . N\n. . P . . . . .\nP . . . B P P P\nR . . Q R . K .",
+        "B": "h6",
+        "I": "h6",
+        "A": "h6",
+        "tag": "all_same"
+      }
+    ]
+  },
+  {
+    "path": "data/dataset/valid_4b_iter1.jsonl",
+    "raw": 351,
+    "unique": 351,
+    "dup_dropped": 0,
+    "overall": {
+      "n": 351,
+      "E1": 347,
+      "E2_strat": 349,
+      "E2_take": 348,
+      "E2_or_tac": 351,
+      "E3": 338,
+      "E4": 351,
+      "E6_jargon": 0,
+      "takeaway": 351,
+      "words_med": 176,
+      "words_mean": 176.30769230769232,
+      "ply_over": 0,
+      "rec_engine_best": 181,
+      "rec_engine_best_known": 351,
+      "maia_top": 176,
+      "maia_known": 320,
+      "forbidden": 0,
+      "all6": 332
+    },
+    "tiers": {
+      "beginner": {
+        "n": 120,
+        "E1": 117,
+        "E2_strat": 118,
+        "E2_take": 117,
+        "E2_or_tac": 120,
+        "E3": 112,
+        "E4": 120,
+        "E6_jargon": 0,
+        "takeaway": 120,
+        "words_med": 142.0,
+        "words_mean": 142.375,
+        "ply_over": 0,
+        "rec_engine_best": 17,
+        "rec_engine_best_known": 120,
+        "maia_top": 86,
+        "maia_known": 120,
+        "forbidden": 0,
+        "all6": 107
+      },
+      "intermediate": {
+        "n": 113,
+        "E1": 112,
+        "E2_strat": 113,
+        "E2_take": 113,
+        "E2_or_tac": 113,
+        "E3": 109,
+        "E4": 113,
+        "E6_jargon": 0,
+        "takeaway": 113,
+        "words_med": 177,
+        "words_mean": 177.0796460176991,
+        "ply_over": 0,
+        "rec_engine_best": 50,
+        "rec_engine_best_known": 113,
+        "maia_top": 64,
+        "maia_known": 109,
+        "forbidden": 0,
+        "all6": 108
+      },
+      "advanced": {
+        "n": 118,
+        "E1": 118,
+        "E2_strat": 118,
+        "E2_take": 118,
+        "E2_or_tac": 118,
+        "E3": 117,
+        "E4": 118,
+        "E6_jargon": 0,
+        "takeaway": 118,
+        "words_med": 208.5,
+        "words_mean": 210.07627118644066,
+        "ply_over": 0,
+        "rec_engine_best": 114,
+        "rec_engine_best_known": 118,
+        "maia_top": 26,
+        "maia_known": 91,
+        "forbidden": 0,
+        "all6": 117
+      }
+    },
+    "boards_total": 121,
+    "boards_multi_tier": 121,
+    "boards_all3": 109,
+    "coherence": {
+      "B=I != A (human vs sharp)": 42,
+      "full gradient (B!=I!=A)": 17,
+      "I=A != B (beginner differs)": 33,
+      "all_same (B=I=A)": 17
+    },
+    "intra_inconsistent_boardtier": 0,
+    "collapse_examples": [
+      {
+        "board": ". . . . . . . .\np . . . . . b .\n. p . . k . . p\nn . . . . . p .\n. . . B P . P .\nP . . P . . P .\n. P . . N . K .\n. . . . . . . .",
+        "B": "Bxd4",
+        "I": "Bxd4",
+        "A": "Bxd4",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q k b . r\np p p . . p p p\n. . . p p . . .\n. . . P n . . .\n. . . . N . . .\n. . . . . B . P\nP P P . . P P .\nR . B Q K . . R",
+        "B": "exd5",
+        "I": "exd5",
+        "A": "exd5",
+        "tag": "all_same"
+      },
+      {
+        "board": ". r . . . . . .\n. r . . p b k .\n. . . . . . p p\n. . P P . . . .\n. p . . P . P .\n. . . . K P . .\n. R . N . . . .\n. R . . . . . .",
+        "B": "c6",
+        "I": "c6",
+        "A": "c6",
+        "tag": "all_same"
+      },
+      {
+        "board": ". k . . . r . .\np p p . . . . .\n. . . . . . . p\n. . q . . . . .\nP . . . P p . .\n. P . P b . . B\n. . P . Q . P P\n. . . . . R . K",
+        "B": "g3",
+        "I": "g3",
+        "A": "g3",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q k . . r\np . . n . p p p\n. p . . p . . .\n. . b n . . . .\nQ . . . . B . .\n. . . . P N . .\nP P . N . P P P\nR . . . . R K .",
+        "B": "Ne5",
+        "I": "Ne5",
+        "A": "Ne5",
+        "tag": "all_same"
+      },
+      {
+        "board": "q . . r . . k .\np . p . . p b p\n. p . p p . p .\nn P . . P n . .\n. . . P . . . .\nP . P . . N . .\n. . . . . P P P\nR N B Q . R K .",
+        "B": "Bg5",
+        "I": "Bg5",
+        "A": "Bg5",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . . . k . . r\n. p . . . . p .\n. p . b p p . p\n. N . p . . . .\n. . . P . . . .\nP . . . P . P .\n. P . . K P P .\n. . R . . . . .",
+        "B": "Ke7",
+        "I": "Ke7",
+        "A": "Ke7",
+        "tag": "all_same"
+      },
+      {
+        "board": ". r . q . r k .\np . p . . . . p\n. n . . . . p .\n. . . p . . b .\n. . . P . . B .\n. P . Q . . P .\nP B P . . P . .\n. . K R . . N R",
+        "B": "f4",
+        "I": "f4",
+        "A": "f4",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . . . . . . .\np . . . k . p p\n. . . . . p . .\n. . . . . . q .\n. . . p . . . .\n. P b . . . . .\nP . . . Q . . P\n. . . R . R . K",
+        "B": "Kf7",
+        "I": "Kf7",
+        "A": "Kf7",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q . k n r\np p . . . p p p\n. . . . p . . .\nb Q . . P . . .\n. . . . . . . .\n. . . . . N . .\nP n . B K P P P\nR N . . . . . R",
+        "B": "Bxa5",
+        "I": "Bxa5",
+        "A": "Bxa5",
+        "tag": "all_same"
+      },
+      {
+        "board": ". . . R . . . .\n. r . . . . . .\n. p . . k . . .\np . . . p . p .\n. . . . . p . .\n. . P . . P . .\nP P . . K B r .\n. . . . . . . .",
+        "B": "Re8+",
+        "I": "Re8+",
+        "A": "Re8+",
+        "tag": "all_same"
+      },
+      {
+        "board": "r . . q . r k .\n. . p . b p p .\np . n p b . . .\n. p . . p . P p\n. . . . P . . .\n. B . P B N . P\nP P P Q . P . .\nR . . . K . . R",
+        "B": "Bxe6",
+        "I": "Bxe6",
+        "A": "Bxe6",
+        "tag": "all_same"
+      }
+    ]
+  }
+]

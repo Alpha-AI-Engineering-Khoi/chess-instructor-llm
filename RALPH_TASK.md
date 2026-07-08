@@ -1,79 +1,41 @@
 ---
-task: Ship v3 — a genuinely BETTER chess-coach fine-tuned from Qwen3-32B on the
-  larger contrastive dataset, trained on Modal, converted to 4-bit MLX, then
-  re-evaluated on the definitive 803-position benchmark and reflected everywhere.
-  Run autonomously as a resumable RALPH loop (state in files, checkpoint per phase,
-  learn guardrails from failures). Do NOT disturb the LIVE v2 platform.
-completion_criteria:
-  - v3 dataset built: teacher (GPT-5.5 via TrueFoundry) labels on the v3_candidates
-    contrastive bank, faithfulness-filtered to 0% false labels, split into
-    data/dataset/{train_v3,valid_v3}.jsonl (report counts + contrastive coverage).
-  - v3 trained: QLoRA fine-tune of Qwen3-32B on Modal (A100-80GB/H100), merged to
-    16-bit, downloaded, converted to 4-bit MLX at models/mlx/chess-coach-v3 (runs
-    locally). v2 artifacts untouched.
-  - v3 evaluated: the 803-position benchmark re-run with OURS->v3, producing an
-    apples-to-apples v2->v3 delta on tier-fit (the moat), instructiveness (council),
-    move-safety, no-jargon, fabrication. Write RESULTS_V3.md + RESULTS_FULL_EVAL_803_v3.md.
-  - Evals updated everywhere: HF Space + benchmark dataset + model card, and
-    FINDINGS.md + README.md/SUBMISSION.md + BrainLift (both copies). Code/docs pushed
-    to GitHub (secret-safe; gitignore protects data/models).
-  - A short honest summary of whether v3 improved the moat/instructiveness and by
-    how much, plus total cost.
-deadline: this session (resumable — never lose work).
+task: Iteratively train a small (4B) open chess-coach model to maximum RELIABLE quality by improving the DATA, autonomously, until the completion criteria are met.
+hero_model: Qwen3-4B-Instruct  # small + locally runnable + on-spec ("tiny local specialist"). 1.7B (v2) and 32B (v3/v4) are REFERENCES only.
+max_iterations: 20
+loop: /loop wakes the parent on a heartbeat to advance one iteration with a FRESH context; state lives in .ralph/ (gitignored), not in context.
 ---
 
-## What we're building (v3)
-Same behavior spec as v1/v2 (engine-grounded, tier-calibrated coaching that selects
-the most INSTRUCTIVE move for the student's tier and explains it in plain human terms
-— no engine-speak, no fabrication, one transferable takeaway). The v3 intervention is
-TWO things at once, on purpose:
-  1. BIGGER BASE: fine-tune Qwen3-32B (the best locally-runnable base per
-     RESULTS_FULL_EVAL_803.md) instead of Qwen3-1.7B. The 803 eval showed OURS-v2
-     (1.7B) already LEADS the moat (tier-fit 53%) but is weak on instructiveness
-     (council rank ~9.4/14) and high on fabrication (30%, neutralized at serve time
-     by the verifier). A 20x-larger base should keep the moat while gaining coaching
-     capacity + faithfulness.
-  2. LARGER + CONTRASTIVE DATA: build the v3 SFT set from data/positions/
-     v3_candidates.jsonl (2,423 curated contrastive multi-tier positions, motif-tagged,
-     Stockfish sound pools) — verified ZERO overlap with the 803 eval and with
-     train_v2/valid_v2. Deterministic tier-aware move selection (src.teacher.tier_select)
-     + grounded, method-teaching GPT-5.5 labels + faithfulness filter.
+## Mission
+Make a 4B Qwen3 coach that **reliably** does the behavior — not a bigger model that out-scores frontier. The spec's grade is `tuned > base` on a Behavior Spec; "beat frontier" is a bonus, not the goal. Keep improving the DATA (the lever) and retraining until the model hits the completion criteria. **Do NOT chase capability benchmarks.**
 
-## Locked design decisions
-- TRAINING -> Modal ONLY. TrueFoundry is an inference gateway (cannot train). 32B QLoRA
-  needs a bigger GPU than v2's A10G -> A100-80GB (or H100). Recipe = v2's Unsloth QLoRA,
-  scaled (4-bit base load, LoRA on attn+MLP, grad-accum for memory, longer timeout).
-- TEACHER (dataset labels) + EVAL judges/frontier/open models -> TrueFoundry gateway
-  (openai-group/gpt-5.5 for teacher; council = GPT-5.5 + Claude Opus 4.8 + Gemini 3.1 Pro).
-- Teacher = GPT-5.5 via TFY (chat.completions + response_format json_object + reasoning
-  high — PROVEN working this session). base=Qwen3-32B, tuned=our v3 output.
-- LOCAL inference = 4-bit MLX (mlx_lm.convert of the merged 16-bit). The Modal PEFT/bnb
-  adapter is NOT MLX-loadable — must merge->download->convert.
-- "unpaid invoice" AND "PING timed out"/unavailable are TRANSIENT -> retry/resume, never stop.
+## Behavior Spec (the falsifiable target)
+Given a position + student tier (beginner ≈1000–1200 / intermediate ≈1300–1600 / advanced ≈1700–2000), return exactly ONE move + a short explanation that passes every clause: (1) one move; (2) sound (Stockfish cp-loss < 250, never a blunder); (3) **tier-appropriate — and DISTINCT across tiers when the position calls for it** (a beginner and an advanced player should NOT get the same move on a differentiating position; if they do, the model is wrong); (4) explained four ways — purpose, transferable principle, board-specific reason, how-to-find-it-next-time; (5) grounded (0 false board facts post-gate); (6) tier-calibrated voice; (7) zero engine-speak.
 
-## Guardrails (do not violate)
-- Do NOT disrupt the LIVE v2 platform (ports 8000/3000). v3 uses its own path/files.
-  Do NOT auto-switch the platform to v3 — leave that to the user.
-- Everything v3-suffixed; never overwrite v1/v2 artifacts, datasets, or models.
-- Secrets are env-only (.env). Never print/commit them. gitignore protects data/models.
-- Cost-aware but substantial spend approved ("make it really good"). Report total cost.
-- If approaching a time/resource limit: WRITE partial state + a clear "done vs remaining"
-  note in .ralph/progress.md and return so it can be resumed.
+## Reward design (anchor on the un-gameable signals)
+- **PRIMARY — deterministic, objective (drives training):**
+  - tier-fit: pick == canonical tier move (`src/teacher/tier_select.select_tier_move`).
+  - **distinct-moves-per-level:** on differentiating positions, beginner ≠ advanced; flag & penalize nonsensical B==A≠I collapses.
+  - move-soundness (no blunders), well-formed output, 0 engine-speak, 0 post-gate fabrication.
+- **SECONDARY — subjective instructiveness (validation only, NEVER trained toward directly):**
+  - blinded cross-family frontier council (TrueFoundry: GPT-5.5 + Claude Opus 4.8 + Gemini 3.1 Pro) ranks instructiveness on a **HELD-OUT set the model never trains on** (guards against Goodhart-ing the judges).
+- Technique ladder: SFT (data-first) → DPO on council/deterministic preference pairs → optional GRPO on the deterministic reward. All cheap + local on a 4B.
 
-## Phases (sequential; checkpoint + update .ralph after each)
-1. Dataset: plan from v3_candidates (Maia per-tier picks) -> generate GPT-5.5 labels
-   (resumable, costed) -> filter --faithfulness reject --target-format v2
-   --dedup-key fen_tier_move -> split -> train_v3/valid_v3.
-2. Train: adapt train_modal_v2 -> train_modal_v3 (Qwen3-32B, A100-80GB). Smoke -> full ->
-   merge 16-bit -> download -> mlx_lm.convert -q 4 -> models/mlx/chess-coach-v3.
-3. Eval: gap803 harness with OURS->v3 (BENCH_OURS_MODEL) -> objective + safety + council
-   -> v2->v3 delta -> RESULTS_V3.md + RESULTS_FULL_EVAL_803_v3.md.
-4. Update everywhere: HF Space + dataset + model card; FINDINGS/README/SUBMISSION;
-   BrainLift (both copies). git push (secret-safe).
+## Completion criteria (the honest "100%" = reliability, not a perfect judge score)
+1. Deterministic gates on the held-out eval: **100% move-soundness, 100% no-engine-speak, 100% well-formed, 0% post-gate fabrication.**
+2. tier-fit ≥ 60% and **distinct-moves-per-level ≥ 95%** on differentiating positions (≈0 nonsensical B==A collapses).
+3. Reliably **beats the untuned Qwen3-4B base** on every axis with identical tools+gate (only training differs).
+4. **Beats the best prompt-engineered 4B base** (the spec's litmus) on the deterministic axes.
+5. Council instructiveness **plateaus** (no gain over 3 iterations) or reaches parity with the best *prompted* model on the tier axis.
 
-## Known-good baseline (from RESULTS_FULL_EVAL_803.md, the moat = tier-fit)
-- OURS-v2 (Qwen3-1.7B tuned): tier-fit 53% (field-leading), tier-diff 44%, direction 54%,
-  instructiveness council rank 9.36/14 (top1 9%), safety 99%, no-jargon 100%, fab 30%.
-- Qwen3-32B BASE (open, untuned): tier-fit 37%, instr rank 8.58/14, fab 6%, local yes.
-- Honest framing: moat = tier-appropriate move selection; faithfulness = a verifier at
-  serve time; do NOT overclaim beating frontier on raw coaching.
+## Compute rotation (cheap → overflow) — SECRETS NEVER IN THIS REPO
+Small 4B QLoRA runs are cheap (~$2–5). **kim-lam is BILLING-BLOCKED (overdue invoice) — DO NOT USE IT for anything.** Use in order, rotate when a workspace errors on credits:
+1. **chess-instructor-2** ($30 fresh) — start here (no v4 competition).
+2. **chess-instructor** (~$28, shared with the running v4 32B — do NOT disturb v4; the 4B run is small enough to coexist).
+Modal auth is via named CLI profiles (`--profile <name>`) in `~/.modal.toml` and tokens in the **gitignored** `.env` — never write tokens into RALPH_TASK.md, .ralph/, or any committed file.
+
+## Guardrails (see .ralph/guardrails.md for the living list)
+- Do NOT stop or touch v4 (32B) training on chess-instructor — the user wants to see it finish.
+- REUSE the hard-test eval harness (base+tuned share identical tools+gate; deterministic + held-out council) — do not rebuild it.
+- Datasets live on the Modal volume / Hugging Face, NOT local disk (keep local storage clean).
+- Data must be rich, high-quality, and correctness-checked against Stockfish/board facts (per `data/analysis/principle_library_v5.md`) — never parrot wrong commentary heuristics (e.g. "trade when behind" is inverted).
+- One iteration per fresh context (Ralph malloc/free). Commit meaningful checkpoints (dataset/config/eval/model refs) with clear messages; keep .ralph/ gitignored to avoid churn.
