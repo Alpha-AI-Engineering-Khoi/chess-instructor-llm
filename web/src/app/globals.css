@@ -344,19 +344,33 @@ select:disabled,
    makes this strictly non-regressive: coordinates can never render larger than
    the current 9px, whatever the container resolves to.
    -------------------------------------------------------------------------- */
+/* NOTE: chessground.base.css ships UNLAYERED, and this file's rules are in a
+   Tailwind cascade layer — so an unlayered `.cg-wrap coords { font-size: 9px }`
+   beats these regardless of specificity. `!important` is required for the
+   scaling to actually win the cascade (verified: without it the coords stay a
+   fixed 9px and look huge on the small Showcase boards). */
 .cg-wrap {
-  container-type: inline-size;
+  container-type: inline-size !important;
 }
 body .cg-wrap coords {
-  font-size: min(9px, 2cqw);
+  font-size: min(9px, 2cqw) !important;
 }
 body .cg-wrap coords.ranks {
-  top: -2.2222em;
-  left: 0.4444em;
-  width: 1.3333em;
+  top: -2.2222em !important;
+  left: 0.4444em !important;
+  width: 1.3333em !important;
 }
 body .cg-wrap coords.files {
-  bottom: -0.4444em;
-  left: 2.6667em;
-  height: 1.7778em;
+  bottom: -0.4444em !important;
+  left: 2.6667em !important;
+  height: 1.7778em !important;
+}
+/* chessground's brown theme colors coords with an alternating light/dark scheme
+   for per-square contrast, but the alternation lands inverted here — white
+   (rgba(255,255,255,.8)) labels end up on the LIGHT squares and wash out. Force
+   a single dark label color; dark reads well on BOTH brown-theme square colors
+   (beige ~11:1, tan ~6.7:1), with a faint light halo for polish. */
+body .cg-wrap coords coord {
+  color: rgba(38, 28, 18, 0.92) !important;
+  text-shadow: 0 0 2px rgba(255, 250, 240, 0.55) !important;
 }

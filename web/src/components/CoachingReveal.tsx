@@ -2,6 +2,7 @@
 
 import { Chip, Separator, Tooltip } from "@heroui/react";
 import type { CoachResponse, Tier } from "@/lib/api";
+import { principleTag } from "@/lib/showcase";
 import AnalysisRail from "./AnalysisRail";
 import EngineLines from "./EngineLines";
 import { ShieldCheckIcon } from "./icons";
@@ -44,6 +45,12 @@ export default function CoachingReveal({
     .split(/\n\s*\n/)
     .map((p) => p.trim())
     .filter(Boolean);
+  const hasProse = paragraphs.length > 0;
+
+  // The PRINCIPLE TAG for the move — assembled from existing CoachResponse fields
+  // (concepts if any, else a short slice of the takeaway). This is the hero's
+  // one-line reason; the full prose drops to an optional, secondary expander.
+  const tag = principleTag(result.concepts_used, result.takeaway);
 
   const student = result.engine.student_move;
   const sev = student ? severityChip(student.severity) : null;
@@ -57,7 +64,8 @@ export default function CoachingReveal({
 
   return (
     <div className="flex flex-col gap-7">
-      {/* Recommended move — the single loudest element, and the panel's heading. */}
+      {/* HERO: the recommended move + a short principle tag — the trained behavior
+          (the tier-appropriate move), and the one-line reason attached to it. */}
       <Block delay={0}>
         <h2 className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
           <span
@@ -70,6 +78,9 @@ export default function CoachingReveal({
             the move for {aOrAn(tier)} {tier} player · {result.side_to_move} to move
           </span>
         </h2>
+        {tag && (
+          <p className="mt-3 max-w-[60ch] text-lg leading-relaxed text-ink text-pretty">{tag}</p>
+        )}
         {student && sev && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Chip color={sev.color} variant="soft" size="sm">
@@ -83,33 +94,27 @@ export default function CoachingReveal({
         )}
       </Block>
 
-      {/* Coaching prose — the grotesque voice, measured, ≤66ch. */}
-      <Block delay={0.08} className="flex max-w-[66ch] flex-col gap-3.5">
-        {paragraphs.map((p, i) => (
-          <p key={i} className="text-lg leading-relaxed text-ink text-pretty">
-            {p}
-          </p>
-        ))}
-      </Block>
-
-      {/* Takeaway — a single tinted inset, not a nested card. */}
-      {result.takeaway && (
-        <Block delay={0.16}>
-          <div className="rounded-[10px] bg-[color:var(--surface-tertiary)]/55 px-4 py-3.5">
-            <p className="mb-1 text-xs font-semibold text-muted">Takeaway</p>
-            <p className="text-base leading-relaxed text-ink">{result.takeaway}</p>
-          </div>
-        </Block>
-      )}
-
-      {/* Concepts — neutral chips (the signal stays reserved for the move). */}
-      {result.concepts_used.length > 0 && (
-        <Block delay={0.24} className="flex flex-wrap gap-2">
-          {result.concepts_used.map((c) => (
-            <Chip key={c} variant="soft" color="default" size="sm">
-              {c}
-            </Chip>
-          ))}
+      {/* Full coaching prose — a SECONDARY, OPTIONAL layer, collapsed by default so
+          the move + principle tag stays the hero. It reads as a supplementary,
+          engine-assisted explanation, not the trained output. */}
+      {hasProse && (
+        <Block delay={0.08}>
+          <details className="group rounded-[10px] border border-[color:var(--border)] bg-[color:var(--surface)]">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-muted transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
+              <span aria-hidden className="text-faint transition-transform group-open:rotate-90">
+                ›
+              </span>
+              Show full explanation
+              <span className="text-faint">(optional, engine-assisted)</span>
+            </summary>
+            <div className="flex max-w-[66ch] flex-col gap-3.5 px-4 pb-4">
+              {paragraphs.map((p, i) => (
+                <p key={i} className="text-base leading-relaxed text-muted text-pretty">
+                  {p}
+                </p>
+              ))}
+            </div>
+          </details>
         </Block>
       )}
 

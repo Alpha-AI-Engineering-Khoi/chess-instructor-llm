@@ -319,8 +319,10 @@ export default function Studio() {
 
   return (
     <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-[1240px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      {/* Top-of-page intro. The spec-aligned hero is the base-vs-tuned reliability
-          story (behavior from data); the cross-model views are the bonus comparison. */}
+      {/* Top-of-page intro. The hero is the ONE behavior — the tuned model selects
+          the tier-appropriate MOVE (+ a short principle tag) where its base can't;
+          the coaching prose is a secondary, optional layer, and the cross-model
+          views are the bonus comparison. */}
       <header className="flex flex-col gap-5">
         <div className="flex items-center justify-end gap-2">
           <Link
@@ -343,7 +345,7 @@ export default function Studio() {
         <div className="flex max-w-3xl flex-col gap-2.5">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex w-fit items-center rounded-full bg-signal/12 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-signal ring-1 ring-signal/30">
-              Behavior from data
+              One behavior · move selection
             </span>
             {oursLabel?.version && (
               <span className="rounded-full px-2.5 py-1 font-mono text-[11px] text-signal ring-1 ring-signal/40 tnum">
@@ -352,16 +354,16 @@ export default function Studio() {
             )}
           </div>
           <h1 className="text-2xl font-semibold leading-tight tracking-tight text-balance text-ink sm:text-[2rem]">
-            Fine-tuning taught a local model to coach where its own base can’t.
+            The fine-tune reliably picks the level-appropriate move where its base can’t.
           </h1>
           <p className="text-pretty text-sm leading-relaxed text-muted sm:text-base">
             A fine-tuned model running locally. Set a position, mark the move you’re unsure about, and
-            pick your rating — it hands back <span className="text-ink">one move</span> and a plain
-            reason: the <span className="text-ink">idea</span> behind it, the{" "}
-            <span className="text-ink">principle</span> to carry forward, why it works{" "}
-            <span className="text-ink">here</span>, and how to <span className="text-ink">find it</span>{" "}
-            next time. Same grounded position and rating, its untuned base fails the shippable gate;
-            the fine-tune passes clean and adapts its answer to your level.{" "}
+            pick your rating — it hands back <span className="text-ink">one move chosen for your
+            level</span> and a short <span className="text-ink">principle tag</span> for why. Its one
+            job is selecting the tier-appropriate move; the full explanation is an{" "}
+            <span className="text-ink">optional layer</span> underneath, not the headline. On the same
+            grounded position and rating, its untuned base picks the level-appropriate move far less
+            reliably.{" "}
             <span className="text-faint">
               See the{" "}
               <Link
@@ -370,7 +372,8 @@ export default function Studio() {
               >
                 multi-model comparison
               </Link>{" "}
-              — OURS against frontier and open models, with the measured per-model metrics.
+              — OURS against frontier and open models on tier-appropriate move selection, with the
+              measured per-model metrics.
             </span>
           </p>
         </div>

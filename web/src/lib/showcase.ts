@@ -346,6 +346,27 @@ function sideToMove(fen: string): "white" | "black" {
   return fen.split(" ")[1] === "b" ? "black" : "white";
 }
 
+/**
+ * A short PRINCIPLE TAG for the move hero, assembled ONLY from fields already in
+ * the data — never invented. Prefers explicit `concepts_used`; otherwise a short
+ * slice of the `takeaway`. Returns null when neither is present. This is the "tag"
+ * half of the reframed hero ("Nf6 — develop a piece, contest e4"): the model's job
+ * is the tier-appropriate MOVE, and this is the one-line reason attached to it —
+ * not a paragraph of prose.
+ */
+export function principleTag(
+  concepts: string[] | null | undefined,
+  takeaway: string | null | undefined,
+): string | null {
+  const cs = (concepts ?? []).map((c) => c.trim()).filter(Boolean);
+  if (cs.length) return cs.slice(0, 3).join(" · ");
+  const t = (takeaway ?? "").replace(/\s+/g, " ").trim();
+  if (!t) return null;
+  const cap = 120;
+  if (t.length <= cap) return t.replace(/[.\s]+$/, "");
+  return t.slice(0, cap).replace(/\s+\S*$/, "") + "…";
+}
+
 /** One reusable SAN->UCI resolver per position (move + undo, no re-parse). */
 function makeUci(fen: string): (san: string | null | undefined) => string | null {
   let game: Chess | null = null;
@@ -1156,6 +1177,77 @@ export function computeLeaderboard(view: ShowcaseView, split?: Split): Leaderboa
     hasCouncil,
     oursKey: rows.find((r) => r.kind === "ours")?.key ?? null,
     baseKey: rows.find((r) => r.kind === "base")?.key ?? null,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* The ONE-BEHAVIOR headline: tier-appropriate move selection          */
+/* ------------------------------------------------------------------ */
+
+/** Mean number of DISTINCT moves a model gives across the three tiers, over the
+ *  positions (in scope) where it was scored at all three — the deterministic
+ *  "does it adapt the move to the level?" signal. */
+function meanDistinctMoves(view: ShowcaseView, kind: ModelKind, split: Split): { mean: number; n: number } {
+  let sum = 0;
+  let n = 0;
+  for (const p of view.positions) {
+    if (p.split !== split) continue;
+    for (const m of p.models) {
+      if (m.kind !== kind) continue;
+      const cells = TIERS.map((t) => m.byTier[t]).filter(
+        (c): c is ViewCell => Boolean(c?.evaluated && c.move),
+      );
+      if (cells.length < TIERS.length) continue;
+      sum += new Set(cells.map((c) => c.move)).size;
+      n += 1;
+    }
+  }
+  return { mean: n > 0 ? sum / n : 0, n };
+}
+
+/**
+ * The single honest headline the whole product now competes on: the tuned model
+ * SELECTS THE TIER-APPROPRIATE MOVE where its own base — and the frontier — can't.
+ * Everything here is computed live from the loaded cells (held-out split), so it
+ * always matches the OURS version on screen and never hardcodes a training figure.
+ *   - tier-fit: OURS vs its own untuned BASE vs the best frontier model.
+ *   - adaptation: mean distinct moves OURS gives across the three levels, on the
+ *     SAME positions where the frontier repeats essentially one move.
+ * Deliberately carries NO instructiveness "lift" — fine-tuning did not improve the
+ * prose (it regressed), so claiming it would be dishonest; the council grades stay
+ * available in the leaderboard as context, not as the headline.
+ */
+export interface MoveSelectionHeadline {
+  ours: ModelAggregate;
+  base: ModelAggregate;
+  bestFrontier: ModelAggregate | null;
+  oursDistinct: number;
+  frontierDistinct: number;
+  nPositions: number;
+}
+
+export function moveSelectionHeadline(
+  view: ShowcaseView | null,
+  split: Split = "test",
+): MoveSelectionHeadline | null {
+  if (!view) return null;
+  const lb = computeLeaderboard(view, split);
+  const ours = lb.rows.find((r) => r.kind === "ours") ?? null;
+  const base = lb.rows.find((r) => r.kind === "base") ?? null;
+  if (!ours || !base) return null;
+  const frontiers = lb.rows.filter((r) => r.kind === "frontier");
+  const bestFrontier = frontiers.length
+    ? frontiers.reduce((a, b) => (b.tierFitRate > a.tierFitRate ? b : a))
+    : null;
+  const oursAdapt = meanDistinctMoves(view, "ours", split);
+  const frontierAdapt = meanDistinctMoves(view, "frontier", split);
+  return {
+    ours,
+    base,
+    bestFrontier,
+    oursDistinct: oursAdapt.mean,
+    frontierDistinct: frontierAdapt.mean,
+    nPositions: oursAdapt.n,
   };
 }
 

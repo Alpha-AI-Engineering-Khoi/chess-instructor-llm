@@ -23,17 +23,19 @@ import {
   describeOursOutcome,
   gateBadge,
   loadShowcaseView,
+  moveSelectionHeadline,
   orderModels,
   primaryTier,
+  principleTag,
   representativeTier,
   tierDuel,
   TIERS,
   TRUTHFULNESS,
   type DuelVerdict,
   type GateBadgeInfo,
-  type Leaderboard,
   type ModelAggregate,
   type ModelKind,
+  type MoveSelectionHeadline,
   type OursLabel,
   type ShowcaseTier,
   type ShowcaseView,
@@ -79,6 +81,20 @@ const TIER_BAND: Record<ShowcaseTier, string> = {
   intermediate: "1300–1600",
   advanced: "1700–2000",
 };
+
+/**
+ * The deterministic PRINCIPLE TAG for a precomputed cell's move — the honest "why
+ * this move" for the reframed hero. Showcase cells carry no concept/takeaway (only
+ * the regressed prose), so the tag is built from the objective verdict we actually
+ * compete on: tier-appropriateness + soundness. This keeps the hero anchored to the
+ * trained behavior (the level-appropriate move), never to the prose.
+ */
+function cellMoveTag(cell: ViewCell, tier: ShowcaseTier): string | null {
+  if (!cell.move) return null;
+  if (cell.tierFit) return `the ${cap(tier)}-appropriate move`;
+  if (cell.sound) return `sound — but not the ${cap(tier)} target move`;
+  return `off-target for ${cap(tier)}`;
+}
 
 /* ================================================================== */
 /* Main view                                                           */
@@ -132,13 +148,12 @@ export default function Showcase() {
   const meta = view?.meta ?? null;
   const positions = useMemo(() => view?.positions ?? [], [view]);
 
-  // Headline OURS-vs-BASE deltas, computed live from the HELD-OUT test split (the
-  // honest measure — and the leaderboard's default view, so the two agree). No
-  // hardcoded training figures; always consistent with the OURS version on screen.
-  const headline = useMemo(
-    () => (view ? oursBaseHeadline(computeLeaderboard(view, "test")) : null),
-    [view],
-  );
+  // The ONE-BEHAVIOR headline: tier-appropriate MOVE SELECTION, computed live from
+  // the HELD-OUT test split (the honest measure — and the leaderboard's default
+  // view, so the two agree). No hardcoded training figures; always consistent with
+  // the OURS version on screen. Carries no instructiveness "lift" — fine-tuning
+  // regressed the prose, so the headline stays on the axis we actually win.
+  const headline = useMemo(() => moveSelectionHeadline(view, "test"), [view]);
 
   // If showcase.json has no training split at all, keep the toggle on Test.
   useEffect(() => {
@@ -405,17 +420,6 @@ export default function Showcase() {
   );
 }
 
-/** The OURS row + its own BASE baseline from the whole-dataset leaderboard — the
- *  honest before/after that replaces any hardcoded training figures. */
-function oursBaseHeadline(
-  lb: Leaderboard | null,
-): { ours: ModelAggregate; base: ModelAggregate } | null {
-  if (!lb) return null;
-  const ours = lb.rows.find((r) => r.kind === "ours") ?? null;
-  const base = lb.rows.find((r) => r.kind === "base") ?? null;
-  return ours && base ? { ours, base } : null;
-}
-
 const LIB_TITLE: Record<LibFilter, string> = {
   proof: "The proof — adapts by level AND diverges from the frontier",
   differentiates: "Where OURS adapts by level",
@@ -452,7 +456,7 @@ function ShowcaseHeader({
 }: {
   meta: ShowcaseView["meta"] | null;
   status: Status;
-  headline: { ours: ModelAggregate; base: ModelAggregate } | null;
+  headline: MoveSelectionHeadline | null;
 }) {
   const ours = meta?.ours ?? null;
   const sizeLabel = ours?.size ? `${ours.size} ` : "";
@@ -485,47 +489,57 @@ function ShowcaseHeader({
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center rounded-full bg-signal/12 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-signal ring-1 ring-signal/30">
-            Behavior from data
+            One behavior · move selection
           </span>
           <span className="text-[11px] uppercase tracking-wide text-faint">
             Multi-Model Showcase{modelCount ? ` · ${modelCount} models` : ""}
           </span>
         </div>
         <h1 className="text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl">
-          The fine-tune makes this local model coach where its base can’t.
+          The fine-tune reliably picks the level-appropriate move where its base — and the frontier —
+          can’t.
         </h1>
         <p className="max-w-3xl text-sm leading-relaxed text-muted sm:text-base">
-          <span className="text-signal">OURS</span> is a {sizeLabel}model running locally. On the
-          same held-out positions as its untuned <span className="text-ink">base</span> — same
-          weights, byte-identical input — fine-tuning{" "}
+          <span className="text-signal">OURS</span> is a {sizeLabel}model running locally with one
+          job: <span className="text-ink">select the tier-appropriate move</span> for the player’s
+          rating.{" "}
           {headline ? (
             <>
-              lifts tier-appropriate move selection{" "}
+              On the same held-out positions as its untuned <span className="text-ink">base</span> —
+              same weights, byte-identical input — fine-tuning lifts tier-appropriate move selection{" "}
               <span className="text-ink tnum">
                 {pct(headline.base.tierFitRate)} → {pct(headline.ours.tierFitRate)}
               </span>
-              {headline.ours.councilInstr != null && headline.base.councilInstr != null && (
+              {headline.bestFrontier && (
                 <>
-                  {" "}
-                  and the blinded council’s instructiveness grade{" "}
-                  <span className="text-ink tnum">
-                    {trimNum(headline.base.councilInstr)} → {trimNum(headline.ours.councilInstr)}
-                  </span>
+                  , past even the best frontier model{" "}
+                  <span className="text-ink tnum">({pct(headline.bestFrontier.tierFitRate)})</span>
                 </>
               )}
-              {" "}(computed live from {headline.ours.cells.toLocaleString()} held-out cells) —
-              reliability a prompt on the same model can’t guarantee.
+              . And it <span className="text-ink">adapts the move to the level</span>: on those same
+              positions OURS gives{" "}
+              <span className="text-ink tnum">{headline.oursDistinct.toFixed(1)}</span> distinct,
+              level-appropriate moves across the three tiers, where the frontier repeats essentially
+              one{" "}
+              <span className="tnum">({headline.frontierDistinct.toFixed(1)})</span>. That
+              level-appropriate move is the behavior a prompt on the same weights can’t reproduce
+              (computed live from {headline.ours.cells.toLocaleString()} held-out cells).
             </>
           ) : (
-            <>makes it pass the shippable gate and adapt its move to the player’s level — reliability a prompt on the same model can’t guarantee.</>
+            <>
+              Fine-tuning teaches it to pick a different, level-appropriate move per rating where the
+              frontier repeats one — a behavior a prompt on the same weights can’t reproduce.
+            </>
           )}
         </p>
         <p className="max-w-3xl text-sm leading-relaxed text-muted">
-          <span className="text-ink">The comparison, below:</span> how OURS stacks up against{" "}
-          {modelCount ? `${modelCount} ` : ""}frontier and open models on the same grounded input.
-          Pick a position, switch the model and the rating tier, and read the recommended move, the
-          objective verdicts, the blinded council grades, and the coaching text side by side. The
-          field is precomputed; only <span className="text-signal">OURS</span> can be re-run live.
+          <span className="text-ink">The comparison, below,</span> is centered on that axis:
+          tier-appropriate move selection and per-level move adaptation, both deterministic. The
+          coaching prose is a <span className="text-ink">secondary, optional layer</span> — the
+          frontier writes livelier explanations (see the council instructiveness grades and the
+          truthfulness residual), and we don’t claim the prose as the win. Pick a position, switch
+          the model and the rating tier, and read each model’s move at every level side by side; only{" "}
+          <span className="text-signal">OURS</span> can be re-run live.
         </p>
       </div>
 
@@ -1047,7 +1061,7 @@ function Explorer({
 
           {tierHasData && selCell && cellEvaluated ? (
             <>
-              <VerdictRow model={selModel} cell={selCell} />
+              <VerdictRow model={selModel} cell={selCell} tier={tier} />
               <CouncilPanel meta={meta} cell={selCell} />
               <CoachingBlock model={selModel} cell={selCell} />
             </>
@@ -1407,17 +1421,30 @@ function SelectedModelTiers({
 
 /* ---- Verdict chips ----------------------------------------------- */
 
-function VerdictRow({ model, cell }: { model: ViewModel; cell: ViewCell }) {
+/** The reframed HERO: the recommended MOVE + a short principle tag — the trained
+ *  behavior — with the deterministic verdict chips (tier-fit / sound / faithful)
+ *  right beneath it. The move, not the prose, is the loudest element. */
+function VerdictRow({ model, cell, tier }: { model: ViewModel; cell: ViewCell; tier: ShowcaseTier }) {
+  const isOurs = model.kind === "ours";
+  const tag = cellMoveTag(cell, tier);
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <span className={`text-base font-semibold ${model.kind === "ours" ? "text-signal" : "text-ink"}`}>
-        {model.name}
-      </span>
-      <KindTag kind={model.kind} />
-      <span className="ml-auto font-mono text-lg font-semibold text-ink tnum">
-        {cell.move ?? "—"}
-      </span>
-      <div className="flex w-full flex-wrap items-center gap-1.5">
+    <div className="flex flex-col gap-2.5 rounded-[10px] border-[1.5px] border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3.5">
+      {/* Move + principle tag — the single loudest element in the explorer. */}
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span
+          className={`font-mono text-[2rem] font-semibold leading-none tnum ${isOurs ? "text-signal" : "text-ink"}`}
+        >
+          {cell.move ?? "—"}
+        </span>
+        {tag && <span className="text-sm text-muted">— {tag}</span>}
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className={`text-sm font-semibold ${isOurs ? "text-signal" : "text-ink"}`}>
+          {model.name}
+        </span>
+        <KindTag kind={model.kind} />
+      </div>
+      <div className="flex flex-wrap items-center gap-1.5">
         <Chip
           tone={cell.tierFit ? "signal" : cell.sound ? "muted" : "danger"}
           label={cell.tierFit ? "tier-fit" : cell.sound ? "sound" : cell.move ? "unsound" : "no move"}
@@ -1503,26 +1530,19 @@ function trimNum(n: number): string {
 
 /* ---- Coaching block ---------------------------------------------- */
 
+/**
+ * The coaching PROSE — now a secondary, OPTIONAL layer. Collapsed behind an
+ * expander so the move + principle tag above stays the hero; the prose reads as a
+ * supplementary, engine-assisted explanation, not the trained output. The gate
+ * badge and the (defensive) post-gate alarm stay visible.
+ */
 function CoachingBlock({ model, cell }: { model: ViewModel; cell: ViewCell }) {
   const badge = gateBadge(cell);
   const raw = cell.rawCoaching;
   const rawDiffers = raw != null && raw !== cell.coaching;
 
   return (
-    <div className="flex flex-col gap-2 rounded-[10px] border-[1.5px] border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3">
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="text-xs font-semibold text-muted">
-          {model.short} coaching · {model.kind === "ours" ? "tuned" : model.kind}
-        </span>
-        <span
-          className="rounded-full bg-[color:var(--surface-tertiary)] px-1.5 py-0.5 text-[10px] font-medium text-faint"
-          title="The text shown is the gated output — what actually ships to a user."
-        >
-          gated · shipped
-        </span>
-        {badge && <GateBadge badge={badge} />}
-      </div>
-
+    <div className="flex flex-col gap-2">
       {/* Defensive: a POST-gate board-fact error would be a genuine alarm. The
           deterministic residual is 0 for every shipped cell, so this normally
           stays hidden — but if incomplete data ever carried one, we surface it. */}
@@ -1542,35 +1562,57 @@ function CoachingBlock({ model, cell }: { model: ViewModel; cell: ViewCell }) {
         </div>
       )}
 
-      {/* The GATED text is what ships — displayed by default. */}
-      <p className="max-h-64 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-muted">
-        {cell.coaching || <span className="text-faint">No coaching text produced.</span>}
-      </p>
+      {/* Full coaching prose — OPTIONAL, collapsed, clearly labeled as secondary. */}
+      <details className="group rounded-[10px] border border-[color:var(--border)] bg-[color:var(--surface)]">
+        <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 px-3.5 py-2.5 text-xs font-medium text-muted [&::-webkit-details-marker]:hidden">
+          <span aria-hidden className="text-faint transition-transform group-open:rotate-90">
+            ›
+          </span>
+          Show full explanation
+          <span className="text-faint">(optional, engine-assisted)</span>
+          {badge && (
+            <span className="ml-auto">
+              <GateBadge badge={badge} />
+            </span>
+          )}
+        </summary>
+        <div className="flex flex-col gap-2 px-3.5 pb-3.5">
+          <p className="text-[11px] leading-relaxed text-faint">
+            {model.short} coaching · {model.kind === "ours" ? "tuned" : model.kind} · gated + shipped.
+            A supplementary layer over the trained behavior (the move above) — not the trained output
+            itself. Fine-tuning did not improve the prose; the frontier writes livelier explanations
+            (see the council + truthfulness panels below).
+          </p>
+          <p className="max-h-64 overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-muted">
+            {cell.coaching || <span className="text-faint">No coaching text produced.</span>}
+          </p>
 
-      {/* Collapsed, clearly-labeled view of the model's ORIGINAL pre-gate draft. */}
-      {raw != null && (
-        <details className="group rounded-md border border-[color:var(--border)] bg-[color:var(--surface-tertiary)]/40">
-          <summary className="flex list-none items-center gap-1.5 px-3 py-2 text-[11px] font-medium text-faint [&::-webkit-details-marker]:hidden">
-            <span aria-hidden className="text-faint transition-transform group-open:rotate-90">
-              ›
-            </span>
-            Raw model output (pre-gate)
-            <span className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] text-faint ring-1 ring-[color:var(--border)]">
-              {rawDiffers ? "differs from shipped" : "identical to shipped"}
-            </span>
-          </summary>
-          <div className="flex flex-col gap-2 px-3 pb-3">
-            <p className="text-[11px] leading-relaxed text-faint">
-              {rawDiffers
-                ? "The model’s first draft was adjusted by the verify-and-regenerate gate; the shipped text above is the gated version. Faithfulness is a fairness floor applied equally to every model — see the truthfulness panel for where models actually differ."
-                : "The model’s first draft passed the board-fact gate unchanged — the shipped text above is the model’s own words."}
-            </p>
-            <p className="max-h-56 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-muted">
-              {raw || <span className="text-faint">No raw text recorded.</span>}
-            </p>
-          </div>
-        </details>
-      )}
+          {/* Collapsed, clearly-labeled view of the model's ORIGINAL pre-gate draft. */}
+          {raw != null && (
+            <details className="group/raw rounded-md border border-[color:var(--border)] bg-[color:var(--surface-tertiary)]/40">
+              <summary className="flex list-none items-center gap-1.5 px-3 py-2 text-[11px] font-medium text-faint [&::-webkit-details-marker]:hidden">
+                <span aria-hidden className="text-faint transition-transform group-open/raw:rotate-90">
+                  ›
+                </span>
+                Raw model output (pre-gate)
+                <span className="ml-1 rounded-full px-1.5 py-0.5 text-[10px] text-faint ring-1 ring-[color:var(--border)]">
+                  {rawDiffers ? "differs from shipped" : "identical to shipped"}
+                </span>
+              </summary>
+              <div className="flex flex-col gap-2 px-3 pb-3">
+                <p className="text-[11px] leading-relaxed text-faint">
+                  {rawDiffers
+                    ? "The model’s first draft was adjusted by the verify-and-regenerate gate; the shipped text above is the gated version. Faithfulness is a fairness floor applied equally to every model — see the truthfulness panel for where models actually differ."
+                    : "The model’s first draft passed the board-fact gate unchanged — the shipped text above is the model’s own words."}
+                </p>
+                <p className="max-h-56 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-muted">
+                  {raw || <span className="text-faint">No raw text recorded.</span>}
+                </p>
+              </div>
+            </details>
+          )}
+        </div>
+      </details>
     </div>
   );
 }
@@ -1822,11 +1864,11 @@ function LiveResult({
   tier: ShowcaseTier;
   oursCell: ViewCell | null;
 }) {
-  const paragraphs = result.coaching
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+  const hasProse = Boolean(result.coaching?.trim());
   const changed = oursCell?.move && oursCell.move !== result.recommended_move_san;
+  // Principle tag assembled from the live CoachResponse's own fields — concepts if
+  // present, else a short slice of the takeaway. The move is the hero, not the prose.
+  const tag = principleTag(result.concepts_used, result.takeaway);
 
   return (
     <div className="rise flex flex-col gap-3 rounded-[10px] border border-signal/40 bg-signal/[0.07] px-4 py-3.5">
@@ -1834,10 +1876,6 @@ function LiveResult({
         <span className="rounded-full bg-signal/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-signal">
           live · OURS
         </span>
-        <span className="font-mono text-lg font-semibold text-signal tnum">
-          {result.recommended_move_san}
-        </span>
-        <span className="text-xs text-muted">for {cap(tier)} · {result.side_to_move} to move</span>
         {oursCell?.evaluated && (
           <span className="ml-auto text-[11px] text-faint">
             precomputed: <span className="font-mono tnum">{oursCell.move ?? "—"}</span>
@@ -1846,17 +1884,37 @@ function LiveResult({
         )}
       </div>
 
-      {paragraphs.map((p, i) => (
-        <p key={i} className="text-sm leading-relaxed text-ink">
-          {p}
-        </p>
-      ))}
+      {/* HERO: the level-appropriate move + a short principle tag. */}
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="font-mono text-[2rem] font-semibold leading-none text-signal tnum">
+          {result.recommended_move_san}
+        </span>
+        <span className="text-xs text-muted">for {cap(tier)} · {result.side_to_move} to move</span>
+      </div>
+      {tag && <p className="text-sm leading-relaxed text-ink">— {tag}</p>}
 
-      {result.takeaway && (
-        <div className="rounded-md bg-[color:var(--surface-tertiary)]/55 px-3 py-2">
-          <p className="mb-0.5 text-[11px] font-semibold text-muted">Takeaway</p>
-          <p className="text-sm leading-relaxed text-ink">{result.takeaway}</p>
-        </div>
+      {/* Full explanation — optional, secondary, collapsed. */}
+      {hasProse && (
+        <details className="group rounded-md border border-[color:var(--border)] bg-[color:var(--surface)]/60">
+          <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 px-3 py-2 text-[11px] font-medium text-muted [&::-webkit-details-marker]:hidden">
+            <span aria-hidden className="text-faint transition-transform group-open:rotate-90">
+              ›
+            </span>
+            Show full explanation
+            <span className="text-faint">(optional, engine-assisted)</span>
+          </summary>
+          <div className="flex flex-col gap-2 px-3 pb-3">
+            {result.coaching
+              .split(/\n\s*\n/)
+              .map((p) => p.trim())
+              .filter(Boolean)
+              .map((p, i) => (
+                <p key={i} className="text-sm leading-relaxed text-muted">
+                  {p}
+                </p>
+              ))}
+          </div>
+        </details>
       )}
 
       <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted">
@@ -1908,11 +1966,13 @@ function LeaderboardPanel({
       </div>
       <p className="max-w-4xl text-xs leading-relaxed text-muted">
         Every number here is computed live from the loaded cells — nothing is hardcoded, so it always
-        matches the OURS version on screen. <span className="text-signal">OURS</span> sits next to its
-        own untuned <span className="text-ink">BASE</span> for the honest before/after:{" "}
-        <span className="text-muted">tier-fit</span> = share of moves matching the trained
-        tier-appropriate target; <span className="text-muted">council</span> = blinded cross-family
-        grades for move quality and instructiveness.
+        matches the OURS version on screen. The axis this product competes on is the leftmost:{" "}
+        <span className="text-ink">tier-appropriate move selection</span> (tier-fit) — where{" "}
+        <span className="text-signal">OURS</span> leads its own untuned <span className="text-ink">BASE</span>{" "}
+        and the frontier. The <span className="text-muted">council move / instructiveness</span> grades
+        are shown as context, not the headline: they grade the coaching prose, where OURS does{" "}
+        <span className="text-ink">not</span> lead — fine-tuning sharpened the move, not the paragraph,
+        and we don’t claim otherwise.
       </p>
 
       <div className="overflow-hidden rounded-[10px] border border-[color:var(--border)]">
