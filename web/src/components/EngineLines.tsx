@@ -52,7 +52,7 @@ export default function EngineLines({
 
   return (
     <section aria-label="Likely continuations">
-      <div className="mb-3 flex items-baseline justify-between gap-2">
+      <div className="mb-2 flex items-baseline justify-between gap-2">
         <h3 className="text-sm font-medium text-ink">How it could continue</h3>
         <span className="text-xs text-muted">Click a line to play it — or a move to go deeper</span>
       </div>
@@ -111,7 +111,7 @@ export default function EngineLines({
                 >
                   {fmtEval(m.cp)}
                 </span>
-                <div className="min-w-0 flex-1 font-mono text-[13px] leading-relaxed">
+                <div className="min-w-0 flex-1 font-serif text-[14px] leading-relaxed">
                   {toks.map((t, i) => {
                     const tokenColor =
                       i === 0

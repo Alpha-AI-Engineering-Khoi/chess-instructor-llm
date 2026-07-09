@@ -69,7 +69,7 @@ export default function CoachingReveal({
       <Block delay={0}>
         <h2 className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
           <span
-            className="font-mono font-semibold text-signal tnum"
+            className="font-serif font-semibold text-signal tnum"
             style={{ fontSize: "var(--text-verdict)", lineHeight: 0.95, letterSpacing: "-0.02em" }}
           >
             {result.recommended_move_san}
@@ -84,7 +84,7 @@ export default function CoachingReveal({
               <Tooltip.Content showArrow className="max-w-[18rem]">
                 <Tooltip.Arrow />
                 <p className="leading-relaxed">
-                  The tuned model’s one job: pick the move that fits this rating band. Switch levels
+                  The tuned model's one job: pick the move that fits this rating band. Switch levels
                   to watch the pick adapt.
                 </p>
               </Tooltip.Content>
@@ -103,7 +103,7 @@ export default function CoachingReveal({
             </Chip>
             <span className="text-sm text-muted">
               You played{" "}
-              <span className="font-mono text-[color:var(--your-move)] tnum">{student.san}</span>.
+              <span className="font-serif text-[color:var(--your-move)] tnum">{student.san}</span>.
             </span>
           </div>
         )}
@@ -135,7 +135,7 @@ export default function CoachingReveal({
 
       {/* Under the board: the measured evidence. */}
       <Separator />
-      <Block delay={0.32}>
+      <Block delay={0.16}>
         <AnalysisRail
           engine={result.engine}
           maia={result.maia}
@@ -144,7 +144,7 @@ export default function CoachingReveal({
         />
       </Block>
 
-      <Block delay={0.4}>
+      <Block delay={0.24}>
         <EngineLines
           engine={result.engine}
           fen={fen}
@@ -154,7 +154,7 @@ export default function CoachingReveal({
       </Block>
 
       {/* Provenance */}
-      <Block delay={0.46} className="flex flex-col gap-2">
+      <Block delay={0.32} className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Chip variant="soft" color="default" size="sm">
             {result.meta.tuned ? "Tuned coach" : "Base model"}

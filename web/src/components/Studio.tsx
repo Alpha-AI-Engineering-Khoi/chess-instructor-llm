@@ -520,8 +520,8 @@ export default function Studio() {
 
         <div className="flex max-w-3xl flex-col gap-2.5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex w-fit items-center rounded-full bg-signal/12 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wide text-signal ring-1 ring-signal/30">
-              One behavior · move selection
+            <span className="inline-flex w-fit items-center rounded-full bg-signal/12 px-2.5 py-1 text-[11px] font-medium text-signal ring-1 ring-signal/30">
+              One behavior: move selection
             </span>
             {oursLabel?.version && (
               <span className="rounded-full px-2.5 py-1 font-mono text-[11px] text-signal ring-1 ring-signal/40 tnum">
@@ -530,11 +530,11 @@ export default function Studio() {
             )}
           </div>
           <h1 className="text-2xl font-semibold leading-tight tracking-tight text-balance text-ink sm:text-[2rem]">
-            The fine-tune reliably picks the level-appropriate move where its base can’t.
+            The fine-tune reliably picks the level-appropriate move where its base can't.
           </h1>
           <p className="text-pretty text-sm leading-relaxed text-muted sm:text-base">
-            A fine-tuned model running locally. Set a position, mark the move you’re unsure about, and
-            pick your rating — it hands back <span className="text-ink">one move chosen for your
+            A fine-tuned model running locally. Set a position, mark the move you're unsure about, and
+            pick your rating. It hands back <span className="text-ink">one move chosen for your
             level</span> and a short <span className="text-ink">principle tag</span> for why. Its one
             job is selecting the tier-appropriate move; the full explanation is an{" "}
             <span className="text-ink">optional layer</span> underneath, not the headline. On the same
@@ -548,8 +548,8 @@ export default function Studio() {
               >
                 multi-model comparison
               </Link>{" "}
-              — OURS against frontier and open models on tier-appropriate move selection, with the
-              measured per-model metrics.
+              (OURS against frontier and open models on tier-appropriate move selection, with the
+              measured per-model metrics).
             </span>
           </p>
         </div>
@@ -558,8 +558,8 @@ export default function Studio() {
             so a first-time viewer knows exactly what to do and what to read. */}
         <div className="flex flex-col gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4 sm:flex-row sm:items-center sm:gap-5">
           <p className="text-sm leading-relaxed text-muted sm:max-w-[15rem]">
-            <span className="font-medium text-ink">How it works.</span> The model’s one job is to
-            pick the move that fits your rating — not to lecture.
+            <span className="font-medium text-ink">How it works.</span> The model's one job is to
+            pick the move that fits your rating, not to lecture.
           </p>
           <ol className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-3">
             {[

@@ -44,7 +44,7 @@ function Row({
     >
       <span
         aria-hidden
-        className="w-11 shrink-0 font-mono text-xs tnum"
+        className="w-11 shrink-0 font-serif text-sm tnum"
         style={{ color: tone === "neutral" ? "var(--muted)" : "var(--ink)" }}
       >
         {san}
@@ -116,7 +116,7 @@ export default function AnalysisRail({
 
       <div className="grid gap-6 sm:grid-cols-2">
         <section aria-label="Strong moves">
-          <h3 className="mb-3 text-sm font-medium text-ink">Strong moves</h3>
+          <h3 className="mb-2 text-sm font-medium text-ink">Strong moves</h3>
           <ul className="flex flex-col gap-1.5">
             {pool.map((m) => {
               const tone = toneFor(m.uci);
@@ -128,7 +128,7 @@ export default function AnalysisRail({
         </section>
 
         <section aria-label="What players usually play">
-          <h3 className="mb-3 text-sm font-medium text-ink">
+          <h3 className="mb-2 text-sm font-medium text-ink">
             What players usually play
           </h3>
           {maiaTop.length === 0 ? (
