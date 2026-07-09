@@ -117,11 +117,11 @@
   },
   "vs_frontier_proof": {
     "n_positions_total": 120,
-    "wins": 44,
-    "losses": 8,
-    "ties": 9,
+    "wins": 51,
+    "losses": 5,
+    "ties": 6,
     "n_distinct": 68,
-    "n_distinct_and_diverge": 61,
+    "n_distinct_and_diverge": 62,
     "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
   },
   "per_model": {

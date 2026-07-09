@@ -6,14 +6,14 @@ The definitive base-vs-tuned eval, re-centered on the **32B v4** adapter. Every 
 
 ## Headline — did the 32B (v4) REGRESS vs the 4B (iter1)?
 
-**Verdict: OURS-v4 trails OURS-4B on a core axis (see table).** 32B ≫ 4B: tier-fit Δ 0.333, distinct-moves Δ 0.530; 44W / 8L / 9T vs the best frontier on the moat.
+**Verdict: OURS-v4 trails OURS-4B on a core axis (see table).** 32B ≫ 4B: tier-fit Δ 0.404, distinct-moves Δ 0.490; 51W / 5L / 6T vs the best frontier on the moat.
 
 **Core moat + instructiveness axes:**
 
 | axis | OURS-v4 (32B) | OURS-4B | Δ (v4−4b) | better | v4 not worse |
 |---|---:|---:|---:|:--:|:--:|
-| tier_fit_mean | 0.719 | 0.386 | 0.333 | higher↑ | yes |
-| distinct_moves_per_level | 0.790 | 0.260 | 0.530 | higher↑ | yes |
+| tier_fit_mean | 0.79 | 0.386 | 0.404 | higher↑ | yes |
+| distinct_moves_per_level | 0.75 | 0.260 | 0.490 | higher↑ | yes |
 | instr_council_rank | 6.076 | 5.622 | 0.454 | lower↓ | NO |
 | coherence_violation_rate | 0.125 | 0.342 | -0.217 | lower↓ | yes |
 | instr_grade_0_10 | 4.670 | 5.320 | -0.650 | higher↑ | NO |
@@ -26,14 +26,14 @@ The definitive base-vs-tuned eval, re-centered on the **32B v4** adapter. Every 
 | well_formed_gated | 1.000 | 1.000 | 0.000 | shared floor ~100% |
 | no_engine_speak_gated | 0.983 | 1.000 | -0.017 | 32B slips ~2% (still > v3 95.6%); negligible |
 
-**vs untuned 32B base (`q3_32b`):** tier-fit Δ 0.378, instr-rank Δ 0.257 (neg=better), distinct Δ 0.490, instr-grade Δ -0.550.
-**vs best prompt-base on this slice (`pbase_4b`):** instr-rank Δ -0.920 (neg=better), tier-fit Δ 0.369. (The 32B prompt-base was shown to lose to the 32B tune on the prior slice — see `RESULTS_HONEST_EVAL.md` litmus [32b].)
+**vs untuned 32B base (`q3_32b`):** tier-fit Δ 0.448, instr-rank Δ 0.257 (neg=better), distinct Δ 0.450, instr-grade Δ -0.550.
+**vs best prompt-base on this slice (`pbase_4b`):** instr-rank Δ -0.920 (neg=better), tier-fit Δ 0.440. (The 32B prompt-base was shown to lose to the 32B tune on the prior slice — see `RESULTS_HONEST_EVAL.md` litmus [32b].)
 
 **Distance to frontier:** best frontier = gpt (instr rank 2.128); OURS-v4 rank 6.076; gap = 3.948 rank positions.
 
 ## vs-frontier + distinct-tier PROOF
 
-Of **120** val positions, OURS-v4 gives distinct, sound, correctly-graded per-tier moves on **68**; of those it also DIVERGES from the best frontier model's move on **61**. On that proof set: **44 wins / 8 losses / 9 ties** for OURS-v4 on the MOAT (tier-fit then soundness) vs the best-moat frontier at each position — the same win definition the platform uses (`assemble.derive_wins`). Instructiveness (where the frontier leads) is reported separately above with CIs; it is NOT folded into this moat proof.
+Of **120** val positions, OURS-v4 gives distinct, sound, correctly-graded per-tier moves on **68**; of those it also DIVERGES from the best frontier model's move on **62**. On that proof set: **51 wins / 5 losses / 6 ties** for OURS-v4 on the MOAT (tier-fit then soundness) vs the best-moat frontier at each position — the same win definition the platform uses (`assemble.derive_wins`). Instructiveness (where the frontier leads) is reported separately above with CIs; it is NOT folded into this moat proof.
 
 ## Leaderboard (v4-centered VAL field)
 
@@ -45,7 +45,7 @@ Of **120** val positions, OURS-v4 gives distinct, sound, correctly-graded per-ti
 | OURS-v3 (Qwen3-32B tuned, prior) | reuse | 0.525 | 4.100 | 6.350 | 8.630 | 1.000 | 0.310 | 0.358 |
 | OURS-4B (Qwen3-4B tuned) | yes | 0.386 | 5.622 | 5.320 | 8.970 | 1.000 | 0.260 | 0.342 |
 | BASE (Qwen3-32B untuned) | reuse | 0.342 | 5.819 | 5.220 | 9.010 | 0.992 | 0.300 | 0.492 |
-| OURS-v4 (Qwen3-32B tuned) | reuse | 0.719 | 6.076 | 4.670 | 7.900 | 0.967 | 0.790 | 0.125 |
+| OURS-v4 (Qwen3-32B tuned) | reuse | 0.79 | 6.076 | 4.670 | 7.900 | 0.986 | 0.75 | 0.125 |
 | PROMPT-BASE-4B (Qwen3-4B engineered) | yes | 0.350 | 6.996 | 4.220 | 8.790 | 1.000 | 0.460 | 0.392 |
 | BASE-4B (Qwen3-4B untuned) | yes | 0.347 | 7.133 | 4.110 | 8.780 | 1.000 | 0.220 | 0.392 |
 
