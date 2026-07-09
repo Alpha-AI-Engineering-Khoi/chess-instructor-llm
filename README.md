@@ -254,14 +254,16 @@ Secrets live only in `./.env` and are read at call time, never printed.
 
 ```
 config/     tiers, engine tolerances, Maia mapping, an older prose-full BEHAVIOR_SPEC (pending update; the canonical one-behavior spec is in BRAINLIFT.md), schema/rendering
-data/       positions / transcripts / generated / dataset / analysis / benchmark / eval (gitignored)
+data/       raw inputs + derived training sets (positions/transcripts/generated/dataset/bank/curate) are gitignored;
+            the benchmark + eval artifacts (benchmark_*/, eval/, showcase/, analysis/ — 250+ tracked files) ARE
+            committed, including the v4 headline inputs (ours_v4 gens, gap803 scenarios, val_ids, report_v4.json)
 prompts/    coach_system.md (the spec), principles.md + fewshots.json (distilled style), tier_guides, rubric
 src/engine  Stockfish + Maia wrappers, position_facts (grounding), faithfulness (the verifier)
 src/ingest  Lichess sampler, YouTube transcript harvester
 src/teacher GPT-5.5 generation + principle distillation + tier selection + the coach gate
 src/train   split_data + Modal QLoRA trainers
 src/eval    base-vs-tuned harness (evaluate.py), the blinded council (benchmark/), honest gated eval (honest/)
-scripts/    grand_eval.py (20-model leaderboard), honest_v4.py (v4 regression + selection-conditioned head-to-head)
+scripts/    reproduce_v4.py (clean-clone headline re-score, no GPU/network), grand_eval.py (20-model leaderboard), honest_v4.py (v4 regression + selection-conditioned head-to-head)
 src/api     FastAPI backend (server.py): the platform's thin HTTP layer
 web/        Next.js 16 + Tailwind v4 + HeroUI v3 + react-chessboard front end
 run_platform.sh  one command to run the whole platform locally
@@ -276,6 +278,34 @@ the engine and Maia, with no model judge in the loop, because the deliverable is
 has a checkable right answer per tier. Instructiveness of the optional prose layer is a separate,
 held-out, cross-family council the model never trains against.
 
+### Reproduce the headline (no GPU, no network)
+
+The v4 headline re-scores from committed files alone — one command, only `python-chess` required:
+
+```bash
+python -m scripts.reproduce_v4
+```
+
+This is **Level 1 (artifact re-score)**: it re-extracts v4's recommended move from the published
+generations (`data/benchmark_honest/gen/ours_v4.jsonl`) with the same strict any-legal extractor the
+report uses (`src/eval/evaluate.py::extract_recommended_move` ->
+`src/teacher/coach_gate.py::pick_recommendation`), scores them against the committed ground truth
+(`data/benchmark_gap803/scenarios.jsonl` + the 120 position ids in
+`data/benchmark_honest/val_ids.txt`), and ASSERTS the numbers equal
+`data/benchmark_honest/report_v4.json`: tier-policy match **0.7667**, distinct-moves **0.7849**, raw
+move-soundness **0.9417**. It re-scores published generations against committed ground truth; it does
+NOT re-derive the ground truth (engine / Maia / `select_tier_move`) and does NOT re-run inference.
+
+Three levels of reproduction, labeled by what each actually re-runs:
+
+| Level | What it re-runs | How | Status |
+|---|---|---|:--|
+| **1 — artifact re-score** | re-scores the published v4 generations against committed ground truth; asserts 0.7667 / 0.7849 / 0.9417 | `python -m scripts.reproduce_v4` | **supported today** — no GPU, no network, no engine |
+| **2 — retrain from final dataset** | re-trains v4 from the shipped dataset (new checkpoint; decoding + hardware variance) | `src/train` QLoRA on `chess-coach-move-review` (v4 config) | **approximate** — needs a CUDA GPU |
+| **3 — full teacher / data regen** | regenerates ground truth + dataset from scratch (Stockfish + Maia + GPT-5.5 teacher + filter), then Level 2 | the offline data pipeline | **not bit-exact** — engine / Maia / teacher nondeterminism; needs GPU + API keys + engines |
+
+### Deeper re-scores (require the full generation field present locally)
+
 ```bash
 # strict v4 regression verdict + selection-conditioned head-to-head -> RESULTS_HONEST_EVAL_V4.md + data/benchmark_honest/report_v4.json
 python -m scripts.honest_v4 report
@@ -283,6 +313,10 @@ python -m scripts.honest_v4 report
 # full 20-model leaderboard (deterministic tier-policy match + selection-conditioned head-to-head + blinded council) -> data/benchmark_grand/GRAND_EVAL_LEADERBOARD.md
 python -m scripts.grand_eval report
 ```
+
+These two re-score the whole field and need every model's generations present (including the 4B trio
+and the frontier council); `scripts.honest_v4` will error on a clean clone that lacks the 4B gens. For
+a bare clean clone, use `scripts.reproduce_v4` above — it needs only the committed v4 artifacts.
 
 Held-out and anti-leak invariants are non-negotiable: every eval FEN is verified absent from the
 training set by board + side-to-move key (0 of 120 leakage), grounding is identical across all

@@ -83,5 +83,22 @@ web/.tweaks-verify/
 # OS
 .DS_Store
 
+# ===== Eval scratch + logs (keep `git status` readable) =====
+# These are transient / re-derivable, NOT the committed benchmark+eval artifacts
+# (data/benchmark_*/, data/eval/, data/showcase/ stay tracked — see README repo layout).
+
+# All log files (run / gen / council / opt / judge logs) — never a source of truth
+*.log
+
+# Underscore-prefixed working files + model downloads for the grand / v4 / v5 evals
+data/benchmark_grand/_*
+data/benchmark_honest/_*
+_v5dl
+_v4dl
+
+# Confounded / abandoned v5 run + one-off benchmark backups (not shipped)
+data/benchmark_v5/
+data/benchmark_honest_1p7_bak/
+
 # Always keep folder-structure placeholders
 !**/.gitkeep

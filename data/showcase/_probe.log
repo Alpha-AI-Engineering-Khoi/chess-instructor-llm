@@ -1,4 +1,0 @@
-gemma3_27b ERR 47.1 s APITimeoutError Request timed out.
-kimi25 ERR 47.1 s APITimeoutError Request timed out.
-mistral3 ERR 47.1 s APITimeoutError Request timed out.
-dsr1 OK 6.3 s ctok 547 | "I'd play g6. This pawn push creates a powerfu"

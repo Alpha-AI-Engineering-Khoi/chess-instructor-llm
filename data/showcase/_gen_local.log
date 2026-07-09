@@ -1,7 +1,0 @@
-=== LOCAL group (OURS x3 splits, BASE x2) ===
-[train/ours] rc=0 504s :: DONE train/ours: 396 gens in 504s -> /Users/khoilam/Documents/Crossover/coding-projects/chess-instructor-llm/data/showcase/train/gen/ours.jsonl
-[test_new/ours] rc=0 737s :: DONE test_new/ours: 630 gens in 736s -> /Users/khoilam/Documents/Crossover/coding-projects/chess-instructor-llm/data/showcase/test_new/gen/ours.jsonl
-[test_reuse/ours] rc=0 816s :: DONE test_reuse/ours: 450 gens in 815s -> /Users/khoilam/Documents/Crossover/coding-projects/chess-instructor-llm/data/showcase/test_reuse/gen/ours.jsonl
-[train/base] rc=0 667s :: DONE train/base: 396 gens in 667s -> /Users/khoilam/Documents/Crossover/coding-projects/chess-instructor-llm/data/showcase/train/gen/base.jsonl
-[test_new/base] rc=0 713s :: DONE test_new/base: 630 gens in 712s -> /Users/khoilam/Documents/Crossover/coding-projects/chess-instructor-llm/data/showcase/test_new/gen/base.jsonl
-=== run_gens DONE (local) in 3437s ===
