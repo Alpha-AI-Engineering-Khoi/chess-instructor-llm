@@ -17,9 +17,11 @@ const nextConfig: NextConfig = {
   // Showcase/Study-library data are static JSON in public/, so no server runtime
   // is needed.
   output: "export",
-  // Directory routes (/showcase/, /showdown/) -> out/<route>/index.html so a plain
-  // static file host serves them without rewrites.
-  trailingSlash: true,
+  // Flat files: routes -> out/<route>.html (e.g. showcase.html). Hugging Face static
+  // Spaces serve exact file paths and the root index, but NOT directory indexes
+  // (/showcase/) or extensionless clean URLs (/showcase) — so the secondary pages
+  // ship as /showcase.html and /showdown.html. The Studio homepage is the root ("/").
+  trailingSlash: false,
   // next/image optimization needs a server; disable it for the static export.
   images: { unoptimized: true },
   env: {
