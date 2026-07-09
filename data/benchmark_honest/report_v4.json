@@ -29,9 +29,9 @@
       },
       {
         "axis": "distinct_moves_per_level",
-        "ours_v4": 0.7849,
+        "ours_v4": 0.73,
         "ours_4b": 0.28,
-        "delta_v4_minus_4b": 0.5049,
+        "delta_v4_minus_4b": 0.45,
         "higher_better": true,
         "v4_not_worse": true
       },
@@ -92,7 +92,7 @@
     "untuned_base": "q3_32b",
     "tier_fit_delta": 0.4195,
     "instr_rank_delta": 0.257,
-    "distinct_delta": 0.4949,
+    "distinct_delta": 0.44,
     "instr_grade_delta": -0.55
   },
   "v4_vs_prompt_base": {
@@ -122,7 +122,25 @@
     "ties": 6,
     "n_distinct": 67,
     "n_distinct_and_diverge": 62,
-    "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
+    "selection_conditioned": true,
+    "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; SELECTION-CONDITIONED subset = only the 62 positions where v4 already gives distinct, sound, correctly-graded tier moves AND diverges from the frontier. Overstates a raw win rate; see unbiased_vs_frontier."
+  },
+  "unbiased_vs_frontier": {
+    "wins": 56,
+    "losses": 28,
+    "ties_diverging": 12,
+    "n_diverging": 96,
+    "ties_all": 36,
+    "n_total": 120,
+    "source": "eval audit (unbiased head-to-head over ALL positions where v4 diverges from the best frontier, NOT conditioned on v4 first succeeding)",
+    "note": "Present 56-28-12 over 96 diverging (56-28-36 over all 120) as the honest unbiased head-to-head; 51-5-6 over 62 is the v4-success-conditioned subset above. The all-scenario tier-policy lead (0.767 vs 0.553) remains the primary unbiased comparison."
+  },
+  "served_tier_fit": {
+    "raw_greedy": 0.7667,
+    "served_post_fix": 0.7889,
+    "served_pre_fix": 0.5889,
+    "served_move_sound": 1.0,
+    "note": "Replay of the shipped (post-fix d4afd73) coach_gate.run_gate over the 120 val drafts: the prose gate changes only the explanation, never the move, and always serves a sound move, so the SERVED move's tier-policy match (0.789) is at/above the evaluated greedy 0.767 - the 0.767 headline holds for what the demo serves. Pre-fix the gate could substitute engine-best on prose-failure, collapsing served match to 0.589 (fixed in d4afd73). The deterministic select_tier_move rule over the same grounding is ~1.0 by construction (the named ceiling)."
   },
   "per_model": {
     "ours_v4": {
@@ -143,9 +161,11 @@
       },
       "move_sound": 0.9417,
       "distinct": {
-        "differentiating_n": 93,
-        "distinct_rate": 0.7849,
-        "collapsed_BA": 20
+        "differentiating_n": 100,
+        "distinct_rate": 0.73,
+        "collapsed_BA": 27,
+        "distinct_count": 73,
+        "note": "denominator = all 100 canonical beginner!=advanced OPPORTUNITIES (73 distinct). The earlier 0.7849 used 93 = only the positions where v4 named BOTH tier moves, excluding 7 where it named none; the honest all-opportunities rate is 73/100 = 0.730."
       },
       "gate": {
         "gated": false,

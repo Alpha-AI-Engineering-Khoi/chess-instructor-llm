@@ -510,21 +510,31 @@ def _tier_fit(field: Sequence[str], by_id: Dict[str, Dict[str, Any]]) -> Dict[st
 
 
 def _distinct(field: Sequence[str], by_id: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
-    """Distinct-moves-per-level on DIFFERENTIATING positions (canonical beginner!=advanced)."""
+    """Distinct-moves-per-level over ALL canonical beginner!=advanced OPPORTUNITIES.
+
+    The denominator is every position whose canonical beginner and advanced moves
+    differ (an opportunity to differentiate), NOT only the positions where the model
+    named both tier moves. A position where the model failed to name a move on a tier
+    is a FAILURE to differentiate (a miss), not an exclusion, so the rate stays honest
+    and apples-to-apples across the field. (An earlier denominator excluded no-answer
+    positions, e.g. v4 read 73/93 = 0.785; the honest all-opportunities rate is
+    73/100 = 0.730.)
+    """
     rec = _rec_by_model_pos_tier(field, by_id)
     canon: Dict[str, Dict[str, Optional[str]]] = defaultdict(dict)
     for s in by_id.values():
         canon[s["pos_id"]][s["tier"]] = s.get("canonical_uci")
+    diff_pos = [pid for pid, cd in canon.items()
+                if cd.get("beginner") and cd.get("advanced") and cd["beginner"] != cd["advanced"]]
     out: Dict[str, Dict[str, Any]] = {}
     for mk in field:
-        n = d = 0
-        for pid, tp in rec[mk].items():
-            cb, ca = canon.get(pid, {}).get("beginner"), canon.get(pid, {}).get("advanced")
+        n = len(diff_pos)
+        d = 0
+        for pid in diff_pos:
+            tp = rec[mk].get(pid, {})
             mb, ma = tp.get("beginner"), tp.get("advanced")
-            if cb and ca and cb != ca and mb and ma:
-                n += 1
-                if mb != ma:
-                    d += 1
+            if mb and ma and mb != ma:
+                d += 1
         out[mk] = {"differentiating_n": n, "distinct_rate": round(d / n, 4) if n else None,
                    "collapsed_BA": n - d}
     return out

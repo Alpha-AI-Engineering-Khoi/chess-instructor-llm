@@ -66,7 +66,8 @@ plainspoken, never chatty, never hyped.
 
 ## Accessibility & Inclusion
 
-- Target **WCAG 2.1 AA**: body/UI text ≥ 4.5:1 contrast, large text ≥ 3:1,
+- Target **WCAG 2.1 AA** (the Studio's primary flow targets AA; dense comparison
+  views still in progress): body/UI text ≥ 4.5:1 contrast, large text ≥ 3:1,
   interactive controls with visible `:focus-visible` rings and ≥ 44×44px hit areas.
 - Never encode meaning by color alone (recommended vs. your move vs. engine data
   carry a label or shape, not just a hue) — important for color-vision deficiency.

@@ -59,6 +59,14 @@ Every TFY gateway model was regenerated **FRESH** on these exact positions (neve
 
 **Frontier reachability:** the 14-model lineup = 3 frontier APIs + 11 open candidates; **12 reachable** (dsr1 via `bedrock-oss-group/deepseek-r1`), **2 blocked**: `llama4-maverick` (400, Meta Llama access denied) and `kimi-k2-thinking` (403, not authorized).
 
+## Metric framing (2026-07-09 honest reframe)
+
+Numbers below are the as-computed grand-eval values (canonical/frozen); the framing terms are aligned to the honest reframe:
+
+- **"tier-fit" = "tier-policy exact match"** — exact agreement with the preregistered `select_tier_move` rule, a PROJECT RULE, not validated pedagogy. Lead with the all-scenario number (v4 0.767 vs best frontier 0.553), not a head-to-head win rate.
+- **The "moat" head-to-head is a project-rule metric, not a general win rate.** The per-tuned W/L/T table below is SELECTION-CONDITIONED (only the positions where OURS already gives a distinct, sound, correctly-graded move AND diverges from the frontier). For v4, the honest **unbiased** head-to-head over all 96 diverging positions is **56-28-12** (56-28-36 over all 120); the **51-5-6 over 62** shown below is the conditioned subset.
+- **distinct-moves denominator:** the `distinct↑` column is distinct / (positions where the model named both tier moves) as computed at grand-eval time (v4 = 73/93 = 0.785). The honest all-opportunities denominator (every canonical beginner!=advanced position, a no-answer counting as a miss) gives v4 **73/100 = 0.730**; see `data/benchmark_honest/report_v4.json`.
+
 ## Leaderboard — ranked by tier-appropriate move selection (the trained behavior)
 
 **Sort key:** ranked by **tier-appropriate move selection** — the deterministic **tier-fit↑** metric (the behavior we trained and the graded axis), ties broken by **distinct-moves-per-level↑** then **move-soundness↑**. Every deterministic axis (tier-fit / distinct / move-sound / coherence and the moat) uses the canonical **STRICT any-legal** move extractor (`coach_gate.pick_recommendation`, accept = any legal move; **no in-pool backfill**) — so an output that names no clearly-legal move is a miss everywhere and the leaderboard method matches the moat method exactly. The per-tuned head-to-head **W/L/T vs the best frontier** is in the moat table below. Instructiveness (the blinded cross-family council) is shown as a **secondary** axis in the `instr 0-10` / `move 0-10` / `rank↓` columns — **OURS-v4 is intentionally weaker on council prose and that is reported here honestly and unchanged.** Only the row order reflects tier-fit; every model's measured numbers are the deterministic + council values.

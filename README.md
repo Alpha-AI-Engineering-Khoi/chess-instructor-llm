@@ -55,14 +55,22 @@ the base does not:
 | 32B base -> 32B tuned (v4, shipped) | 0.347 -> 0.767 | strongest instance; mid-size, not small |
 | best frontier (Gemini 3.1 Pro) | 0.553 | #4 overall |
 
-(v4 distinct-moves-per-level 0.785 vs base 0.290; raw move soundness 0.942.)
+(v4 distinct-moves-per-level 0.730 = 73/100 canonical beginner!=advanced opportunities, vs base 0.290;
+raw move soundness 0.942.)
 
 - All-scenario lead (unbiased): across all 120 x 3 scenarios, v4 tier-policy match 0.767 vs the best
-  frontier 0.553 (Gemini, #4). The tuned checkpoints take 4 of the top 5.
-- Selection-conditioned head-to-head (NOT a general win rate): within the v4-success/divergence subset
-  (the 62 of 120 positions where v4 already gives a distinct, sound, correctly-graded move AND diverges
-  from the frontier), v4 wins 51-5 (6 ties). Conditioned on v4 succeeding, so not a win rate over all
-  positions.
+  frontier 0.553 (Gemini, #4). The tuned checkpoints take 4 of the top 5. This is the primary unbiased
+  comparison.
+- Unbiased head-to-head: over ALL positions where v4 diverges from the best frontier (not conditioned
+  on v4 succeeding), v4 goes 56-28-12 over the 96 diverging positions (56-28-36 over all 120) on the
+  moat (tier-policy match then soundness).
+- Selection-conditioned subset (NOT a general win rate): within the v4-success/divergence subset (the
+  62 of 120 positions where v4 already gives a distinct, sound, correctly-graded move AND diverges from
+  the frontier), v4 wins 51-5 (6 ties). Conditioned on v4 succeeding, so it overstates a win rate; use
+  the unbiased 56-28-12 above.
+- The demo serves the evaluated move: the prose gate changes only the explanation, never the move (it
+  keeps v4's own greedy sound move on a prose failure and rewrites only the prose), so the served-move
+  tier-policy match (0.789 replayed over the val drafts) matches the evaluated greedy 0.767.
 - Deployment-necessity is false as built: the deterministic rule already computes the canonical move
   at ~1.0 from the same grounding, so the model approximates a policy the product produces without it.
 - Move soundness equalizes to a shared ~100% floor once every model passes the shipped gate; it is a
@@ -138,9 +146,10 @@ wrong turns.
 - v3 (Qwen3-32B QLoRA): the all-rounder. It kept a strong balance of move and prose, landing about
   5th of 20 on the blinded prose council (instructiveness grade about 6.35) at tier-policy match 0.558.
 - v4 (Qwen3-32B QLoRA): the shipped model. Trained to maximize the policy match, it leads the field
-  (tier-policy match 0.767, distinct-moves 0.785, raw move-soundness 0.942) and wins the
-  selection-conditioned head-to-head 51-5 (6 ties) over the 62 diverging positions, while trading
-  prose down to about 15th of 20 (grade about 4.5). 32B is a mid-size extension, not a small model.
+  (tier-policy match 0.767, distinct-moves 0.730, raw move-soundness 0.942); the unbiased head-to-head
+  over the 96 diverging positions is 56-28-12 (the 51-5-6 over 62 is the v4-success-conditioned subset,
+  not a win rate), while it trades prose down to about 15th of 20 (grade about 4.5). 32B is a mid-size
+  extension, not a small model.
 - v5 (Qwen3-32B QLoRA): an attempt to fix v4's prose and raw faithfulness with a cleaner, filtered
   dataset. It regressed (tier-policy match 0.536, move-soundness 0.828, prose about 3.9, faithfulness
   flat around 0.58) but the run was CONFOUNDED and does not prove filtering alone caused it: about 27%
@@ -292,15 +301,16 @@ report uses (`src/eval/evaluate.py::extract_recommended_move` ->
 `src/teacher/coach_gate.py::pick_recommendation`), scores them against the committed ground truth
 (`data/benchmark_gap803/scenarios.jsonl` + the 120 position ids in
 `data/benchmark_honest/val_ids.txt`), and ASSERTS the numbers equal
-`data/benchmark_honest/report_v4.json`: tier-policy match **0.7667**, distinct-moves **0.7849**, raw
-move-soundness **0.9417**. It re-scores published generations against committed ground truth; it does
+`data/benchmark_honest/report_v4.json`: tier-policy match **0.7667**, distinct-moves **0.7300**
+(73/100 canonical beginner!=advanced opportunities), raw move-soundness **0.9417**. It re-scores
+published generations against committed ground truth; it does
 NOT re-derive the ground truth (engine / Maia / `select_tier_move`) and does NOT re-run inference.
 
 Three levels of reproduction, labeled by what each actually re-runs:
 
 | Level | What it re-runs | How | Status |
 |---|---|---|:--|
-| **1 — artifact re-score** | re-scores the published v4 generations against committed ground truth; asserts 0.7667 / 0.7849 / 0.9417 | `python -m scripts.reproduce_v4` | **supported today** — no GPU, no network, no engine |
+| **1 — artifact re-score** | re-scores the published v4 generations against committed ground truth; asserts 0.7667 / 0.7300 / 0.9417 | `python -m scripts.reproduce_v4` | **supported today** — no GPU, no network, no engine |
 | **2 — retrain from final dataset** | re-trains v4 from the shipped dataset (new checkpoint; decoding + hardware variance) | `src/train` QLoRA on `chess-coach-move-review` (v4 config) | **approximate** — needs a CUDA GPU |
 | **3 — full teacher / data regen** | regenerates ground truth + dataset from scratch (Stockfish + Maia + GPT-5.5 teacher + filter), then Level 2 | the offline data pipeline | **not bit-exact** — engine / Maia / teacher nondeterminism; needs GPU + API keys + engines |
 
@@ -322,7 +332,7 @@ Held-out and anti-leak invariants are non-negotiable: every eval FEN is verified
 training set by board + side-to-move key (0 of 120 leakage), grounding is identical across all
 models, Maia is symmetric across the field, and local decoding is greedy so tier differences are
 genuine conditioning, not sampling noise. Re-scoring the published generations reproduces tier-policy
-match 0.767 and distinct-moves 0.785 exactly.
+match 0.767 and distinct-moves 0.730 exactly.
 
 ---
 

@@ -130,13 +130,20 @@ def _distinct_rate(
     for scn in by_id.values():
         canon.setdefault(scn["pos_id"], {})[scn["tier"]] = scn.get("canonical_uci")
     differentiating = distinct = 0
-    for pos_id, picks in rec.items():
-        cb, ca = canon.get(pos_id, {}).get("beginner"), canon.get(pos_id, {}).get("advanced")
+    # Honest denominator: EVERY canonical beginner!=advanced OPPORTUNITY counts,
+    # including the positions where the model failed to name a move on a tier — a
+    # failure to differentiate is a miss, not an exclusion. (The earlier denominator
+    # counted only positions where the model named BOTH tier moves, giving 73/93 =
+    # 0.785; the honest all-opportunities denominator is 73/100 = 0.730.)
+    for pos_id, cd in canon.items():
+        cb, ca = cd.get("beginner"), cd.get("advanced")
+        if not (cb and ca and cb != ca):
+            continue
+        differentiating += 1
+        picks = rec.get(pos_id, {})
         mb, ma = picks.get("beginner"), picks.get("advanced")
-        if cb and ca and cb != ca and mb and ma:
-            differentiating += 1
-            if mb != ma:
-                distinct += 1
+        if mb and ma and mb != ma:
+            distinct += 1
     rate = distinct / differentiating if differentiating else 0.0
     return rate, differentiating, distinct
 

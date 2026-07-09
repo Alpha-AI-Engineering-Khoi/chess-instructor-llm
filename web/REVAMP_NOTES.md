@@ -33,7 +33,7 @@ console** — deliberately not wooden-and-serif and not cream-editorial.
 The palette *encodes the product thesis*: cool = measured engine truth; one warm
 signal = the human verdict.
 - Canvas: cool graphite, blue-tinted (OKLCH hue ~258), never pure black/white.
-- Ink: cool near-white; `--muted` / `--faint` tuned to clear WCAG AA on every surface.
+- Ink: cool near-white; `--muted` / `--faint` tuned so the Studio's primary flow targets WCAG AA (dense comparison views still in progress).
 - `--signal` (luminous amber, hue ~66): **reserved** for the recommended move,
   current selection, focus ring, and the primary action — never decoration.
 - `--engine` (cool blue, hue ~236): raw Stockfish/Maia data (the measured lane).
@@ -61,10 +61,11 @@ real structural axis, mono strictly *earned* (chess notation = tabular data):
 - **Color semantics:** signal reserved for the move (removed amber from the wordmark
   mark, provenance chip, takeaway label, eyebrows); "your move" no longer painted as
   a danger/error before the coach speaks; a legend + per-row tags so nothing is color-only.
-- **A11y / WCAG AA:** fixed the contrast failures (rust error text, translucent
-  severity chips, faint captions, amber-on-amber eval chip); ≥44px tap targets
-  (tier toggle, filter pills, retry); focus-visible signal rings; recommended move
-  promoted to the panel `h2`.
+- **A11y / WCAG AA (primary flow):** the Studio's primary flow targets WCAG AA
+  (dense comparison views still in progress); fixed the contrast failures (rust
+  error text, translucent severity chips, faint captions, amber-on-amber eval chip);
+  ≥44px tap targets (tier toggle, filter pills, retry); focus-visible signal rings;
+  recommended move promoted to the panel `h2`.
 - **States:** spinner-in-content → measured skeleton (console) + a status bar
   (board); plain-language error with retry + collapsible technical details;
   a real loading / error / empty distinction for the study library.
