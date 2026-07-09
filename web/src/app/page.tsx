@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Studio from "@/components/Studio";
 
 // Grader-facing clarity in the browser tab / link previews: state the one
-// behavior up front — the tuned model picks the level-appropriate move.
+// behavior up front: the tuned model picks the level-appropriate move.
 export const metadata: Metadata = {
   title: "Coach Studio · one move for your level",
   description:

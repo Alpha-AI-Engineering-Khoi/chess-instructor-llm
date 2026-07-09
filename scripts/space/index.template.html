@@ -2,27 +2,37 @@
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Chess-Coach Benchmark — definitive 803-position, 14-model eval (+ earlier 100-position run)</title>
+<title>Chess-Coach Benchmark: definitive 803-position, 14-model eval (plus earlier 100-position run)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Merriweather:wght@400;700;900&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* THE TOURNAMENT HALL: drenched felt-green surface, one warm brass signal for the
+   recommended/OURS accent, cream ink. All OKLCH; never flat #000/#fff. */
 :root{
-  --bg:#0b0d12; --panel:#12151d; --panel2:#171b25; --line:#242a38; --line2:#2f3646;
-  --ink:#e8ecf4; --muted:#9aa4b8; --dim:#6b7488;
-  --accent:#6ea8fe; --good:#33c27f; --warn:#f2b04a; --bad:#f2685f; --ours:#8b7bff;
-  --chip:#1c2130;
+  --bg:oklch(0.28 0.045 155); --panel:oklch(0.32 0.04 155); --panel2:oklch(0.35 0.04 155);
+  --line:oklch(0.40 0.04 155); --line2:oklch(0.44 0.04 155);
+  --ink:oklch(0.93 0.02 90); --muted:oklch(0.78 0.02 90); --dim:oklch(0.60 0.02 90);
+  --accent:oklch(0.735 0.09 236); --good:oklch(0.742 0.115 158); --warn:oklch(0.808 0.12 78);
+  --bad:oklch(0.64 0.17 25); --ours:oklch(0.78 0.13 85); --ours-ink:oklch(0.24 0.03 85);
+  --chip:oklch(0.35 0.04 155);
+  --font-ui:Archivo,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --font-mono:"Spline Sans Mono",ui-monospace,Menlo,monospace;
+  --font-serif:Merriweather,Georgia,serif;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{
-  background:radial-gradient(1200px 600px at 80% -10%, #16233b 0%, transparent 55%), var(--bg);
+  background:var(--bg);
   color:var(--ink);
-  font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
+  font:15px/1.55 var(--font-ui);
   -webkit-font-smoothing:antialiased;
 }
 .wrap{max-width:1080px;margin-inline:auto;padding:32px 22px 72px}
 a{color:var(--accent);text-decoration:none}
 a:hover{text-decoration:underline}
-.eyebrow{letter-spacing:.14em;text-transform:uppercase;font-size:12px;color:var(--muted);font-weight:600}
+.label{font-size:12.5px;color:var(--muted);font-weight:650}
 h1{font-size:30px;line-height:1.15;margin:8px 0 6px;font-weight:750;letter-spacing:-.02em}
 h1 .sub{color:var(--muted);font-weight:600}
 .framing{font-size:16.5px;color:var(--ink);font-weight:650;max-width:80ch;margin:6px 0 10px;letter-spacing:-.01em}
@@ -38,12 +48,10 @@ h2{font-size:20px;margin:38px 0 4px;letter-spacing:-.01em}
 h2 .sub{color:var(--muted);font-weight:600;font-size:15px}
 h3{font-size:14.5px;margin:0 0 4px;font-weight:650}
 .hint{color:var(--muted);font-size:13.5px;margin:0 0 14px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:12px;margin:16px 0 6px}
-.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 15px}
-.kpi .k{font-size:12px;color:var(--muted);font-weight:600}
-.kpi .v{font-size:26px;font-weight:750;margin-top:4px;letter-spacing:-.02em}
-.kpi .d{font-size:12.5px;color:var(--muted);margin-top:3px}
-.v.good{color:var(--good)} .v.bad{color:var(--bad)} .v.accent{color:var(--accent)} .v.ours{color:var(--ours)} .v.warn{color:var(--warn)}
+/* hero-metric KPI grid removed; the summary numbers now live in native tables */
+.summary td.num{font-variant-numeric:tabular-nums;font-family:var(--font-mono)}
+.summary td.num.good{color:var(--good)} .summary td.num.bad{color:var(--bad)}
+.summary td.num.accent{color:var(--accent)} .summary td.num.ours{color:var(--ours);font-weight:700} .summary td.num.warn{color:var(--warn)}
 .arrow{color:var(--dim);font-weight:600}
 .toggle{display:inline-flex;border:1px solid var(--line2);border-radius:10px;overflow:hidden;margin:2px 0}
 .toggle button{background:transparent;color:var(--muted);border:0;padding:7px 14px;font:inherit;font-size:13.5px;cursor:pointer}
@@ -51,23 +59,20 @@ h3{font-size:14.5px;margin:0 0 4px;font-weight:650}
 .toggle.ver button.on{background:var(--ours);color:#0a0713}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 4px;overflow-x:auto}
 /* headline hero — the moat */
-.hero{border:1px solid rgba(139,123,255,.55);background:rgba(139,123,255,.06);border-radius:16px;padding:16px 18px 20px;margin:14px 0 6px}
+.hero{border:1px solid rgba(212,165,74,.55);background:rgba(212,165,74,.06);border-radius:16px;padding:16px 18px 20px;margin:14px 0 6px}
 .hero-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:2px}
-.hero .eyebrow{color:#b7abff}
 .hero h2{margin:6px 0 4px}
-.hero .kpi{background:var(--panel2)}
-.stakes-band{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#7be3b1;background:rgba(51,194,127,.1);border:1px solid rgba(51,194,127,.32);border-radius:8px;padding:3px 10px;margin-bottom:2px}
+.stakes-band{display:inline-block;font-size:12.5px;font-weight:700;color:#7be3b1;background:rgba(51,194,127,.1);border:1px solid rgba(51,194,127,.32);border-radius:8px;padding:3px 10px;margin-bottom:2px}
 table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{padding:9px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
 th:first-child,td:first-child{text-align:left}
 thead th{color:var(--muted);font-weight:600;font-size:12.5px;border-bottom:1px solid var(--line2)}
 tbody tr:last-child td{border-bottom:0}
-tr.ours td{background:rgba(139,123,255,.09)}
-tr.ours td:first-child{box-shadow:inset 3px 0 0 var(--ours)}
+tr.ours td{background:rgba(212,165,74,.12)}
 tr.good td{background:rgba(51,194,127,.07)}
 .mname{font-weight:600}
 .mtag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:5px;margin-left:7px;vertical-align:1px}
-.mtag.ours{background:rgba(139,123,255,.18);color:#c3baff}
+.mtag.ours{background:rgba(212,165,74,.18);color:#e8cf9a}
 .mtag.local{background:rgba(51,194,127,.16);color:#7be3b1}
 .mtag.frontier{background:rgba(110,168,254,.15);color:#a9cbff}
 .mtag.open{background:rgba(110,168,254,.12);color:#9fc0f5}
@@ -77,14 +82,14 @@ tr.good td{background:rgba(51,194,127,.07)}
 .barrow{display:grid;grid-template-columns:200px 1fr 96px;align-items:center;gap:12px}
 .barrow .nm{font-size:13.5px}
 .track{background:var(--panel2);border:1px solid var(--line);border-radius:8px;height:22px;position:relative;overflow:hidden}
-.fill{height:100%;border-radius:7px;background:linear-gradient(90deg,#3b6fd6,#6ea8fe)}
-.fill.ours{background:linear-gradient(90deg,#5a49c7,#8b7bff)}
+.fill{height:100%;border-radius:7px;background:var(--accent)}
+.fill.ours{background:var(--ours)}
 .barrow .val{font-size:13px;text-align:right;font-weight:650;color:var(--muted)}
 .barrow .val.g{color:var(--good)} .barrow .val.b{color:var(--bad)}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:820px){.two{grid-template-columns:1fr}.barrow{grid-template-columns:120px 1fr 80px}}
 .note{color:var(--muted);font-size:13px;margin-top:10px}
-.callout{border-radius:13px;padding:14px 16px;margin:16px 0;border:1px solid var(--line2);background:linear-gradient(180deg,#161b26,#12151d)}
+.callout{border-radius:13px;padding:14px 16px;margin:16px 0;border:1px solid var(--line2);background:var(--panel)}
 .callout .ct{font-weight:700;color:#fff;margin-bottom:5px;font-size:14.5px}
 .callout.info{border-color:rgba(110,168,254,.4);background:rgba(110,168,254,.07)}
 .callout.good{border-color:rgba(51,194,127,.4);background:rgba(51,194,127,.08)}
@@ -103,19 +108,20 @@ tr.good td{background:rgba(51,194,127,.07)}
 .hh-head{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px}
 .chip{display:inline-block;background:var(--chip);border:1px solid var(--line);border-radius:7px;padding:2px 9px;margin:0;color:var(--ink);font-size:12.5px}
 .chip.tier{text-transform:capitalize;border-color:var(--line2)}
-.chip.mv{background:rgba(139,123,255,.14);border-color:rgba(139,123,255,.4);color:#cdc3ff}
+.chip.mv{background:rgba(212,165,74,.14);border-color:rgba(212,165,74,.4);color:#e8cf9a}
+.chip.mv b,.hh-rec b{font-family:var(--font-serif)}
 .hh-facts{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 13px;margin-bottom:12px}
 @media(max-width:640px){.hh-facts{grid-template-columns:1fr}}
-pre.board{font:12.5px/1.3 ui-monospace,Menlo,monospace;background:#0d1017;border:1px solid var(--line);color:#cbd3e4;padding:10px 12px;border-radius:9px;display:inline-block;margin:0}
+pre.board{font:12.5px/1.3 var(--font-mono);background:oklch(0.24 0.04 155);border:1px solid var(--line);color:var(--ink);padding:10px 12px;border-radius:9px;display:inline-block;margin:0}
 .hh-fsum{font-size:13.5px;color:#dbe1ee}
 .hh-fsum .k{color:var(--good);font-weight:700}
 .hh-facts details{margin-top:9px}
 .hh-facts summary{cursor:pointer;color:var(--accent);font-size:12.5px}
-pre.facts{font:12px/1.4 ui-monospace,Menlo,monospace;white-space:pre-wrap;background:#0d1017;border:1px solid var(--line);color:#aeb8cc;padding:10px 12px;border-radius:9px;margin:8px 0 0}
+pre.facts{font:12px/1.4 var(--font-mono);white-space:pre-wrap;background:oklch(0.24 0.04 155);border:1px solid var(--line);color:var(--muted);padding:10px 12px;border-radius:9px;margin:8px 0 0}
 .hh-models{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 @media(max-width:760px){.hh-models{grid-template-columns:1fr}}
 .hh-model{border:1px solid var(--line);border-radius:11px;padding:11px 13px;background:var(--panel2)}
-.hh-model.ours{grid-column:1 / -1;border-color:rgba(139,123,255,.5);background:rgba(139,123,255,.06)}
+.hh-model.ours{grid-column:1 / -1;border-color:rgba(212,165,74,.5);background:rgba(212,165,74,.06)}
 .hh-model.frontier{border-color:rgba(110,168,254,.28)}
 .hh-mh{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:6px}
 .hh-mh .mname{font-size:13.5px}
@@ -154,7 +160,7 @@ mark.false{background:rgba(242,104,95,.26);color:#ffd9d5;border-bottom:2px solid
 </head>
 <body><div class="wrap">
 
-<div class="eyebrow">Evaluation dashboard</div>
+<div class="label">Evaluation dashboard</div>
 <h1>Chess-Coach Benchmark <span class="sub">— OURS-v2 vs frontier</span></h1>
 <p class="framing">We optimize for <b>tier-appropriate move selection</b>; safety, no-jargon, and faithfulness are <b class="ts">table-stakes</b> (faithfulness is verifier-guaranteed).</p>
 <p class="lede">A 1.7B <b>on-device</b> chess-coaching fine-tune benchmarked head-to-head against GPT-5.5, Claude Opus 4.8, and Gemini 3.1 Pro on <b>100 held-out positions</b>, in two conditions (with / without engine grounding), scored by <b>deterministic</b> objective verifiers <b>and</b> a blinded cross-family LLM council. <b>v2 is the current shipped model</b>; v1 is the matched baseline (same 100 positions). Every model saw the byte-identical grounded input. <b>The definitive comparison — 803 held-out positions across 14 models — is right below;</b> this 100-position head-to-head is retained as the earlier run.</p>
@@ -168,7 +174,7 @@ mark.false{background:rgba(242,104,95,.26);color:#ffd9d5;border-bottom:2px solid
 
 <!-- ==================== DEFINITIVE 803-POSITION / 14-MODEL EVAL ==================== -->
 <section id="def803" style="margin-top:20px">
-<div class="hero" style="border-color:rgba(51,194,127,.5);background:linear-gradient(180deg,rgba(51,194,127,.07),rgba(139,123,255,.05))">
+<div class="hero" style="border-color:rgba(51,194,127,.5);background:rgba(51,194,127,.07)">
   <div class="hero-top">
     <span class="stakes-band">Definitive eval · authoritative comparison</span>
     <span class="pill cur" style="margin:0"><b>803</b> held-out positions</span>
@@ -177,12 +183,14 @@ mark.false{background:rgba(242,104,95,.26);color:#ffd9d5;border-bottom:2px solid
   </div>
   <h2 style="font-size:24px;margin:8px 0 4px">Definitive eval — 803 held-out positions, 14 models</h2>
   <p class="framing" style="max-width:90ch">OURS-v2 <b class="ts">leads tier-appropriate move selection</b> (~50–53%, <b>the moat</b>) across the entire field — but its <b>raw</b> balanced score is mid-pack, dragged down by raw fabrication (<b class="ts">verifier-fixed to 0% in deployment</b>) and instructiveness. Best open coach = <b style="color:#a9cbff">GLM-5</b> (too big to run local); best v3 base = <b class="ts">Qwen3-32B ≈ Gemma-3-27B</b>.</p>
-  <div class="kpis">
-    <div class="kpi"><div class="k">OURS-v2 · tier-fit (the moat)</div><div class="v ours">53%</div><div class="d">field-leading · 803&times;3 tiers</div></div>
-    <div class="kpi"><div class="k">Best OPEN coach (balanced)</div><div class="v accent">GLM-5 · 55.3</div><div class="d">strongest open · too big for local</div></div>
-    <div class="kpi"><div class="k">Best v3 BASE (local, fine-tunable)</div><div class="v good">Qwen3-32B · 72.6</div><div class="d">&asymp; Gemma-3-27B 72.2 (tie)</div></div>
-    <div class="kpi"><div class="k">Definitive-eval spend</div><div class="v">$65.45</div><div class="d">local rows free</div></div>
-  </div>
+  <div class="panel"><table class="summary">
+    <tbody>
+      <tr><th>OURS-v2 tier-fit, the moat <span class="mut">field-leading, 803&times;3 tiers</span></th><td class="num ours">53%</td></tr>
+      <tr><th>Best OPEN coach, balanced <span class="mut">strongest open, too big for local</span></th><td class="num accent">GLM-5 · 55.3</td></tr>
+      <tr><th>Best v3 BASE, local + fine-tunable <span class="mut">&asymp; Gemma-3-27B 72.2 (tie)</span></th><td class="num good">Qwen3-32B · 72.6</td></tr>
+      <tr><th>Definitive-eval spend <span class="mut">local rows free</span></th><td class="num">$65.45</td></tr>
+    </tbody>
+  </table></div>
   <p class="hint" style="margin-top:10px">Every model coaches the <b>same</b> 803 positions at all 3 tiers with byte-identical grounding (sound-move pool + Maia block). Deterministic metrics on all 803&times;3 for the 2 local + 9 open models; the 3 frontier references on a balanced 150-position stratified subset. Instructiveness = one blinded cross-family council (GPT-5.5 + Claude Opus 4.8 + Gemini 3.1 Pro) over a stratified 120-item slice.</p>
 </div>
 
@@ -349,16 +357,18 @@ mark.false{background:rgba(242,104,95,.26);color:#ffd9d5;border-bottom:2px solid
 <!-- (a) HEADLINE — the moat -->
 <div class="hero">
   <div class="hero-top">
-    <span class="eyebrow">What we optimize for</span>
+    <span class="label">What we optimize for</span>
     <span class="pill" style="margin:0">separate greedy analysis · not affected by the toggles</span>
   </div>
   <h2>Tier-appropriate move selection</h2>
   <p class="hint">Does the coach recommend a <b>different, level-suited</b> move to a beginner vs an advanced player in the <b>same</b> position? This is the moat — a leveled coach, not one-size-fits-all engine output. Higher = more level-awareness. OURS-v2 on 120 matched held-out; frontier on 50 held-out (GAP report).</p>
-  <div class="kpis">
-    <div class="kpi"><div class="k">OURS-v2 · tier-appropriate</div><div class="v ours">39.2%</div><div class="d">120 matched held-out</div></div>
-    <div class="kpi"><div class="k">Frontier average</div><div class="v">~22.7%</div><div class="d">50 held-out (GAP report)</div></div>
-    <div class="kpi"><div class="k">v1 &rarr; v2</div><div class="v good">+11.7 pts</div><div class="d">27.5% &rarr; 39.2% · re-directed</div></div>
-  </div>
+  <div class="panel"><table class="summary">
+    <tbody>
+      <tr><th>OURS-v2 tier-appropriate <span class="mut">120 matched held-out</span></th><td class="num ours">39.2%</td></tr>
+      <tr><th>Frontier average <span class="mut">50 held-out (GAP report)</span></th><td class="num">~22.7%</td></tr>
+      <tr><th>v1 &rarr; v2 <span class="mut">27.5% &rarr; 39.2%, re-directed</span></th><td class="num good">+11.7 pts</td></tr>
+    </tbody>
+  </table></div>
   <div class="panel" style="padding:16px;margin-top:6px"><div class="bars" id="tierBars"></div></div>
   <div class="callout good">
     <div class="ct">Direction corrected in v2</div>
@@ -688,7 +698,7 @@ renderToggled();
 renderStatic();
 
 /* ---------- Blinded example viewer (version-aware) ---------- */
-const MODEL_COLOR={ours:'#8b7bff',base:'#33c27f',gpt:'#6ea8fe',claude:'#f2b04a',gemini:'#f4a29c'};
+const MODEL_COLOR={ours:'#d4a54a',base:'#33c27f',gpt:'#6ea8fe',claude:'#f2b04a',gemini:'#f4a29c'};
 let ITEMS=[], KEY={}, OBJ={}, idx=0, revealed=false, viewList=[];
 function objKey(sid,model,cnd){return sid+'::'+model+'::'+cnd;}
 async function loadViewer(){

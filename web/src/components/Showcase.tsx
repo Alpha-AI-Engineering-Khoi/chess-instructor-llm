@@ -87,7 +87,7 @@ const TIER_BAND: Record<ShowcaseTier, string> = {
 };
 
 /**
- * The deterministic PRINCIPLE TAG for a precomputed cell's move — the honest "why
+ * The deterministic PRINCIPLE TAG for a precomputed cell's move: the honest "why
  * this move" for the reframed hero. Showcase cells carry no concept/takeaway (only
  * the regressed prose), so the tag is built from the objective verdict we actually
  * compete on: tier-appropriateness + soundness. This keeps the hero anchored to the
@@ -96,7 +96,7 @@ const TIER_BAND: Record<ShowcaseTier, string> = {
 function cellMoveTag(cell: ViewCell, tier: ShowcaseTier): string | null {
   if (!cell.move) return null;
   if (cell.tierFit) return `the ${cap(tier)}-appropriate move`;
-  if (cell.sound) return `sound — but not the ${cap(tier)} target move`;
+  if (cell.sound) return `sound, but not the ${cap(tier)} target move`;
   return `off-target for ${cap(tier)}`;
 }
 
@@ -142,6 +142,7 @@ export default function Showcase() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mount data fetch
     load();
     return () => {
       abortRef.current?.abort();
@@ -153,14 +154,15 @@ export default function Showcase() {
   const positions = useMemo(() => view?.positions ?? [], [view]);
 
   // The ONE-BEHAVIOR headline: tier-appropriate MOVE SELECTION, computed live from
-  // the HELD-OUT test split (the honest measure — and the leaderboard's default
+  // the HELD-OUT test split (the honest measure: and the leaderboard's default
   // view, so the two agree). No hardcoded training figures; always consistent with
-  // the OURS version on screen. Carries no instructiveness "lift" — fine-tuning
+  // the OURS version on screen. Carries no instructiveness "lift": fine-tuning
   // regressed the prose, so the headline stays on the axis we actually win.
   const headline = useMemo(() => moveSelectionHeadline(view, "test"), [view]);
 
   // If showcase.json has no training split at all, keep the toggle on Test.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- keep the split toggle valid
     if (meta && !meta.hasTrain && split === "train") setSplit("test");
   }, [meta, split]);
 
@@ -184,7 +186,7 @@ export default function Showcase() {
   );
 
   // Lenses worth showing in this split: "all" always; the rest only when populated
-  // (so the Shine tab hides when it isn't a distinct, non-empty subset — item 4).
+  // (so the Shine tab hides when it isn't a distinct, non-empty subset: item 4).
   const availableLenses = useMemo<LibFilter[]>(
     () =>
       (["proof", "differentiates", "wins", "loses", "shine", "all"] as LibFilter[]).filter(
@@ -194,7 +196,7 @@ export default function Showcase() {
   );
 
   // The lens we actually render: honor the user's pick when it's populated, else
-  // fall back to the first populated lens (preferred order above). Derived — never
+  // fall back to the first populated lens (preferred order above). Derived: never
   // lands on an empty view, and needs no set-state-in-effect (item 5).
   const effectiveLibFilter: LibFilter = availableLenses.includes(libFilter)
     ? libFilter
@@ -212,10 +214,12 @@ export default function Showcase() {
     });
   }, [splitPositions, phase, effectiveLibFilter]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- reset pagination when the filter changes
   useEffect(() => setVisible(LIB_PAGE), [split, effectiveLibFilter, phase]);
 
   // Keep a valid selection as the library changes.
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- keep the selection valid as the library changes */
     if (filtered.length === 0) {
       setSelectedId(null);
       return;
@@ -223,6 +227,7 @@ export default function Showcase() {
     if (!selectedId || !filtered.some((p) => p.id === selectedId)) {
       setSelectedId(filtered[0].id);
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [filtered, selectedId]);
 
   const selected = useMemo(
@@ -236,6 +241,7 @@ export default function Showcase() {
     if (!selected) return;
     // Keep the current tier if a rival is scored there; otherwise land on the
     // position's primary (rival-bearing) tier so the head-to-head is populated.
+    /* eslint-disable react-hooks/set-state-in-effect -- sync tier/model/live to the selected position */
     setTier((t) =>
       selected.models.some((m) => m.kind !== "ours" && m.byTier[t]?.evaluated)
         ? t
@@ -247,10 +253,12 @@ export default function Showcase() {
         : selected.models.find((m) => m.kind === "ours")?.key ?? selected.models[0]?.key ?? "ours",
     );
     setLive(IDLE_LIVE);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [selected]);
 
   // A tier/position change invalidates a live re-run tied to the old context.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- invalidate a stale live re-run
     setLive((l) =>
       l.status !== "idle" && (l.fen !== selected?.fen || l.tier !== tier) ? IDLE_LIVE : l,
     );
@@ -282,7 +290,7 @@ export default function Showcase() {
       { fen: forFen, tier: forTier, student_move: selected.studentMove?.uci ?? undefined },
       {
         signal: ctrl.signal,
-        // Cold start in progress — annotate the loading state, don't error out.
+        // Cold start in progress: annotate the loading state, don't error out.
         onStatus: (st) => {
           if (ctrl.signal.aborted) return;
           setLive((l) => (l.status === "loading" ? { ...l, waking: st } : l));
@@ -362,7 +370,7 @@ export default function Showcase() {
                 </div>
               ) : (
                 <>
-                  <ul className="flex flex-col divide-y divide-[color:var(--separator)] border-y border-[color:var(--border)] lg:border-none lg:divide-y-0 lg:gap-2.5">
+                  <ul className="flex flex-col divide-y divide-[color:var(--separator)] overflow-hidden rounded-[10px] border border-[color:var(--border)]">
                     {shownLib.map((p) => (
                       <li key={p.id}>
                         <LibraryCard
@@ -415,7 +423,7 @@ export default function Showcase() {
             </section>
           </div>
 
-          {/* HEADLINE: every model's move at every level, side by side — the
+          {/* HEADLINE: every model's move at every level, side by side: the
               visceral "OURS adapts by level where the frontier repeats one" grid
               for the selected position. */}
           {selected && selModel && (
@@ -439,7 +447,7 @@ export default function Showcase() {
 }
 
 const LIB_TITLE: Record<LibFilter, string> = {
-  proof: "The proof — adapts by level AND diverges from the frontier",
+  proof: "The proof: adapts by level AND diverges from the frontier",
   differentiates: "Where OURS adapts by level",
   shine: "Where our model shines",
   wins: "Where OURS beats the frontier",
@@ -447,7 +455,7 @@ const LIB_TITLE: Record<LibFilter, string> = {
   all: "All positions",
 };
 
-/** Honest empty-state copy per filter — tells the grader exactly why a lens is
+/** Honest empty-state copy per filter: tells the grader exactly why a lens is
  *  empty and what would fill it, without pretending data exists. */
 function emptyLibraryText(libFilter: LibFilter, meta: ShowcaseView["meta"], split: Split): string {
   if (libFilter === "proof" || libFilter === "differentiates") {
@@ -455,7 +463,7 @@ function emptyLibraryText(libFilter: LibFilter, meta: ShowcaseView["meta"], spli
       ? libFilter === "proof"
         ? "No position in this split has OURS both adapting across all three tiers AND diverging from the best frontier move."
         : "No position in this split varies OURS’s move across all three tiers."
-      : "The full tier-differentiation set arrives with showcase.json — it needs all three tiers scored per position. Meanwhile, the OURS wins / All lenses are live from the held-out set.";
+      : "The full tier-differentiation set arrives with showcase.json: it needs all three tiers scored per position. Meanwhile, the OURS wins / All lenses are live from the held-out set.";
   }
   if (split === "train" && !meta.hasTrain) {
     return "The training sample arrives with showcase.json.";
@@ -514,7 +522,7 @@ function ShowcaseHeader({
           </span>
         </div>
         <h1 className="text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl">
-          The fine-tune reliably picks the level-appropriate move where its base — and the frontier —
+          The fine-tune reliably picks the level-appropriate move where its base (and the frontier)
           can’t.
         </h1>
         <p className="max-w-3xl text-sm leading-relaxed text-muted sm:text-base">
@@ -523,8 +531,8 @@ function ShowcaseHeader({
           rating.{" "}
           {headline ? (
             <>
-              On the same held-out positions as its untuned <span className="text-ink">base</span> —
-              same weights, byte-identical input — fine-tuning lifts tier-appropriate move selection{" "}
+              On the same held-out positions as its untuned <span className="text-ink">base</span>{" "}
+              (same weights, byte-identical input), fine-tuning lifts tier-appropriate move selection{" "}
               <span className="text-ink tnum">
                 {pct(headline.base.tierFitRate)} → {pct(headline.ours.tierFitRate)}
               </span>
@@ -546,14 +554,14 @@ function ShowcaseHeader({
           ) : (
             <>
               Fine-tuning teaches it to pick a different, level-appropriate move per rating where the
-              frontier repeats one — a behavior a prompt on the same weights can’t reproduce.
+              frontier repeats one: a behavior a prompt on the same weights can’t reproduce.
             </>
           )}
         </p>
         <p className="max-w-3xl text-sm leading-relaxed text-muted">
           <span className="text-ink">The comparison, below,</span> is centered on that axis:
           tier-appropriate move selection and per-level move adaptation, both deterministic. The
-          coaching prose is a <span className="text-ink">secondary, optional layer</span> — the
+          coaching prose is a <span className="text-ink">secondary, optional layer</span>: the
           frontier writes livelier explanations (see the council instructiveness grades and the
           truthfulness residual), and we don’t claim the prose as the win. Pick a position, switch
           the model and the rating tier, and read each model’s move at every level side by side; only{" "}
@@ -580,10 +588,10 @@ function ProvenanceNote({ meta }: { meta: ShowcaseView["meta"] }) {
   const dotCls = source === "showdown" ? "text-[color:var(--caution)]" : "text-signal";
   const title =
     source === "showcase"
-      ? "Live showcase data — showcase.json"
+      ? "Live showcase data: showcase.json"
       : source === "interim"
-        ? "Interim data — OURS re-scored at all three tiers"
-        : "Preview data — showdown.json (held-out only)";
+        ? "Interim data: OURS re-scored at all three tiers"
+        : "Preview data: showdown.json (held-out only)";
   return (
     <div className={`flex flex-col gap-1 rounded-[10px] border px-4 py-3 text-xs leading-relaxed ${tone}`}>
       <div className="flex items-center gap-2 text-sm font-medium text-ink">
@@ -623,7 +631,7 @@ function ProvenanceNote({ meta }: { meta: ShowcaseView["meta"] }) {
 }
 
 /* ================================================================== */
-/* Control bar — split tabs, curated filters, phase                    */
+/* Control bar: split tabs, curated filters, phase                    */
 /* ================================================================== */
 
 const LENS_LABEL: Record<LibFilter, string> = {
@@ -712,7 +720,7 @@ function ControlBar({
           <Tooltip.Content showArrow className="max-w-[20rem]">
             <Tooltip.Arrow />
             <p className="leading-relaxed">
-              Training positions are in-distribution for the tuned model — expected to be strong, and{" "}
+              Training positions are in-distribution for the tuned model: expected to be strong, and{" "}
               <span className="font-medium">not</span> a generalization test. Test positions are
               held-out; that split is the honest measure of the coach.
             </p>
@@ -749,13 +757,13 @@ function ControlBar({
       </div>
 
       <p className="max-w-4xl text-xs leading-relaxed text-faint">
-        <span className="font-medium text-muted">Proof</span> is the headline — where OURS both
+        <span className="font-medium text-muted">Proof</span> is the headline: where OURS both
         adapts by level (a different, level-appropriate move across the three tiers) AND diverges
         from the best frontier model’s move. <span className="font-medium text-muted">Distinct-tier</span>{" "}
         is the broader adaptation set it’s drawn from.{" "}
         <span className="font-medium text-muted">OURS wins / OURS loses</span> compare OURS to the
         three <span className="text-muted">frontier</span> models only (GPT-5.5 / Claude / Gemini)
-        on the sound tier move — OURS’s own <span className="text-muted">BASE</span> baseline and the
+        on the sound tier move: OURS’s own <span className="text-muted">BASE</span> baseline and the
         open field are excluded from win credit, so the banner and these counts use one rule. Every
         shipped cell is gated, so deterministic board-fact fabrication is{" "}
         <span className="text-muted">0% for all models</span>; the measured per-model metrics are in
@@ -819,18 +827,18 @@ function LensLegend() {
         <Tooltip.Arrow />
         <div className="flex flex-col gap-1.5 leading-relaxed">
           <p>
-            <span className="font-medium text-signal">Proof</span> — the headline set. OURS
+            <span className="font-medium text-signal">Proof</span>: the headline set. OURS
             recommends a genuinely different, level-appropriate move across Beginner / Intermediate /
             Advanced (each sound and tier-fit) AND that move diverges from the best frontier model’s
-            move — the case that the tuned coach adapts by level in a way the frontier doesn’t.
+            move: the case that the tuned coach adapts by level in a way the frontier doesn’t.
           </p>
           <p>
-            <span className="font-medium">Distinct-tier</span> — the broader adaptation set: OURS
+            <span className="font-medium">Distinct-tier</span> is the broader adaptation set: OURS
             varies its move across the three tiers (excluded when all three are the same move). Proof
             is this set intersected with frontier-divergence.
           </p>
           <p>
-            <span className="font-medium">OURS wins / OURS loses</span> — head-to-head vs the three
+            <span className="font-medium">OURS wins / OURS loses</span>: head-to-head vs the three
             frontier models only (GPT-5.5 / Claude / Gemini), on the sound tier move.{" "}
             <span className="font-medium">OURS’s own BASE and the open field are excluded</span> from
             win credit, so the “OURS wins here” banner uses the exact same rule as these counts.
@@ -838,8 +846,8 @@ function LensLegend() {
           <p className="text-muted">
             Faithfulness is a fairness floor, not a ranking axis: after the verify-and-regenerate
             gate, user-visible board-fact fabrication is{" "}
-            <span className="font-medium">0% for all models</span>. The honest differentiator — the
-            cross-family semantic-judge residual (any / majority / unanimous, with CIs) — is in the
+            <span className="font-medium">0% for all models</span>. The honest differentiator, the
+            cross-family semantic-judge residual (any / majority / unanimous, with CIs), is in the
             truthfulness panel below.
           </p>
         </div>
@@ -868,8 +876,7 @@ function LibraryCard({
   const outcome = describeOursOutcome(position, t);
 
   return (
-    <Card
-      variant={active ? "tertiary" : "secondary"}
+    <div
       role="button"
       tabIndex={0}
       aria-pressed={active}
@@ -880,11 +887,11 @@ function LibraryCard({
           onSelect();
         }
       }}
-      className={`cursor-pointer outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal/60 ${
-        active ? "ring-[1.5px] ring-[color:var(--field-border)]" : "hover:bg-[color:var(--surface-tertiary)]"
+      className={`cursor-pointer p-2.5 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal/60 ${
+        active ? "bg-signal/12" : "hover:bg-[color:var(--surface-tertiary)]"
       }`}
     >
-      <Card.Content className="flex items-stretch gap-3 p-2.5">
+      <div className="flex items-stretch gap-3">
         <div className="w-[104px] shrink-0 sm:w-[112px]">
           <ShowdownBoard
             fen={position.fen}
@@ -919,7 +926,7 @@ function LibraryCard({
           <div className="flex items-baseline gap-1.5 text-xs text-muted">
             <span>OURS</span>
             <span className="font-mono text-sm font-semibold text-ink tnum">
-              {ours?.move ?? "—"}
+              {ours?.move ?? "–"}
             </span>
             <span className="text-faint">· {cap(t)}</span>
           </div>
@@ -936,8 +943,8 @@ function LibraryCard({
             <p className="text-xs leading-snug text-faint">Grounded comparison across the field.</p>
           )}
         </div>
-      </Card.Content>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -981,7 +988,7 @@ function Explorer({
   const ordered = useMemo(() => orderModels(models), [models]);
   const target = position.tierTargets[tier];
   const tierHasData = position.tierEvaluated[tier];
-  // Item 8: only show measured verdicts when THIS cell is actually evaluated — a
+  // Item 8: only show measured verdicts when THIS cell is actually evaluated: a
   // cell with absent/null objective flags must not render as green "sound/faithful".
   const cellEvaluated = Boolean(selCell?.evaluated);
 
@@ -1094,7 +1101,7 @@ function Explorer({
 
           <Separator />
 
-          {/* The whole field at this tier — the differentiation view */}
+          {/* The whole field at this tier: the differentiation view */}
           <FieldGrid
             meta={meta}
             models={ordered}
@@ -1167,7 +1174,7 @@ function OursVsBest({
             type="button"
             onClick={() => onSelectModel(frontier.key)}
             className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-[11px] text-faint transition-colors hover:text-engine focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
-            title="Open the best frontier model — the win/loss reference"
+            title="Open the best frontier model: the win/loss reference"
           >
             frontier ref: {frontier.short}
           </button>
@@ -1200,15 +1207,15 @@ function OursVsBest({
               <>
                 Verdict weighs tier-fit, soundness and faithfulness
                 {position.source === "showcase" ? " plus the blinded council grades" : ""} at each
-                level. “—” marks a tier neither side was scored at
+                level. “–” marks a tier neither side was scored at
                 {position.source === "showdown"
                   ? " (all three light up with showcase.json)"
                   : position.source === "interim"
-                    ? " — OURS is scored at all three; rivals only at their benchmarked tier"
+                    ? " (OURS is scored at all three; rivals only at their benchmarked tier)"
                     : ""}.
               </>
             ) : (
-              "Neither side is scored at these tiers yet — the per-tier duel fills in with showcase.json."
+              "Neither side is scored at these tiers yet: the per-tier duel fills in with showcase.json."
             )}
           </p>
         </>
@@ -1238,11 +1245,11 @@ function DuelRow({
         <span className="text-[10px] text-faint tnum">{TIER_BAND[row.tier]}</span>
       </span>
       <span className="truncate font-mono text-sm font-semibold text-ink tnum">
-        {row.ours?.move ?? "—"}
+        {row.ours?.move ?? "–"}
       </span>
       <VerdictPill verdict={row.verdict} />
       <span className="truncate text-right font-mono text-sm text-muted tnum">
-        {row.other?.move ?? "—"}
+        {row.other?.move ?? "–"}
       </span>
     </button>
   );
@@ -1253,7 +1260,7 @@ function VerdictPill({ verdict }: { verdict: DuelVerdict }) {
     beats: { label: "OURS ahead", cls: "text-[color:var(--good)] bg-[color:var(--good)]/12" },
     trails: { label: "OURS behind", cls: "text-[color:var(--caution)] bg-[color:var(--caution)]/12" },
     even: { label: "even", cls: "text-muted bg-[color:var(--surface-tertiary)]" },
-    na: { label: "—", cls: "text-faint" },
+    na: { label: "–", cls: "text-faint" },
   };
   const v = map[verdict];
   return (
@@ -1374,7 +1381,7 @@ function ModelPicker({
 /* ---- Selected model's per-tier recommendations ------------------- */
 
 /** The picked model's recommended move at Beginner / Intermediate / Advanced,
- *  side by side — so switching the dropdown shows one model's answer at every
+ *  side by side: so switching the dropdown shows one model's answer at every
  *  level at a glance. Each cell doubles as the tier selector. */
 function SelectedModelTiers({
   model,
@@ -1393,7 +1400,7 @@ function SelectedModelTiers({
           <InfoTip label="Distinct moves per level">
             <p>
               One model’s recommended move at each rating tier. When these moves differ, the model{" "}
-              <span className="font-medium">adapts the move to the level</span> — the behavior OURS
+              <span className="font-medium">adapts the move to the level</span>: the behavior OURS
               is tuned for. A model that repeats one move across all three isn’t adapting.
             </p>
             <p>
@@ -1429,7 +1436,7 @@ function SelectedModelTiers({
                   model.kind === "ours" ? "text-signal" : "text-ink"
                 }`}
               >
-                {c?.move ?? "—"}
+                {c?.move ?? "–"}
               </span>
               {evaluated ? (
                 <span className="flex flex-wrap items-center gap-1">
@@ -1449,30 +1456,30 @@ function SelectedModelTiers({
 
 /* ---- Verdict chips ----------------------------------------------- */
 
-/** The reframed HERO: the recommended MOVE + a short principle tag — the trained
- *  behavior — with the deterministic verdict chips (tier-fit / sound / faithful)
+/** The reframed HERO: the recommended MOVE + a short principle tag: the trained
+ *  behavior: with the deterministic verdict chips (tier-fit / sound / faithful)
  *  right beneath it. The move, not the prose, is the loudest element. */
 function VerdictRow({ model, cell, tier }: { model: ViewModel; cell: ViewCell; tier: ShowcaseTier }) {
   const isOurs = model.kind === "ours";
   const tag = cellMoveTag(cell, tier);
   return (
     <div className="flex flex-col gap-2.5 rounded-[10px] border-[1.5px] border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3.5">
-      {/* Move + principle tag — the single loudest element in the explorer. */}
+      {/* Move + principle tag: the single loudest element in the explorer. */}
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span
-          className={`font-mono text-[2rem] font-semibold leading-none tnum ${isOurs ? "text-signal" : "text-ink"}`}
+          className="font-mono text-[2rem] font-semibold leading-none text-[color:var(--text-verdict)] tnum"
         >
-          {cell.move ?? "—"}
+          {cell.move ?? "–"}
         </span>
         {tag && (
           <span className="inline-flex items-center gap-1.5 text-sm text-muted">
-            — {tag}
+            {tag}
             <InfoTip label="What the principle tag is">
               <p>
                 The <span className="font-medium">principle tag</span> is the one-line “why this
-                move”, derived deterministically from the objective verdict — whether the move is
+                move”, derived deterministically from the objective verdict (whether the move is
                 the <span className="font-medium">tier-appropriate</span> target and whether it is{" "}
-                <span className="font-medium">sound</span> — not from the coaching prose.
+                <span className="font-medium">sound</span>), not from the coaching prose.
               </p>
               <p>
                 The move (and this tag) is the trained behavior; the full explanation below is a
@@ -1500,16 +1507,16 @@ function VerdictRow({ model, cell, tier }: { model: ViewModel; cell: ViewCell; t
         />
         <InfoTip label="What the verdict chips mean">
           <p>
-            <span className="font-medium text-signal">tier-fit</span> — the move matches the
+            <span className="font-medium text-signal">tier-fit</span>: the move matches the
             canonical tier-appropriate target OURS is trained to produce for that rating band (a
             trained-target match, not an emergent judgment).
           </p>
           <p>
-            <span className="font-medium">sound move</span> — an objectively sound choice for the
+            <span className="font-medium">sound move</span>: an objectively sound choice for the
             position (doesn’t drop material or the thread), per the engine.
           </p>
           <p>
-            <span className="font-medium">faithful</span> — the explanation passed the deterministic
+            <span className="font-medium">faithful</span>: the explanation passed the deterministic
             board-fact gate. That gate is a fairness floor (0% fabrication for every shipped cell);
             the honest semantic-truth gap is in the residual panel below.
           </p>
@@ -1573,7 +1580,7 @@ function CouncilMeter({ label, value, max }: { label: string; value: number | nu
       <div className="flex items-baseline justify-between">
         <span className="text-[11px] uppercase tracking-wide text-faint">{label}</span>
         <span className="font-mono text-sm font-semibold text-ink tnum">
-          {value == null ? "—" : trimNum(value)}
+          {value == null ? "–" : trimNum(value)}
           <span className="text-[10px] font-normal text-faint">/{trimNum(scale)}</span>
         </span>
       </div>
@@ -1591,7 +1598,7 @@ function trimNum(n: number): string {
 /* ---- Coaching block ---------------------------------------------- */
 
 /**
- * The coaching PROSE — now a secondary, OPTIONAL layer. Collapsed behind an
+ * The coaching PROSE: now a secondary, OPTIONAL layer. Collapsed behind an
  * expander so the move + principle tag above stays the hero; the prose reads as a
  * supplementary, engine-assisted explanation, not the trained output. The gate
  * badge and the (defensive) post-gate alarm stay visible.
@@ -1605,7 +1612,7 @@ function CoachingBlock({ model, cell }: { model: ViewModel; cell: ViewCell }) {
     <div className="flex flex-col gap-2">
       {/* Defensive: a POST-gate board-fact error would be a genuine alarm. The
           deterministic residual is 0 for every shipped cell, so this normally
-          stays hidden — but if incomplete data ever carried one, we surface it. */}
+          stays hidden: but if incomplete data ever carried one, we surface it. */}
       {cell.violations.length > 0 && (
         <div className="rounded-md border border-[color:var(--danger)]/40 bg-[color:var(--danger)]/10 px-3 py-2">
           <div className="text-xs font-semibold text-[color:var(--danger)]">
@@ -1615,14 +1622,14 @@ function CoachingBlock({ model, cell }: { model: ViewModel; cell: ViewCell }) {
             {cell.violations.map((v, i) => (
               <li key={i}>
                 <span className="text-ink">&ldquo;{v.sentence}&rdquo;</span>{" "}
-                <span className="text-[color:var(--danger)]">— {v.reason}</span>
+                <span className="text-[color:var(--danger)]">({v.reason})</span>
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* Full coaching prose — OPTIONAL, collapsed, clearly labeled as secondary. */}
+      {/* Full coaching prose: OPTIONAL, collapsed, clearly labeled as secondary. */}
       <details className="group rounded-[10px] border border-[color:var(--border)] bg-[color:var(--surface)]">
         <summary className="flex min-h-10 cursor-pointer list-none items-center gap-2 px-3.5 py-2.5 text-xs font-medium text-muted [&::-webkit-details-marker]:hidden">
           <span aria-hidden className="text-faint transition-transform group-open:rotate-90">
@@ -1639,7 +1646,7 @@ function CoachingBlock({ model, cell }: { model: ViewModel; cell: ViewCell }) {
         <div className="flex flex-col gap-2 px-3.5 pb-3.5">
           <p className="text-[11px] leading-relaxed text-faint">
             {model.short} coaching · {model.kind === "ours" ? "tuned" : model.kind} · gated + shipped.
-            A supplementary layer over the trained behavior (the move above) — not the trained output
+            A supplementary layer over the trained behavior (the move above): not the trained output
             itself. Fine-tuning did not improve the prose; the frontier writes livelier explanations
             (see the council + truthfulness panels below).
           </p>
@@ -1662,8 +1669,8 @@ function CoachingBlock({ model, cell }: { model: ViewModel; cell: ViewCell }) {
               <div className="flex flex-col gap-2 px-3 pb-3">
                 <p className="text-[11px] leading-relaxed text-faint">
                   {rawDiffers
-                    ? "The model’s first draft was adjusted by the verify-and-regenerate gate; the shipped text above is the gated version. Faithfulness is a fairness floor applied equally to every model — see the truthfulness panel for where models actually differ."
-                    : "The model’s first draft passed the board-fact gate unchanged — the shipped text above is the model’s own words."}
+                    ? "The model’s first draft was adjusted by the verify-and-regenerate gate; the shipped text above is the gated version. Faithfulness is a fairness floor applied equally to every model: see the truthfulness panel for where models actually differ."
+                    : "The model’s first draft passed the board-fact gate unchanged: the shipped text above is the model’s own words."}
                 </p>
                 <p className="max-h-56 overflow-y-auto whitespace-pre-wrap text-xs leading-relaxed text-muted">
                   {raw || <span className="text-faint">No raw text recorded.</span>}
@@ -1708,9 +1715,9 @@ function NotEvaluated({ tier, source }: { tier: ShowcaseTier; source: ShowcaseVi
       <p className="text-sm text-ink">Not evaluated at {cap(tier)} in this dataset.</p>
       <p className="mt-1 text-xs leading-relaxed text-muted">
         {source === "showdown"
-          ? "This held-out position was scored at one tier. Per-tier answers for all three levels arrive with showcase.json — or re-run OURS live below to see it at this tier now."
+          ? "This held-out position was scored at one tier. Per-tier answers for all three levels arrive with showcase.json: or re-run OURS live below to see it at this tier now."
           : source === "interim"
-            ? "This rival was scored only at its benchmarked tier. OURS is scored at all three tiers — switch the model to OURS, or re-run OURS live below."
+            ? "This rival was scored only at its benchmarked tier. OURS is scored at all three tiers: switch the model to OURS, or re-run OURS live below."
             : "The showcase didn’t include this tier for this position."}
       </p>
     </div>
@@ -1769,9 +1776,9 @@ function FieldGrid({
       {/* Item 7: keep "tier-fit" from being misread as an emergent judgment. */}
       <p className="text-[10px] leading-relaxed text-faint">
         <span className="text-muted">tier-fit</span> = the move matches the canonical
-        tier-appropriate target OURS is trained to produce for that band — a trained-target match,
+        tier-appropriate target OURS is trained to produce for that band: a trained-target match,
         not an emergent capability. <span className="text-muted">faithful</span> = passed the
-        deterministic board-fact gate (not a guarantee of full semantic truth — see the residual
+        deterministic board-fact gate (not a guarantee of full semantic truth: see the residual
         panel).
       </p>
       {anyEvaluated ? (
@@ -1787,7 +1794,7 @@ function FieldGrid({
               aria-pressed={selected}
               className={`flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal/60 ${
                 selected
-                  ? "bg-[color:var(--surface-tertiary)] shadow-[inset_2px_0_0_0_var(--field-border)]"
+                  ? "bg-[color:var(--surface-tertiary)] ring-1 ring-[color:var(--field-border)]"
                   : "hover:bg-[color:var(--surface-tertiary)]"
               }`}
             >
@@ -1814,7 +1821,7 @@ function FieldGrid({
                 </div>
               </div>
               <span className="shrink-0 font-mono text-sm font-semibold tnum text-ink">
-                {cell?.move ?? "—"}
+                {cell?.move ?? "–"}
               </span>
             </button>
           );
@@ -1822,7 +1829,7 @@ function FieldGrid({
       </div>
       ) : (
         <p className="rounded-[10px] border border-dashed border-[color:var(--border)] px-4 py-6 text-center text-xs leading-relaxed text-muted">
-          No model was scored at {cap(tier)} for this position — the preview data (showdown.json)
+          No model was scored at {cap(tier)} for this position: the preview data (showdown.json)
           scores each held-out position at a single tier. All three levels for the full field arrive
           with showcase.json; you can re-run OURS live below to score it at {cap(tier)} now.
         </p>
@@ -1895,7 +1902,7 @@ function RerunPanel({
       {loading && live.waking && (
         <div className="rounded-[10px] border border-signal/40 bg-signal/[0.07] px-3.5 py-2.5 text-xs leading-relaxed text-muted">
           <span className="font-medium text-signal">Waking the model…</span> First live call after
-          idle takes ~2–3 min while the scale-to-zero container spins up — retrying automatically
+          idle takes ~2–3 min while the scale-to-zero container spins up: retrying automatically
           {live.waking.elapsedSec > 0 ? ` · ${live.waking.elapsedSec}s elapsed` : ""}.
         </div>
       )}
@@ -1926,7 +1933,7 @@ function LiveResult({
 }) {
   const hasProse = Boolean(result.coaching?.trim());
   const changed = oursCell?.move && oursCell.move !== result.recommended_move_san;
-  // Principle tag assembled from the live CoachResponse's own fields — concepts if
+  // Principle tag assembled from the live CoachResponse's own fields: concepts if
   // present, else a short slice of the takeaway. The move is the hero, not the prose.
   const tag = principleTag(result.concepts_used, result.takeaway);
 
@@ -1938,7 +1945,7 @@ function LiveResult({
         </span>
         {oursCell?.evaluated && (
           <span className="ml-auto text-[11px] text-faint">
-            precomputed: <span className="font-mono tnum">{oursCell.move ?? "—"}</span>
+            precomputed: <span className="font-mono tnum">{oursCell.move ?? "–"}</span>
             {changed ? " (differs)" : " (matches)"}
           </span>
         )}
@@ -1946,14 +1953,14 @@ function LiveResult({
 
       {/* HERO: the level-appropriate move + a short principle tag. */}
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="font-mono text-[2rem] font-semibold leading-none text-signal tnum">
+        <span className="font-mono text-[2rem] font-semibold leading-none text-[color:var(--text-verdict)] tnum">
           {result.recommended_move_san}
         </span>
         <span className="text-xs text-muted">for {cap(tier)} · {result.side_to_move} to move</span>
       </div>
-      {tag && <p className="text-sm leading-relaxed text-ink">— {tag}</p>}
+      {tag && <p className="text-sm leading-relaxed text-ink">{tag}</p>}
 
-      {/* Full explanation — optional, secondary, collapsed. */}
+      {/* Full explanation: optional, secondary, collapsed. */}
       {hasProse && (
         <details className="group rounded-md border border-[color:var(--border)] bg-[color:var(--surface)]/60">
           <summary className="flex min-h-9 cursor-pointer list-none items-center gap-2 px-3 py-2 text-[11px] font-medium text-muted [&::-webkit-details-marker]:hidden">
@@ -1996,21 +2003,14 @@ function LiveResult({
 }
 
 /* ================================================================== */
-/* Side-by-side tier matrix — every model's move at every level         */
+/* Side-by-side tier matrix: every model's move at every level         */
 /* ================================================================== */
-
-/** Shared column template so the header row and every model row line up: model
- *  name, the three tier columns, then the per-model adaptation indicator. The
- *  grid is wrapped in an x-scroller with a min width so it stays legible (and
- *  swipeable) on narrow screens while ~14 rows scroll vertically. */
-const MATRIX_COLS =
-  "grid grid-cols-[minmax(116px,1.4fr)_repeat(3,minmax(72px,1fr))_minmax(84px,auto)] items-stretch";
 
 /**
  * The HEADLINE side-by-side: rows = every model (OURS distinct + pinned first),
  * columns = Beginner / Intermediate / Advanced, each cell = that model's move for
  * that tier. Changed moves pop and the ⇅ badge counts distinct moves, so the point
- * is visceral at a glance — OURS varies its move by level where the frontier
+ * is visceral at a glance: OURS varies its move by level where the frontier
  * repeats one. Cells are live: tapping one drives the explorer above (model + tier).
  */
 function TierMatrixPanel({
@@ -2036,7 +2036,7 @@ function TierMatrixPanel({
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <div className="flex items-center gap-1.5">
           <h2 className="text-sm font-semibold text-ink">
-            Every model’s move, every level — side by side
+            Every model’s move, every level: side by side
           </h2>
           <InfoTip label="What this side-by-side grid shows">
             <p>
@@ -2061,67 +2061,68 @@ function TierMatrixPanel({
       <MatrixCaption matrix={matrix} source={meta.source} />
 
       {matrix.anyEvaluated ? (
-        <div className="rise overflow-hidden rounded-[10px] border border-[color:var(--border)]">
-          <div className="overflow-x-auto">
-            <div className="min-w-[560px]">
-              {/* Header — the tier columns double as tier selectors. */}
-              <div
-                className={`${MATRIX_COLS} border-b border-[color:var(--separator)] bg-[color:var(--surface)] px-1 py-2 text-[10px] uppercase tracking-wide text-faint`}
-              >
-                <span className="flex items-center px-2">Model</span>
+        <div className="rise overflow-x-auto rounded-[10px] border border-[color:var(--border)]">
+          <table className="w-full min-w-[560px] border-collapse text-left">
+            <thead>
+              {/* The tier column headers double as tier selectors. */}
+              <tr className="border-b border-[color:var(--separator)] bg-[color:var(--surface)] text-[10px] uppercase tracking-wide text-faint">
+                <th scope="col" className="px-3 py-2 font-medium">
+                  Model
+                </th>
                 {TIERS.map((t) => {
                   const active = t === tier;
                   return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => onTier(t)}
-                      aria-pressed={active}
-                      className={`flex flex-col items-center rounded-md py-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal/60 ${
-                        active ? "text-signal" : "text-faint hover:text-muted"
-                      }`}
-                      title={
-                        matrix.tierEvaluated[t]
-                          ? `Focus ${cap(t)} in the explorer above`
-                          : "Not scored at this tier"
-                      }
-                    >
-                      <span className="font-medium">{cap(t)}</span>
-                      <span className="text-[9px] normal-case text-faint tnum">{TIER_BAND[t]}</span>
-                    </button>
+                    <th key={t} scope="col" className="px-1 py-2 font-medium">
+                      <button
+                        type="button"
+                        onClick={() => onTier(t)}
+                        aria-pressed={active}
+                        className={`mx-auto flex flex-col items-center rounded-md py-0.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal/60 ${
+                          active ? "text-signal" : "text-faint hover:text-muted"
+                        }`}
+                        title={
+                          matrix.tierEvaluated[t]
+                            ? `Focus ${cap(t)} in the explorer above`
+                            : "Not scored at this tier"
+                        }
+                      >
+                        <span className="font-medium">{cap(t)}</span>
+                        <span className="text-[9px] normal-case text-faint tnum">{TIER_BAND[t]}</span>
+                      </button>
+                    </th>
                   );
                 })}
-                <span className="flex items-center justify-end px-2 text-right">Adapts</span>
-              </div>
-
-              {/* Body — scrolls vertically for the full field (~14 rows). */}
-              <div className="max-h-[440px] divide-y divide-[color:var(--separator)] overflow-y-auto">
-                {matrix.rows.map((row) => (
-                  <MatrixRowView
-                    key={row.key}
-                    row={row}
-                    activeModel={row.key === selectedKey}
-                    activeTier={tier}
-                    onSelect={(t) => {
-                      onSelectModel(row.key);
-                      onTier(t);
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
+                <th scope="col" className="px-3 py-2 text-right font-medium">
+                  Adapts
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[color:var(--separator)]">
+              {matrix.rows.map((row) => (
+                <MatrixRowView
+                  key={row.key}
+                  row={row}
+                  activeModel={row.key === selectedKey}
+                  activeTier={tier}
+                  onSelect={(t) => {
+                    onSelectModel(row.key);
+                    onTier(t);
+                  }}
+                />
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : (
         <div className="rounded-[10px] border border-dashed border-[color:var(--border)] px-4 py-10 text-center text-sm leading-relaxed text-muted">
           No model was scored at any tier for this position yet.{" "}
           {meta.source === "showdown"
-            ? "The preview data scores each held-out position at a single tier — the full three-level grid arrives with showcase.json."
+            ? "The preview data scores each held-out position at a single tier: the full three-level grid arrives with showcase.json."
             : "Re-run OURS live in the explorer above to score it now."}
         </div>
       )}
 
-      {/* Legend — the same objective flags used everywhere, spelled out once. */}
+      {/* Legend: the same objective flags used everywhere, spelled out once. */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-[10px] text-faint">
         <span className="inline-flex items-center gap-1.5">
           <span
@@ -2140,14 +2141,14 @@ function TierMatrixPanel({
           off-target / unsound
         </span>
         <span className="inline-flex items-center gap-1">
-          <span aria-hidden>—</span> not scored at that level
+          <span aria-hidden>–</span> not scored at that level
         </span>
       </div>
     </section>
   );
 }
 
-/** Honest one-line read of the matrix for the selected position — computed live
+/** Honest one-line read of the matrix for the selected position: computed live
  *  from the rows, never asserting a frontier "repeats one" it doesn't measure. */
 function MatrixCaption({
   matrix,
@@ -2188,7 +2189,7 @@ function MatrixCaption({
         <>
           On this position OURS gives{" "}
           <span className="text-ink tnum">{oursRow.distinctMoves}</span>{" "}
-          {oursRow.distinctMoves === 1 ? "move" : "moves"} across the scored levels — the
+          {oursRow.distinctMoves === 1 ? "move" : "moves"} across the scored levels: the
           per-level adaptation moat lives in the Proof / Distinct-tier lenses above.{" "}
         </>
       )}
@@ -2214,31 +2215,33 @@ function MatrixRowView({
 }) {
   const isOurs = row.kind === "ours";
   return (
-    <div
-      className={`${MATRIX_COLS} px-1 py-1 transition-colors ${
+    <tr
+      className={`transition-colors ${
         isOurs
-          ? "sticky top-0 z-[1] shadow-[inset_3px_0_0_0_var(--signal)]"
+          ? ""
           : activeModel
             ? "bg-[color:var(--surface-tertiary)]/60"
             : "hover:bg-[color:var(--surface-tertiary)]/30"
       }`}
-      // OURS is pinned to the top of the scroller and gets a SOLID tinted fill so
-      // it stays visibly distinct (and never bleeds) while ~14 rows scroll beneath.
+      // OURS gets a SOLID tinted fill (a background tint, not a side-stripe) so it
+      // stays visibly distinct from the field.
       style={
         isOurs
           ? { backgroundColor: "color-mix(in oklab, var(--signal) 9%, var(--surface))" }
           : undefined
       }
     >
-      <div className="flex min-w-0 items-center gap-1.5 px-2">
-        <span
-          className={`truncate text-xs ${isOurs ? "font-semibold text-signal" : "text-ink"}`}
-          title={row.name}
-        >
-          {row.short}
+      <th scope="row" className="px-3 py-1 text-left font-normal">
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span
+            className={`truncate text-xs ${isOurs ? "font-semibold text-signal" : "text-ink"}`}
+            title={row.name}
+          >
+            {row.short}
+          </span>
+          <KindTag kind={row.kind} />
         </span>
-        <KindTag kind={row.kind} />
-      </div>
+      </th>
 
       {row.cells.map((cell) => (
         <MatrixMoveCell
@@ -2250,15 +2253,15 @@ function MatrixRowView({
         />
       ))}
 
-      <div className="flex items-center justify-end px-2">
+      <td className="px-3 py-1 text-right">
         <AdaptBadge row={row} />
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 }
 
 /** One move cell. A changed move (differs from the model's first-level pick) pops
- *  — signal for OURS, ink for rivals — while a repeated move on a flat row stays
+ * : signal for OURS, ink for rivals: while a repeated move on a flat row stays
  *  muted, so "repeats one move" reads visually flat. A dash marks a missing tier. */
 function MatrixMoveCell({
   row,
@@ -2273,12 +2276,9 @@ function MatrixMoveCell({
 }) {
   if (!cell.evaluated || !cell.move) {
     return (
-      <div
-        className="flex items-center justify-center py-1 text-sm text-faint"
-        title="Not scored at this level"
-      >
-        —
-      </div>
+      <td className="px-1 py-1 text-center text-sm text-faint" title="Not scored at this level">
+        –
+      </td>
     );
   }
 
@@ -2301,20 +2301,22 @@ function MatrixMoveCell({
         : "color-mix(in oklab, var(--danger) 80%, transparent)";
 
   return (
-    <button
-      type="button"
-      onClick={onSelect}
-      aria-pressed={active}
-      title={`${row.short} · ${cap(cell.tier)}: ${cell.move}${
-        cell.tierFit ? " · tier-fit" : cell.sound ? " · sound" : cell.fabricated ? " · fabricated" : ""
-      }`}
-      className={`flex flex-col items-center justify-center gap-1 rounded-md py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal/60 ${bg} ${
-        active ? "ring-1 ring-[color:var(--field-border)]" : ""
-      }`}
-    >
-      <span className={`font-mono text-sm font-semibold tnum ${moveColor}`}>{cell.move}</span>
-      <span aria-hidden className="inline-block size-1.5 rounded-full" style={{ backgroundColor: dotColor }} />
-    </button>
+    <td className="px-1 py-1">
+      <button
+        type="button"
+        onClick={onSelect}
+        aria-pressed={active}
+        title={`${row.short} · ${cap(cell.tier)}: ${cell.move}${
+          cell.tierFit ? " · tier-fit" : cell.sound ? " · sound" : cell.fabricated ? " · fabricated" : ""
+        }`}
+        className={`flex w-full flex-col items-center justify-center gap-1 rounded-md py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal/60 ${bg} ${
+          active ? "ring-1 ring-[color:var(--field-border)]" : ""
+        }`}
+      >
+        <span className={`font-mono text-sm font-semibold tnum ${moveColor}`}>{cell.move}</span>
+        <span aria-hidden className="inline-block size-1.5 rounded-full" style={{ backgroundColor: dotColor }} />
+      </button>
+    </td>
   );
 }
 
@@ -2323,7 +2325,7 @@ function MatrixMoveCell({
 function AdaptBadge({ row }: { row: MatrixRow }) {
   const isOurs = row.kind === "ours";
   if (row.scoredTiers === 0) {
-    return <span className="text-[10px] text-faint">—</span>;
+    return <span className="text-[10px] text-faint">–</span>;
   }
   if (row.adapts) {
     return (
@@ -2355,7 +2357,7 @@ function AdaptBadge({ row }: { row: MatrixRow }) {
 }
 
 /* ================================================================== */
-/* Per-model leaderboard — computed live from the loaded cells          */
+/* Per-model leaderboard: computed live from the loaded cells          */
 /* ================================================================== */
 
 function LeaderboardPanel({
@@ -2377,49 +2379,62 @@ function LeaderboardPanel({
       <Separator />
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <h2 className="text-sm font-semibold text-ink">
-          Per-model metrics — measured on the {splitLabel} split
+          Per-model metrics: measured on the {splitLabel} split
         </h2>
         <span className="text-[11px] text-faint tnum">
           {board.rows.length} models · council 0–{trimNum(board.councilScale)}
         </span>
       </div>
       <p className="max-w-4xl text-xs leading-relaxed text-muted">
-        Every number here is computed live from the loaded cells — nothing is hardcoded, so it always
+        Every number here is computed live from the loaded cells: nothing is hardcoded, so it always
         matches the OURS version on screen. The axis this product competes on is the leftmost:{" "}
-        <span className="text-ink">tier-appropriate move selection</span> (tier-fit) — where{" "}
+        <span className="text-ink">tier-appropriate move selection</span> (tier-fit): where{" "}
         <span className="text-signal">OURS</span> leads its own untuned <span className="text-ink">BASE</span>{" "}
         and the frontier. The <span className="text-muted">council move / instructiveness</span> grades
         are shown as context, not the headline: they grade the coaching prose, where OURS does{" "}
-        <span className="text-ink">not</span> lead — fine-tuning sharpened the move, not the paragraph,
+        <span className="text-ink">not</span> lead: fine-tuning sharpened the move, not the paragraph,
         and we don’t claim otherwise.
       </p>
 
-      <div className="overflow-hidden rounded-[10px] border border-[color:var(--border)]">
-        {/* Header row */}
-        <div className="grid grid-cols-[minmax(120px,1.5fr)_minmax(0,2fr)_64px_64px_56px] items-center gap-2 border-b border-[color:var(--separator)] bg-[color:var(--surface)] px-3 py-2 text-[10px] uppercase tracking-wide text-faint">
-          <span>Model</span>
-          <span>Tier-fit</span>
-          <span className="text-right">Council&nbsp;move</span>
-          <span className="text-right">Instruct.</span>
-          <span className="text-right">Cells</span>
-        </div>
-        <ul className="divide-y divide-[color:var(--separator)]">
-          {board.rows.map((r) => (
-            <LeaderboardRow key={r.key} row={r} scale={board.councilScale} />
-          ))}
-        </ul>
+      <div className="overflow-x-auto rounded-[10px] border border-[color:var(--border)]">
+        <table className="w-full border-collapse text-left">
+          <thead>
+            <tr className="border-b border-[color:var(--separator)] bg-[color:var(--surface)] text-[10px] uppercase tracking-wide text-faint">
+              <th scope="col" className="px-3 py-2 font-medium">
+                Model
+              </th>
+              <th scope="col" className="px-3 py-2 font-medium">
+                Tier-fit
+              </th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">
+                Council&nbsp;move
+              </th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">
+                Instruct.
+              </th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">
+                Cells
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-[color:var(--separator)]">
+            {board.rows.map((r) => (
+              <LeaderboardRow key={r.key} row={r} />
+            ))}
+          </tbody>
+        </table>
       </div>
       <p className="text-[10px] leading-relaxed text-faint">
         Deterministic board-fact fabrication is <span className="text-muted">0% for every model</span>{" "}
         after the verify-and-regenerate gate (the fairness floor), so it isn’t a ranking column here.{" "}
-        <span className="text-[color:var(--caution)]">⚠</span> marks a partial model (fewer cells —
+        <span className="text-[color:var(--caution)]">⚠</span> marks a partial model (fewer cells,
         provider throttling); its rates are over the cells it does have.
       </p>
     </section>
   );
 }
 
-function LeaderboardRow({ row, scale }: { row: ModelAggregate; scale: number }) {
+function LeaderboardRow({ row }: { row: ModelAggregate }) {
   const isOurs = row.kind === "ours";
   const isBase = row.kind === "base";
   const fill =
@@ -2431,63 +2446,63 @@ function LeaderboardRow({ row, scale }: { row: ModelAggregate; scale: number }) 
           ? "var(--faint)"
           : "var(--muted)";
   return (
-    <li
-      className={`grid grid-cols-[minmax(120px,1.5fr)_minmax(0,2fr)_64px_64px_56px] items-center gap-2 px-3 py-2 ${
-        isOurs ? "bg-signal/[0.06]" : isBase ? "bg-[color:var(--surface-tertiary)]/40" : ""
-      }`}
-    >
-      <div className="flex min-w-0 items-center gap-1.5">
-        <span
-          className={`truncate text-xs ${isOurs ? "font-semibold text-signal" : "text-ink"}`}
-          title={row.name}
-        >
-          {row.short}
-        </span>
-        <KindTag kind={row.kind} />
-        {row.partial && (
+    <tr className={isOurs ? "bg-signal/[0.06]" : isBase ? "bg-[color:var(--surface-tertiary)]/40" : ""}>
+      <th scope="row" className="px-3 py-2 text-left font-normal">
+        <span className="flex min-w-0 items-center gap-1.5">
           <span
-            className="text-[10px] text-[color:var(--caution)]"
-            title="Partial model — only a subset of cells exist (provider throttling)."
+            className={`truncate text-xs ${isOurs ? "font-semibold text-signal" : "text-ink"}`}
+            title={row.name}
           >
-            ⚠
+            {row.short}
           </span>
-        )}
-      </div>
+          <KindTag kind={row.kind} />
+          {row.partial && (
+            <span
+              className="text-[10px] text-[color:var(--caution)]"
+              title="Partial model: only a subset of cells exist (provider throttling)."
+            >
+              ⚠
+            </span>
+          )}
+        </span>
+      </th>
 
       {/* Tier-fit bar */}
-      <div className="flex items-center gap-2">
-        <span
-          className="relative h-2 flex-1 overflow-hidden rounded-full bg-[color:var(--surface-tertiary)]"
-          title={`tier-fit ${pct(row.tierFitRate)}`}
-        >
+      <td className="px-3 py-2">
+        <span className="flex items-center gap-2">
           <span
-            aria-hidden
-            className="absolute inset-y-0 left-0 rounded-full"
-            style={{ width: `${row.tierFitRate * 100}%`, backgroundColor: fill }}
-          />
+            className="relative h-2 flex-1 overflow-hidden rounded-full bg-[color:var(--surface-tertiary)]"
+            title={`tier-fit ${pct(row.tierFitRate)}`}
+          >
+            <span
+              aria-hidden
+              className="absolute inset-y-0 left-0 rounded-full"
+              style={{ width: `${row.tierFitRate * 100}%`, backgroundColor: fill }}
+            />
+          </span>
+          <span
+            className={`w-12 shrink-0 text-right font-mono text-xs tnum ${isOurs ? "font-semibold text-signal" : "text-ink"}`}
+          >
+            {pct(row.tierFitRate)}
+          </span>
         </span>
-        <span
-          className={`w-12 shrink-0 text-right font-mono text-xs tnum ${isOurs ? "font-semibold text-signal" : "text-ink"}`}
-        >
-          {pct(row.tierFitRate)}
-        </span>
-      </div>
+      </td>
 
-      <span className="text-right font-mono text-xs text-ink tnum">
-        {row.councilMove == null ? "—" : trimNum(row.councilMove)}
-      </span>
-      <span className="text-right font-mono text-xs text-ink tnum">
-        {row.councilInstr == null ? "—" : trimNum(row.councilInstr)}
-      </span>
-      <span className="text-right font-mono text-[11px] text-faint tnum">
+      <td className="px-3 py-2 text-right font-mono text-xs text-ink tnum">
+        {row.councilMove == null ? "–" : trimNum(row.councilMove)}
+      </td>
+      <td className="px-3 py-2 text-right font-mono text-xs text-ink tnum">
+        {row.councilInstr == null ? "–" : trimNum(row.councilInstr)}
+      </td>
+      <td className="px-3 py-2 text-right font-mono text-[11px] text-faint tnum">
         {row.cells.toLocaleString()}
-      </span>
-    </li>
+      </td>
+    </tr>
   );
 }
 
 /* ================================================================== */
-/* Truthfulness residual — two honest layers (per-model, static)       */
+/* Truthfulness residual: two honest layers (per-model, static)       */
 /* ================================================================== */
 
 function TruthfulnessPanel({ oursLabel }: { oursLabel: OursLabel }) {
@@ -2507,22 +2522,22 @@ function TruthfulnessPanel({ oursLabel }: { oursLabel: OursLabel }) {
       <Separator />
       <div className="flex flex-col gap-1.5">
         <h2 className="text-sm font-semibold text-ink">
-          Truthfulness — one fairness floor, one honest differentiator
+          Truthfulness: one fairness floor, one honest differentiator
         </h2>
         <p className="max-w-4xl text-xs leading-relaxed text-muted">
           Faithfulness is a <span className="text-ink">fairness floor, not a differentiator</span>:
           after the verify-and-regenerate gate, <span className="text-ink">every</span> model ships{" "}
           <span className="text-ink">0.0%</span> user-visible board-fact fabrication
-          (n={t.determOverall.n.toLocaleString()} cells) — the same bar for OURS, BASE, frontier and
+          (n={t.determOverall.n.toLocaleString()} cells): the same bar for OURS, BASE, frontier and
           open alike. Where models genuinely differ is the{" "}
           <span className="text-ink">semantic-truth</span> residual: a strict cross-family judge panel
           ({t.judgePanel.join(" + ")}) fact-checks a stratified sample of the{" "}
           <span className="text-ink">gated</span> text for the multi-move / evaluative claims the
-          deterministic layer can’t decide. OURS trails the frontier here — shown, not smoothed over.
+          deterministic layer can’t decide. OURS trails the frontier here: shown, not smoothed over.
         </p>
       </div>
 
-      {/* The fairness floor — one statement, all models */}
+      {/* The fairness floor: one statement, all models */}
       <div className="flex items-start gap-3 rounded-[10px] border-[1.5px] border-[color:var(--good)]/35 bg-[color:var(--good)]/10 px-4 py-3">
         <ShieldCheckIcon width={18} height={18} className="mt-0.5 shrink-0 text-[color:var(--good)]" />
         <div className="flex flex-col gap-0.5">
@@ -2532,17 +2547,17 @@ function TruthfulnessPanel({ oursLabel }: { oursLabel: OursLabel }) {
           </span>
           <span className="text-xs leading-relaxed text-muted">
             After the verify-and-regenerate gate, no mechanical board-fact lie survives in what a user
-            sees — verified on n={t.determOverall.n.toLocaleString()} shipped cells, the same gate for
+            sees: verified on n={t.determOverall.n.toLocaleString()} shipped cells, the same gate for
             every model. Faithfulness is table-stakes here, so it is not a ranking axis.
           </span>
         </div>
       </div>
 
-      {/* The semantic-judge residual — three nested aggregations, per model */}
+      {/* The semantic-judge residual: three nested aggregations, per model */}
       <div className="flex flex-col gap-2.5 rounded-[10px] border-[1.5px] border-[color:var(--border)] px-4 py-3.5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-faint">
-            Semantic-judge truthful-rate — any · majority · unanimous (95% CI)
+            Semantic-judge truthful-rate: any · majority · unanimous (95% CI)
           </h3>
           <span className="text-[11px] text-faint tnum">
             pooled: any {trimNum(t.overall.any.pct)}% · maj {trimNum(t.overall.majority.pct)}% · unan{" "}
@@ -2559,8 +2574,8 @@ function TruthfulnessPanel({ oursLabel }: { oursLabel: OursLabel }) {
           extended by a lighter band to the <span className="text-muted">unanimous</span> (lenient)
           rate; the tick marks <span className="text-muted">majority</span>.{" "}
           <span className="text-muted">any</span> = a single cross-family judge’s objection sinks the
-          cell — a conservative <span className="text-muted">lower bound</span>, not a claim the rest
-          are lies. <span className="text-muted">unanimous</span> = only a 3/3 objection sinks it — an{" "}
+          cell: a conservative <span className="text-muted">lower bound</span>, not a claim the rest
+          are lies. <span className="text-muted">unanimous</span> = only a 3/3 objection sinks it: an{" "}
           <span className="text-muted">upper bound</span>. Truth sits inside that band. Engine-derived
           fallback cells are judged 100% truthful; the residual lives in mechanically-clean model
           prose. {t.judgeCalls.toLocaleString()} judge calls · ${t.judgeCostUsd.toFixed(2)}.{" "}
@@ -2594,7 +2609,7 @@ function TruthBar({ row }: { row: TruthfulnessRow }) {
         </span>
         <KindTag kind={row.kind} />
         {row.partial && (
-          <span className="text-[10px] text-[color:var(--caution)]" title="Partial model — only a subset of cells exist (Bedrock throttling).">
+          <span className="text-[10px] text-[color:var(--caution)]" title="Partial model: only a subset of cells exist (Bedrock throttling).">
             ⚠
           </span>
         )}

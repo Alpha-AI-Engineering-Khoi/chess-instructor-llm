@@ -47,7 +47,7 @@ export default function CoachingReveal({
     .filter(Boolean);
   const hasProse = paragraphs.length > 0;
 
-  // The PRINCIPLE TAG for the move — assembled from existing CoachResponse fields
+  // The PRINCIPLE TAG for the move: assembled from existing CoachResponse fields
   // (concepts if any, else a short slice of the takeaway). This is the hero's
   // one-line reason; the full prose drops to an optional, secondary expander.
   const tag = principleTag(result.concepts_used, result.takeaway);
@@ -64,7 +64,7 @@ export default function CoachingReveal({
 
   return (
     <div className="flex flex-col gap-7">
-      {/* HERO: the recommended move + a short principle tag — the trained behavior
+      {/* HERO: the recommended move + a short principle tag: the trained behavior
           (the tier-appropriate move), and the one-line reason attached to it. */}
       <Block delay={0}>
         <h2 className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -84,7 +84,7 @@ export default function CoachingReveal({
               <Tooltip.Content showArrow className="max-w-[18rem]">
                 <Tooltip.Arrow />
                 <p className="leading-relaxed">
-                  The tuned model's one job: pick the move that fits this rating band. Switch levels
+                  The tuned model&apos;s one job: pick the move that fits this rating band. Switch levels
                   to watch the pick adapt.
                 </p>
               </Tooltip.Content>
@@ -109,11 +109,11 @@ export default function CoachingReveal({
         )}
       </Block>
 
-      {/* Full coaching prose — a SECONDARY, OPTIONAL layer, collapsed by default so
+      {/* Full coaching prose: a SECONDARY, OPTIONAL layer, collapsed by default so
           the move + principle tag stays the hero. It reads as a supplementary,
           engine-assisted explanation, not the trained output. */}
       {hasProse && (
-        <Block delay={0.08}>
+        <Block delay={0.04}>
           <details className="group rounded-[10px] border border-[color:var(--border)] bg-[color:var(--surface)]">
             <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-muted transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
               <span aria-hidden className="text-faint transition-transform group-open:rotate-90">
@@ -135,7 +135,7 @@ export default function CoachingReveal({
 
       {/* Under the board: the measured evidence. */}
       <Separator />
-      <Block delay={0.16}>
+      <Block delay={0.08}>
         <AnalysisRail
           engine={result.engine}
           maia={result.maia}
@@ -144,7 +144,7 @@ export default function CoachingReveal({
         />
       </Block>
 
-      <Block delay={0.24}>
+      <Block delay={0.12}>
         <EngineLines
           engine={result.engine}
           fen={fen}
@@ -154,7 +154,7 @@ export default function CoachingReveal({
       </Block>
 
       {/* Provenance */}
-      <Block delay={0.32} className="flex flex-col gap-2">
+      <Block delay={0.16} className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <Chip variant="soft" color="default" size="sm">
             {result.meta.tuned ? "Tuned coach" : "Base model"}

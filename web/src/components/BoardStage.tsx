@@ -83,7 +83,7 @@ export default function BoardStage({
 
   // Accessible description of the board for screen readers (the chessground DOM
   // itself is decorative). States side-to-move, check, and how to interact.
-  const boardLabel = `Interactive chess board — ${
+  const boardLabel = `Interactive chess board: ${
     turnColor === "white" ? "White" : "Black"
   } to move${check ? ", in check" : ""}. ${
     interactive
@@ -92,7 +92,7 @@ export default function BoardStage({
   }`;
 
   return (
-    // No card/bezel/border around the board — it sits clean on the canvas.
+    // No card/bezel/border around the board: it sits clean on the canvas.
     <div className="relative aspect-square w-full select-none">
       <ChessgroundBoard
         fen={fen}

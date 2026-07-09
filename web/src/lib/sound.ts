@@ -1,4 +1,4 @@
-// Tiny Web-Audio "board feel" engine — a synthesized wood knock for moves and a
+// Tiny Web-Audio "board feel" engine: a synthesized wood knock for moves and a
 // sharper thud for captures. No audio assets (nothing to host or license), works
 // offline, and is created lazily on the first user gesture (a drag) so it obeys
 // browser autoplay rules.
@@ -37,7 +37,7 @@ function knock(freq: number, dur: number, gain: number, clickAmt: number) {
   osc.start(now);
   osc.stop(now + dur + 0.02);
 
-  // Click transient (short filtered noise) — the "attack" of the knock.
+  // Click transient (short filtered noise): the "attack" of the knock.
   const len = Math.floor(c.sampleRate * 0.02);
   const buf = c.createBuffer(1, len, c.sampleRate);
   const data = buf.getChannelData(0);

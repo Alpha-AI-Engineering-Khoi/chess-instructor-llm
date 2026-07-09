@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Button, Card, FieldError, Input, Label, Separator, TextArea, TextField, Tooltip } from "@heroui/react";
+import { Button, FieldError, Input, Label, Separator, TextArea, TextField, Tooltip } from "@heroui/react";
 import {
   getLibrary,
   postCoachAll,
@@ -36,9 +36,9 @@ type Status = "idle" | "loading" | "done" | "error";
 
 // DEFAULT is a moat demo verified on the LIVE served model: on this held-out
 // rook endgame the coach gives a DIFFERENT, level-appropriate move for each tier
-// — g5 (beginner) · Ra1 (intermediate) · h5 (advanced). Switching tiers on load
+//: g5 (beginner) · Ra1 (intermediate) · h5 (advanced). Switching tiers on load
 // is the one-screen proof that the fine-tune adapts the move to the player's
-// level. No student move — the point is the recommendation per tier.
+// level. No student move: the point is the recommendation per tier.
 const DEFAULT = {
   fen: "r5kr/6pp/p7/8/6PP/8/8/5RK1 w - - 1 39",
   tier: "beginner" as Tier,
@@ -60,33 +60,33 @@ interface Preset {
 const PRESETS: Preset[] = [
   {
     label: "Moat · rook endgame",
-    hint: "The default demo — the live model adapts g5 / Ra1 / h5 by level; switch tiers to watch the move change.",
+    hint: "The default demo: the live model adapts g5 / Ra1 / h5 by level; switch tiers to watch the move change.",
     fen: "r5kr/6pp/p7/8/6PP/8/8/5RK1 w - - 1 39",
   },
   {
     label: "Italian Game",
-    hint: "1.e4 e5 2.Nf3 Nc6 3.Bc4 — Black to choose a developing move.",
+    hint: "1.e4 e5 2.Nf3 Nc6 3.Bc4: Black to choose a developing move.",
     fen: "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
   },
   {
     label: "Ruy López",
-    hint: "1.e4 e5 2.Nf3 Nc6 3.Bb5 — the Spanish, Black to respond.",
+    hint: "1.e4 e5 2.Nf3 Nc6 3.Bb5: the Spanish, Black to respond.",
     fen: "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
   },
   {
     label: "Sicilian Defence",
-    hint: "1.e4 c5 — White to develop against the Sicilian.",
+    hint: "1.e4 c5: White to develop against the Sicilian.",
     fen: "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
   },
   {
     label: "Early queen 2.Qh5?!",
-    hint: "The classic beginner queen sortie — sound pressure, or just a target?",
+    hint: "The classic beginner queen sortie: sound pressure, or just a target?",
     fen: "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
     move: "Qh5",
   },
   {
     label: "Starting position",
-    hint: "A fresh game — White to make the first move.",
+    hint: "A fresh game: White to make the first move.",
     fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
   },
 ];
@@ -146,8 +146,8 @@ export default function Studio() {
   // ONCE and returns all three tiers, so the initial load costs a single engine
   // pass, not three. If that route is missing (404 before the backend is
   // restarted) or fails, it GRACEFULLY FALLS BACK to the proven 3-parallel
-  // `postCoachResilient` path — each tier landing independently, with the existing
-  // cold-start "waking" handling — so the Studio never breaks. A seeded run always
+  // `postCoachResilient` path: each tier landing independently, with the existing
+  // cold-start "waking" handling: so the Studio never breaks. A seeded run always
   // takes the per-tier path so the seeded band stays instant while the others
   // prefetch. Either way the answers land in the same per-tier cache, so switching
   // levels afterward is instant.
@@ -172,7 +172,7 @@ export default function Studio() {
       });
       setTierError({ beginner: null, intermediate: null, advanced: null });
 
-      // Cold start in progress — surface "waking" without flipping to error.
+      // Cold start in progress: surface "waking" without flipping to error.
       const onStatus = (st: CoachWakeStatus) => {
         if (!ctrl.signal.aborted) setWakingCoach(st);
       };
@@ -193,7 +193,7 @@ export default function Studio() {
       const failTier = (t: Tier, e: unknown) => {
         if (ctrl.signal.aborted) return;
         // Only reached once the resilient call gives up (retries exhausted or a
-        // hard, non-cold error) — so "offline" never flashes mid-wake.
+        // hard, non-cold error): so "offline" never flashes mid-wake.
         setTierStatus((prev) => {
           const next = { ...prev };
           next[t] = "error";
@@ -274,7 +274,7 @@ export default function Studio() {
   }, [runCoachAllTiers, loadLibrary]);
 
   // The displayed answer is whatever the ACTIVE tier holds in the cache; a tier
-  // switch just re-points these — no network call when a tier is already cached.
+  // switch just re-points these: no network call when a tier is already cached.
   const activeStatus = tierStatus[tier];
   const activeResult = tierResults[tier] ?? null;
   const activeError = tierError[tier];
@@ -342,7 +342,7 @@ export default function Studio() {
     [fen, runCoachAllTiers],
   );
 
-  // Take back the last move — return to the previous position and ask "what now?".
+  // Take back the last move: return to the previous position and ask "what now?".
   const undo = useCallback(() => {
     if (history.length === 0) return;
     const prev = history[history.length - 1];
@@ -379,7 +379,7 @@ export default function Studio() {
   const flip = useCallback(() => setOrientation((o) => (o === "white" ? "black" : "white")), []);
 
   // Tier switching is INSTANT: all three bands were fetched together for this
-  // position, so we just swap which cached answer is displayed — no new model
+  // position, so we just swap which cached answer is displayed: no new model
   // call. (A tier still in flight shows a lightweight per-tier skeleton via the
   // console until its result lands.) Dropping the library pin keeps the highlight
   // honest once the shown level differs from the pinned entry.
@@ -495,7 +495,7 @@ export default function Studio() {
 
   return (
     <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-[1240px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-      {/* Top-of-page intro. The hero is the ONE behavior — the tuned model selects
+      {/* Top-of-page intro. The hero is the ONE behavior: the tuned model selects
           the tier-appropriate MOVE (+ a short principle tag) where its base can't;
           the coaching prose is a secondary, optional layer, and the cross-model
           views are the bonus comparison. */}
@@ -658,17 +658,18 @@ export default function Studio() {
                   </span>
                 </Button>
                 <Tooltip.Content>
-                  Flip the board (F) — viewing from {orientation === "white" ? "White" : "Black"}
+                  Flip the board (F): viewing from {orientation === "white" ? "White" : "Black"}
                 </Tooltip.Content>
               </Tooltip>
             </div>
           </div>
         </section>
 
-        {/* Coaching console */}
+        {/* Coaching console: unboxed onto the felt. On desktop a 1px divider (not
+            a card) separates it from the board column. */}
         <section className="order-2 flex lg:col-start-2 lg:row-span-2 lg:row-start-1">
-          <Card variant="secondary" className="flex flex-1 flex-col lg:min-h-[660px]">
-            <Card.Content className="flex flex-1 flex-col p-5 sm:p-7" aria-live="polite">
+          <div className="flex flex-1 flex-col lg:min-h-[660px] lg:border-l lg:border-[color:var(--separator)] lg:pl-8">
+            <div className="flex flex-1 flex-col pt-1" aria-live="polite">
               {activeStatus === "done" && activeResult ? (
                 // Key by position+tier so an INSTANT tier switch (done→done) still
                 // replays the reveal animation, while a background tier landing for
@@ -691,15 +692,15 @@ export default function Studio() {
               ) : (
                 <IdlePanel toMove={toMove} studentSan={studentSan} />
               )}
-            </Card.Content>
-          </Card>
+            </div>
+          </div>
         </section>
 
-        {/* Controls */}
+        {/* Controls: unboxed onto the felt, sections divided by 1px rules. */}
         <section className="order-3 lg:col-start-1 lg:row-start-2">
-          <Card variant="secondary">
-            <Card.Content className="flex flex-col gap-5 p-4 sm:p-5">
-              {/* Always enabled — switching bands reads from the per-tier cache, so
+          <div className="flex flex-col">
+            <div className="flex flex-col gap-5">
+              {/* Always enabled: switching bands reads from the per-tier cache, so
                   the user can click around the three levels even mid-fetch. */}
               <TierControl tier={tier} onChange={changeTier} />
 
@@ -746,14 +747,14 @@ export default function Studio() {
                   </Tooltip.Content>
                 </Tooltip>
                 <p className="text-[11px] leading-relaxed text-faint">
-                  A fresh live pass over this exact position — re-reads it and re-picks the
+                  A fresh live pass over this exact position: re-reads it and re-picks the
                   level-appropriate move, rather than reusing a cached answer.
                 </p>
               </div>
 
               <Separator />
 
-              {/* Position library — real dataset positions, each coached by the tuned model */}
+              {/* Position library: real dataset positions, each coached by the tuned model */}
               <PositionLibrary
                 entries={library}
                 status={libStatus}
@@ -821,7 +822,7 @@ export default function Studio() {
                     {!fenDraftState.ok && (
                       <FieldError className="text-xs text-[color:var(--caution)]">
                         {fenDraftState.error
-                          ? `Not a valid FEN — ${fenDraftState.error}`
+                          ? `Not a valid FEN: ${fenDraftState.error}`
                           : "That doesn’t look like a valid FEN. Paste the full board string."}
                       </FieldError>
                     )}
@@ -829,7 +830,7 @@ export default function Studio() {
                   {/* Valid FEN, but a finished game has no move to coach. */}
                   {fenDraftState.ok && fenDraftState.gameOver && (
                     <p className="text-xs leading-relaxed text-[color:var(--caution)]">
-                      That position is already game over — there’s no move to coach. Try another FEN.
+                      That position is already game over: there’s no move to coach. Try another FEN.
                     </p>
                   )}
                   <TextField
@@ -904,8 +905,8 @@ export default function Studio() {
                   </div>
                 </div>
               </details>
-            </Card.Content>
-          </Card>
+            </div>
+          </div>
         </section>
       </main>
     </div>
@@ -944,7 +945,7 @@ function CoachingSkeleton({ waking }: { waking?: CoachWakeStatus | null }) {
         <div className="flex flex-col gap-1.5">
           <p className="flex items-center gap-2 text-sm font-medium text-ink">
             <span aria-hidden className="inline-block size-2 shrink-0 animate-pulse rounded-full bg-signal" />
-            Waking the coach model — first call after idle takes ~2–3 min…
+            Waking the coach model: first call after idle takes ~2–3 min…
           </p>
           <p className="text-xs leading-relaxed text-muted">
             The model scales to zero when idle.{" "}
@@ -964,7 +965,7 @@ function ErrorPanel({ error, onRetry }: { error: string | null; onRetry: () => v
     <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
       <h2 className="text-xl font-semibold text-ink">The coach is offline for a moment.</h2>
       <p className="max-w-sm text-sm leading-relaxed text-muted">
-        Your position is saved. This usually means the coaching service is restarting — give it a
+        Your position is saved. This usually means the coaching service is restarting: give it a
         moment and try again.
       </p>
       <Button variant="primary" size="md" className="min-h-11" onPress={onRetry}>

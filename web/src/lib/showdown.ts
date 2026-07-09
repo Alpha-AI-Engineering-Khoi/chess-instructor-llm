@@ -1,5 +1,5 @@
 // Typed client for the pre-computed "Model Showdown" slice (web/public/showdown.json).
-// Built by scripts/build_showdown.py from the real benchmark artifacts — every
+// Built by scripts/build_showdown.py from the real benchmark artifacts: every
 // model's recommended move + objective flags + coaching, per held-out position.
 
 import type { Tier } from "@/lib/api";

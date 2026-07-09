@@ -71,6 +71,7 @@ export default function Showdown() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mount data fetch
     load();
     return () => abortRef.current?.abort();
   }, [load]);
@@ -100,6 +101,7 @@ export default function Showdown() {
   }, [positions, tier, phase, bench, winsOnly, model]);
 
   // Reset pagination whenever the filter set changes.
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- reset pagination when filters change
   useEffect(() => setVisible(PAGE), [tier, phase, bench, model, winsOnly]);
 
   const shown = filtered.slice(0, visible);
@@ -138,25 +140,43 @@ export default function Showdown() {
         </div>
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-            Model Showdown — where OURS beats the frontier
+            Model Showdown: where OURS beats the frontier
           </h1>
           <p className="max-w-3xl text-sm leading-relaxed text-muted sm:text-base">
             Every held-out position, with each model&rsquo;s recommended move on the same grounded
             input. A move is <span className="text-ink">tier-fit</span> when it is the human-findable
             sound move for that tier; <span className="text-ink">fabricated</span> when the
             faithfulness verifier caught a false board fact. Rows where{" "}
-            <span className="text-signal">OURS wins</span> — sound + tier-fit where a frontier model
-            isn&rsquo;t, or faithful where a frontier model invents a fact — are surfaced first.
+            <span className="text-signal">OURS wins</span> (sound + tier-fit where a frontier model
+            isn&rsquo;t, or faithful where a frontier model invents a fact) are surfaced first.
           </p>
         </div>
 
-        {/* Summary tiles */}
+        {/* Summary totals: a compact table, not a hero-metric KPI grid. */}
         {totals && (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatTile label="Positions" value={totals.positions} sub="held-out" />
-            <StatTile label="OURS wins" value={totals.ours_wins} sub="beats ≥1 frontier" accent />
-            <StatTile label="Tier-fit wins" value={totals.ours_wins_tier} sub="right move for the level" />
-            <StatTile label="Faithfulness wins" value={totals.ours_wins_faithful} sub="honest where frontier fabricates" />
+          <div className="overflow-x-auto rounded-[10px] border border-[color:var(--border)]">
+            <table className="w-full border-collapse text-left text-sm">
+              <caption className="sr-only">Showdown totals across the held-out set</caption>
+              <tbody className="divide-y divide-[color:var(--separator)]">
+                <SummaryRow label="Positions" value={totals.positions} note="held-out" />
+                <SummaryRow
+                  label="OURS wins"
+                  value={totals.ours_wins}
+                  note="beats at least one frontier model"
+                  accent
+                />
+                <SummaryRow
+                  label="Tier-fit wins"
+                  value={totals.ours_wins_tier}
+                  note="the right move for the level"
+                />
+                <SummaryRow
+                  label="Faithfulness wins"
+                  value={totals.ours_wins_faithful}
+                  note="honest where a frontier model fabricates"
+                />
+              </tbody>
+            </table>
           </div>
         )}
 
@@ -177,8 +197,8 @@ export default function Showdown() {
               <div className="mt-1 flex flex-col gap-0.5 border-t border-[color:var(--separator)] pt-2 sm:flex-row sm:gap-2">
                 <dt className="shrink-0 font-mono text-faint sm:w-36">benchmarks</dt>
                 <dd>
-                  <span className="text-ink">v2</span> — {doc.meta.benchmarks.v2}{" "}
-                  <span className="text-ink">open</span> — {doc.meta.benchmarks.open}
+                  <span className="text-ink">v2</span>: {doc.meta.benchmarks.v2}{" "}
+                  <span className="text-ink">open</span>: {doc.meta.benchmarks.open}
                 </dd>
               </div>
             </dl>
@@ -285,7 +305,7 @@ export default function Showdown() {
         {status === "error" && (
           <EmptyState
             title="The showdown data didn’t load."
-            body="showdown.json is served from web/public — rebuild it with scripts/build_showdown.py, then retry."
+            body="showdown.json is served from web/public: rebuild it with scripts/build_showdown.py, then retry."
             onRetry={load}
           />
         )}
@@ -347,6 +367,7 @@ function PositionCard({ position, focusModel }: { position: ShowdownPosition; fo
   const models = useMemo(() => orderedModels(position.models), [position.models]);
   const defaultKey = models.some((m) => m.key === focusModel) ? focusModel : "ours";
   const [sel, setSel] = useState<string>(defaultKey);
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- keep the model selection valid
   useEffect(() => setSel(defaultKey), [defaultKey]);
 
   const selModel = models.find((m) => m.key === sel) ?? models.find((m) => m.key === "ours") ?? models[0];
@@ -354,10 +375,10 @@ function PositionCard({ position, focusModel }: { position: ShowdownPosition; fo
 
   return (
     <Card variant="secondary" className="overflow-hidden">
-      <Card.Content className="grid grid-cols-1 gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,300px)_minmax(0,1fr)]">
+      <Card.Content className="grid grid-cols-1 gap-5 p-4 sm:p-5 lg:grid-cols-[minmax(0,480px)_minmax(0,1fr)]">
         {/* Left: board + position meta */}
         <div className="flex flex-col gap-3">
-          <div className="mx-auto w-full max-w-[300px]">
+          <div className="mx-auto w-full max-w-[480px]">
             <ShowdownBoard
               fen={position.fen}
               orientation={orientation}
@@ -473,9 +494,11 @@ function ModelRow({
       aria-pressed={selected}
       className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal/60 ${
         selected
-          ? "bg-signal/12 shadow-[inset_2px_0_0_0_var(--signal)]"
-          : "hover:bg-[color:var(--surface-tertiary)]"
-      } ${isOurs ? "ring-1 ring-signal/30" : ""}`}
+          ? "bg-signal/12 ring-1 ring-signal/50"
+          : isOurs
+            ? "ring-1 ring-signal/30 hover:bg-[color:var(--surface-tertiary)]"
+            : "hover:bg-[color:var(--surface-tertiary)]"
+      }`}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <div className="flex items-center gap-1.5">
@@ -498,7 +521,7 @@ function ModelRow({
         </div>
       </div>
       <span className={`shrink-0 font-serif text-base font-semibold tnum ${isOurs ? "text-signal" : "text-ink"}`}>
-        {model.rec_san ?? "—"}
+        {model.rec_san ?? "–"}
       </span>
     </button>
   );
@@ -515,7 +538,7 @@ function CoachingPanel({ model }: { model: ShowdownModel }) {
           </span>
           <KindTag kind={model.kind} />
         </div>
-        <span className="font-serif text-sm font-semibold text-ink tnum">{model.rec_san ?? "—"}</span>
+        <span className="font-serif text-sm font-semibold text-ink tnum">{model.rec_san ?? "–"}</span>
       </div>
 
       {model.violations.length > 0 && (
@@ -527,14 +550,14 @@ function CoachingPanel({ model }: { model: ShowdownModel }) {
             {model.violations.map((v, i) => (
               <li key={i}>
                 <span className="text-ink">&ldquo;{v.sentence}&rdquo;</span>{" "}
-                <span className="text-[color:var(--danger)]">— {v.reason}</span>
+                <span className="text-[color:var(--danger)]">({v.reason})</span>
               </li>
             ))}
           </ul>
         </div>
       )}
 
-      {/* Coaching prose — a secondary, OPTIONAL layer, collapsed by default so the
+      {/* Coaching prose: a secondary, OPTIONAL layer, collapsed by default so the
           model's recommended move (in the header above) stays the hero, matching
           the Studio + Showcase reveal. The fabrication receipts above stay visible. */}
       {hasProse ? (
@@ -592,29 +615,31 @@ function Chip({ tone, label }: { tone: "good" | "signal" | "danger" | "muted"; l
   );
 }
 
-function StatTile({
+function SummaryRow({
   label,
   value,
-  sub,
+  note,
   accent,
 }: {
   label: string;
   value: number;
-  sub: string;
+  note: string;
   accent?: boolean;
 }) {
   return (
-    <div
-      className={`flex flex-col gap-0.5 rounded-[10px] border px-3.5 py-3 ${
-        accent ? "border-signal/40 bg-signal/10" : "border-[color:var(--border)]"
-      }`}
-    >
-      <span className={`font-mono text-2xl font-semibold tnum ${accent ? "text-signal" : "text-ink"}`}>
-        {value}
-      </span>
-      <span className="text-xs font-medium text-ink">{label}</span>
-      <span className="text-[11px] text-faint">{sub}</span>
-    </div>
+    <tr className={accent ? "bg-signal/[0.06]" : undefined}>
+      <th scope="row" className="px-3 py-2 text-left text-sm font-medium text-ink">
+        {label}
+      </th>
+      <td
+        className={`px-3 py-2 text-right font-mono tnum ${
+          accent ? "font-semibold text-signal" : "text-ink"
+        }`}
+      >
+        {value.toLocaleString()}
+      </td>
+      <td className="px-3 py-2 text-muted">{note}</td>
+    </tr>
   );
 }
 

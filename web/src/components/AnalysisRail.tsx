@@ -96,7 +96,7 @@ export default function AnalysisRail({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Legend — the color language, stated once (not color-alone). */}
+      {/* Legend: the color language, stated once (not color-alone). */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
         <span className="inline-flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-signal" aria-hidden />
@@ -139,7 +139,7 @@ export default function AnalysisRail({
             <ul className="flex flex-col gap-1.5">
               {maiaTop.map((m) => {
                 const tone = toneFor(m.uci);
-                // Human odds are true probabilities — bars use the absolute 0–100%
+                // Human odds are true probabilities: bars use the absolute 0–100%
                 // scale (with a small floor so tiny odds stay visible).
                 const pct = Math.max(6, m.policy * 100);
                 return (

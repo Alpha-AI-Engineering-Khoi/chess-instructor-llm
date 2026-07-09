@@ -1,7 +1,7 @@
 // EVIDENCE + TRUST BAR
 // A global footer, rendered once in the root layout, that surfaces the ONE
-// deterministic claim this product is built on — tier-appropriate move selection
-// — as a measured, non-hand-wavy proof, next to the artifacts anyone can check:
+// deterministic claim this product is built on (tier-appropriate move selection)
+// as a measured, non-hand-wavy proof, next to the artifacts anyone can check:
 // the model weights, the benchmark dataset, the live Space, the source, and the
 // written thesis. On-theme (Bench-Instrument dark tokens, one warm signal accent);
 // no server state, so it's a plain server component. Links open in a new tab and
@@ -64,22 +64,22 @@ export default function EvidenceBar() {
   return (
     <footer
       aria-labelledby="evidence-heading"
-      className="relative z-[1] mt-8 border-t border-[color:var(--separator)] bg-[color:var(--surface)]/70 backdrop-blur-sm"
+      className="relative z-[1] mt-8 border-t border-[color:var(--separator)] bg-[color:var(--surface)]"
     >
       <div className="mx-auto flex w-full max-w-[1320px] flex-col gap-5 px-4 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:py-4">
-        {/* The deterministic proof — the honest headline number, stated once. */}
+        {/* The deterministic proof: the honest headline number, stated once. */}
         <div className="flex min-w-0 flex-col gap-1.5">
           <h2
             id="evidence-heading"
-            className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wide text-faint"
+            className="flex items-center gap-2 text-sm font-semibold text-ink"
           >
-            <ShieldCheckIcon width={13} height={13} className="text-signal" />
+            <ShieldCheckIcon width={15} height={15} className="text-signal" />
             Deterministic proof
           </h2>
           <p className="max-w-2xl text-pretty text-[13px] leading-relaxed text-muted">
             Tier-appropriate move selection lifts{" "}
-            <span className="font-mono text-faint tnum">27.8%</span>{" "}
-            <span className="text-faint">base</span> →{" "}
+            <span className="font-mono text-muted tnum">27.8%</span>{" "}
+            <span className="text-muted">base</span> →{" "}
             <span className="font-mono font-semibold text-signal tnum">82.8%</span>{" "}
             <span className="text-ink">tuned</span>, past the best frontier at{" "}
             <span className="font-mono text-ink tnum">48.3%</span>. Across the three tiers OURS gives{" "}
@@ -88,7 +88,7 @@ export default function EvidenceBar() {
           </p>
         </div>
 
-        {/* The artifacts anyone can check — each opens in a new tab. */}
+        {/* The artifacts anyone can check: each opens in a new tab. */}
         <nav
           aria-label="Model, dataset, and project links"
           className="flex shrink-0 flex-wrap items-center gap-2"
@@ -100,7 +100,7 @@ export default function EvidenceBar() {
               target="_blank"
               rel="noopener noreferrer"
               title={hint}
-              aria-label={`${label} — ${hint} (opens in a new tab)`}
+              aria-label={`${label}: ${hint} (opens in a new tab)`}
               className="group inline-flex items-center gap-1.5 rounded-full border border-[color:var(--border)] bg-[color:var(--surface-secondary)]/60 px-3 py-1.5 text-[13px] font-medium text-muted transition-colors hover:border-[color:var(--field-border)] hover:bg-[color:var(--surface-tertiary)] hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
             >
               <Icon width={14} height={14} className="text-faint transition-colors group-hover:text-signal" />

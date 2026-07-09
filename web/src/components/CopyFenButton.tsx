@@ -37,7 +37,7 @@ export default function CopyFenButton({ fen, className }: CopyFenButtonProps) {
   }, []);
 
   const copy = useCallback(() => {
-    // Clipboard is unavailable in insecure contexts / older browsers — bail
+    // Clipboard is unavailable in insecure contexts / older browsers: bail
     // quietly rather than throw. (localhost + https are secure contexts.)
     if (!navigator.clipboard) return;
     // Handle the promise so a denied/failed write never becomes an unhandled
@@ -50,7 +50,7 @@ export default function CopyFenButton({ fen, className }: CopyFenButtonProps) {
         timerRef.current = setTimeout(() => setCopied(false), COPIED_MS);
       })
       .catch(() => {
-        // Permission denied or clipboard unavailable — leave the label as-is.
+        // Permission denied or clipboard unavailable: leave the label as-is.
       });
   }, [fen]);
 

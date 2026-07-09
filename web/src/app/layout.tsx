@@ -3,7 +3,7 @@ import { Archivo, Spline_Sans_Mono, Merriweather } from "next/font/google";
 import "./globals.css";
 import EvidenceBar from "@/components/EvidenceBar";
 // Chessground (Lichess board) styles loaded GLOBALLY in the root layout so the
-// board is always styled on first paint — not dependent on the client-component
+// board is always styled on first paint: not dependent on the client-component
 // bundle loading first (which could briefly render an unstyled board).
 // base = board layout, brown = square theme, cburnett = embedded piece sprites.
 import "chessground/assets/chessground.base.css";
@@ -19,7 +19,7 @@ const ui = Archivo({
 });
 
 // The notation face: recommended move (hero), evals, FEN, engine lines. Mono is
-// strictly earned here — it renders real tabular chess data, never plain prose.
+// strictly earned here: it renders real tabular chess data, never plain prose.
 const mono = Spline_Sans_Mono({
   subsets: ["latin"],
   variable: "--font-data",
@@ -37,7 +37,7 @@ const notation = Merriweather({
 export const metadata: Metadata = {
   title: "AI Chess Instructor",
   description:
-    "An engine-grounded chess coach that reliably picks the level-appropriate move for your rating — a move plus a short principle tag, with a full written explanation as an optional layer. Set a position, mark the move you are unsure about, and pick your level.",
+    "An engine-grounded chess coach that reliably picks the level-appropriate move for your rating: a move plus a short principle tag, with a full written explanation as an optional layer. Set a position, mark the move you are unsure about, and pick your level.",
 };
 
 export default function RootLayout({

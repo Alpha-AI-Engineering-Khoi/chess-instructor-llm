@@ -1,7 +1,7 @@
 "use client";
 
 // Lichess' own board library. CSS is global (board layout + brown theme + the
-// cburnett piece set, whose SVGs are embedded as data-URIs — no asset hosting).
+// cburnett piece set, whose SVGs are embedded as data-URIs: no asset hosting).
 import "chessground/assets/chessground.base.css";
 import "chessground/assets/chessground.brown.css";
 import "chessground/assets/chessground.cburnett.css";
@@ -64,7 +64,7 @@ export default function ChessgroundBoard(props: ChessgroundBoardProps) {
   const elRef = useRef<HTMLDivElement>(null);
   const apiRef = useRef<Api | null>(null);
   // Last fen we handed to chessground. Used so the sync effect only re-sends the
-  // fen when the position actually changed — chessground's configure() resets
+  // fen when the position actually changed: chessground's configure() resets
   // user-drawn shapes whenever a fen is present, so re-sending it on every
   // annotation/orientation update would wipe the user's arrows (see sync effect).
   const prevFenRef = useRef(fen);
@@ -73,7 +73,6 @@ export default function ChessgroundBoard(props: ChessgroundBoardProps) {
   // from a 0×0 board (a mobile-first-paint issue that logs console errors).
   const [ready, setReady] = useState(false);
   const didFirstDraw = useRef(false);
-  const rafRef = useRef(0);
   const onMoveRef = useRef(onMove);
   // Keep the latest onMove without re-running the mount effect (updated post-render,
   // before any board interaction can fire handleAfter).
@@ -93,6 +92,10 @@ export default function ChessgroundBoard(props: ChessgroundBoardProps) {
   // Mount once.
   useEffect(() => {
     if (!elRef.current) return;
+    // Respect the user's reduced-motion preference: no piece-slide animation.
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const api = Chessground(elRef.current, {
       fen,
       orientation,
@@ -101,7 +104,7 @@ export default function ChessgroundBoard(props: ChessgroundBoardProps) {
       check,
       lastMove,
       highlight: { lastMove: true, check: true },
-      animation: { enabled: true, duration: 200 },
+      animation: { enabled: !prefersReducedMotion, duration: 200 },
       movable: {
         free: false,
         color: movableColor,
@@ -110,30 +113,26 @@ export default function ChessgroundBoard(props: ChessgroundBoardProps) {
         events: { after: handleAfter },
       },
       // Start with no annotations; the sync effect applies them once the board has
-      // real bounds (drawing arrows at 0×0 yields NaN line coordinates).
+      // real bounds (drawing arrows at 0x0 yields NaN line coordinates).
       drawable: { enabled: drawable, visible: true, autoShapes: [], brushes: BRUSHES },
     });
     apiRef.current = api;
-    const ro = new ResizeObserver(() => api.redrawAll());
-    ro.observe(elRef.current);
-    // Poll redrawAll (which rebuilds chessground's bounds memo) until the board's
-    // OWN measured bounds are non-zero, then flip ready. Chessground computes arrow
-    // geometry as min(1, bounds.width / bounds.height); a 0×0 board yields NaN
-    // <line> coordinates, so we never draw arrows until its bounds are real.
-    const waitForLayout = () => {
+    // Redraw on resize, and flip `ready` the first time the board has real
+    // (non-zero) bounds. Chessground computes arrow geometry as
+    // min(1, bounds.width / bounds.height), so a 0x0 board yields NaN <line>
+    // coordinates; we never draw arrows until bounds are real. A ResizeObserver
+    // fires on first layout and every resize, so it drives both concerns without
+    // the old requestAnimationFrame(redrawAll/bounds) loop that thrashed layout
+    // on every frame until the board measured.
+    const ro = new ResizeObserver(() => {
       const cg = apiRef.current;
       if (!cg) return;
       cg.redrawAll();
       const b = cg.state.dom.bounds();
-      if (b.width > 0 && b.height > 0) {
-        setReady(true);
-      } else {
-        rafRef.current = requestAnimationFrame(waitForLayout);
-      }
-    };
-    rafRef.current = requestAnimationFrame(waitForLayout);
+      if (b.width > 0 && b.height > 0) setReady(true);
+    });
+    ro.observe(elRef.current);
     return () => {
-      cancelAnimationFrame(rafRef.current);
       ro.disconnect();
       api.destroy();
       apiRef.current = null;

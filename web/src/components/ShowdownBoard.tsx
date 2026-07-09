@@ -2,12 +2,12 @@
 
 // A board for the Showcase/Showdown views. Reuses the same ChessgroundBoard
 // (Lichess board) the Studio uses, but the PIECES are non-movable (no legal-move
-// targets): it renders a position plus up to two annotation arrows — the selected
+// targets): it renders a position plus up to two annotation arrows: the selected
 // model's recommended move (amber signal) and the student's mistake (coral).
 //
 // Drawing IS enabled: like on Lichess, the user can right-click-drag (or
 // shift-drag) to draw their own arrows and circles for analysis. Those user
-// shapes are a separate layer from the annotation autoShapes, so both coexist —
+// shapes are a separate layer from the annotation autoShapes, so both coexist :
 // and ChessgroundBoard preserves user drawings across annotation/tier/model
 // changes (it only resets them when the position itself changes). Cheap enough to
 // render many at once.
@@ -46,7 +46,7 @@ export default function ShowdownBoard({ fen, orientation, moveUci, studentUci }:
   }, [moveUci, studentUci]);
 
   // Accessible description: the position plus a hint that arrows can be drawn.
-  const boardLabel = `Chess position — ${
+  const boardLabel = `Chess position: ${
     turnColor === "white" ? "White" : "Black"
   } to move. Right-click and drag to draw your own arrows.`;
 

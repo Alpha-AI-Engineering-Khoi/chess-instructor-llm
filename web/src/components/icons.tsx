@@ -63,7 +63,7 @@ export function FlipVerticalIcon({ style, ...props }: IconProps) {
   );
 }
 
-// A shield with a check — marks an engine-verified, truth-gated explanation.
+// A shield with a check: marks an engine-verified, truth-gated explanation.
 export function ShieldCheckIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -124,7 +124,7 @@ export function UndoIcon(props: IconProps) {
   );
 }
 
-// Two stacked sheets — the copy-to-clipboard affordance.
+// Two stacked sheets: the copy-to-clipboard affordance.
 export function CopyIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -134,7 +134,7 @@ export function CopyIcon(props: IconProps) {
   );
 }
 
-// A check — confirms the copy landed.
+// A check: confirms the copy landed.
 export function CheckIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -143,7 +143,7 @@ export function CheckIcon(props: IconProps) {
   );
 }
 
-// Stacked planes — the released model weights (Evidence bar link).
+// Stacked planes: the released model weights (Evidence bar link).
 export function LayersIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -153,7 +153,7 @@ export function LayersIcon(props: IconProps) {
   );
 }
 
-// A database cylinder — the benchmark dataset (Evidence bar link).
+// A database cylinder: the benchmark dataset (Evidence bar link).
 export function DatabaseIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -164,7 +164,7 @@ export function DatabaseIcon(props: IconProps) {
   );
 }
 
-// A rocket — the live interactive Space (Evidence bar link).
+// A rocket: the live interactive Space (Evidence bar link).
 export function RocketIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -176,7 +176,7 @@ export function RocketIcon(props: IconProps) {
   );
 }
 
-// A book — the BrainLift write-up (Evidence bar link).
+// A book: the BrainLift write-up (Evidence bar link).
 export function BookIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -186,7 +186,7 @@ export function BookIcon(props: IconProps) {
   );
 }
 
-// The GitHub mark — the source repository (Evidence bar link). Filled glyph.
+// The GitHub mark: the source repository (Evidence bar link). Filled glyph.
 export function GitHubIcon({ "aria-hidden": ariaHidden = true, ...props }: IconProps) {
   return (
     <svg
@@ -206,7 +206,7 @@ export function GitHubIcon({ "aria-hidden": ariaHidden = true, ...props }: IconP
   );
 }
 
-// A small "opens in a new tab" arrow — pairs with external links.
+// A small "opens in a new tab" arrow: pairs with external links.
 export function ExternalLinkIcon(props: IconProps) {
   return (
     <svg {...base} {...props}>

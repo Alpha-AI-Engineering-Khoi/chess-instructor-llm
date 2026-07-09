@@ -30,11 +30,7 @@
   --color-good: var(--good);
   --color-board-light: var(--board-light);
   --color-board-dark: var(--board-dark);
-
-  /* Type scale — fixed rem, ~1.25 modular. The verdict move is the one fluid step. */
-  --text-verdict: clamp(2.6rem, 6vw, 3.4rem);
-  --text-verdict--line-height: 0.95;
-  --text-verdict--letter-spacing: -0.02em;
+  --color-text-verdict: var(--text-verdict);
 }
 
 /* Scene tokens (mode-agnostic; this is a single, committed dark instrument). */
@@ -56,6 +52,11 @@
   /* Chalk and Walnut Board */
   --board-light: oklch(0.90 0.02 90);
   --board-dark: oklch(0.42 0.05 60);
+
+  /* The verdict move: a fluid display size plus the brass color the recommended,
+     selected, or focused move is painted in (the one accent, used as focus). */
+  --fs-verdict: clamp(2.6rem, 6vw, 3.4rem);
+  --text-verdict: var(--signal);
 }
 
 /* Map HeroUI's semantic tokens onto the Tournament Hall palette. */
@@ -112,7 +113,7 @@
 
   --backdrop: color-mix(in oklab, oklch(0.20 0.04 155) 64%, transparent);
 
-  /* Flat surfaces — no drop shadow on cards/panels (only floating overlays keep depth). */
+  /* Flat surfaces: no drop shadow on cards/panels (only floating overlays keep depth). */
   --surface-shadow: none;
   --overlay-shadow: 0 24px 60px -30px oklch(0.15 0.04 155);
 }
@@ -155,7 +156,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Motion — one purposeful "the verdict is arriving" reveal (transform/opacity
+   Motion: one purposeful "the verdict is arriving" reveal (transform/opacity
    only), plus a measured skeleton shimmer for loading. Everything degrades to
    an instant, already-visible state under prefers-reduced-motion.
    -------------------------------------------------------------------------- */
@@ -191,10 +192,10 @@ body {
 
 @keyframes shimmer {
   0% {
-    background-position: -160% 0;
+    transform: translateX(-100%);
   }
   100% {
-    background-position: 160% 0;
+    transform: translateX(100%);
   }
 }
 
@@ -226,7 +227,7 @@ body {
   animation: draw 420ms cubic-bezier(0.65, 0, 0.35, 1) both;
 }
 
-/* Measured skeleton for loading — a calm sweep across surface blocks. */
+/* Measured skeleton for loading: a calm sweep across surface blocks. */
 .skeleton {
   position: relative;
   overflow: hidden;
@@ -237,13 +238,15 @@ body {
   content: "";
   position: absolute;
   inset: 0;
+  /* S-tier sweep: a compositor-only transform slide (not a background sweep),
+     clipped by the skeleton's overflow:hidden. */
+  transform: translateX(-100%);
   background: linear-gradient(
     90deg,
     transparent 0%,
     color-mix(in oklab, var(--ink) 8%, transparent) 50%,
     transparent 100%
   );
-  background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
 
@@ -278,10 +281,10 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Keyboard focus — a single, consistent, always-visible focus ring for
+   Keyboard focus: a single, consistent, always-visible focus ring for
    keyboard users on the interactive elements the codebase doesn't already give
    a custom `focus-visible` ring: plain links and native <details> summaries.
-   Wrapped in :where() so its specificity is 0 — any component that paints its
+   Wrapped in :where() so its specificity is 0: any component that paints its
    own focus style (HeroUI controls, our role="button" rows) still wins, so this
    never double-rings them; it only fills the gaps. Amber signal = focus token.
    Pointer/mouse focus stays quiet (only :focus-visible, not :focus).
@@ -316,7 +319,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   Pointer affordance — ONE global rule so everything interactive shows a
+   Pointer affordance: ONE global rule so everything interactive shows a
    pointer cursor without per-component styling: native controls, links, ARIA
    roles used by HeroUI/React-Aria (button/tab/option/switch/menuitem/radio),
    selects, labels, summaries, our clickable cards ([role="button"]), and the
@@ -356,6 +359,12 @@ select:disabled,
    dragged, switch to grabbing so the drag has tactile feedback. */
 .cg-wrap piece.dragging {
   cursor: grabbing;
+  /* Tactile piece-lift while dragging. Uses the individual `scale` property (not
+     `transform: scale()`) so it composes with chessground's inline
+     `transform: translate()` that follows the cursor, instead of overriding it
+     and snapping the piece to the origin. */
+  scale: 1.1;
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.4));
 }
 
 /* Keep the legal-move green dot visible on hover instead of swapping to the
@@ -369,7 +378,44 @@ select:disabled,
 }
 
 /* --------------------------------------------------------------------------
-   Chessground coordinate labels — scale with the board so the rank/file marks
+   Board squares: Chalk (light) + Walnut (dark), overriding the imported
+   chessground brown theme. This chessground build paints the board on cg-board
+   itself (a single light background-color plus an SVG overlay for the dark
+   squares), NOT via per-square elements, so the effective recolor lives on
+   cg-board: a chalk background-color with the walnut squares drawn as a
+   conic-gradient checkerboard (a 2x2 tile repeated to the full 8x8). The
+   square.light / square.dark overrides below are kept as a defensive recolor for
+   any chessground build/theme that DOES emit per-square colored elements.
+   Highlight layers (move-dest / last-move / selected / check) are separate
+   <square> elements painted on top, so they are untouched. Loaded after
+   chessground.brown.css, so !important wins the unlayered import.
+   -------------------------------------------------------------------------- */
+body .cg-wrap cg-board {
+  background-color: var(--board-light) !important;
+  background-image: conic-gradient(
+    var(--board-dark) 0deg 90deg,
+    transparent 90deg 180deg,
+    var(--board-dark) 180deg 270deg,
+    transparent 270deg 360deg
+  ) !important;
+  background-size: 25% 25% !important;
+}
+body .cg-wrap cg-board square.light {
+  background: var(--board-light) !important;
+}
+body .cg-wrap cg-board square.dark {
+  background: var(--board-dark) !important;
+}
+
+/* Luminous brass drop-shadow on the coach's recommended-move arrow. Targets the
+   arrow shaft by the signal brush color, so only the coach arrow glows (the
+   student / user-drawn arrows stay clean). */
+body .cg-wrap svg line[stroke="#eaa93a" i] {
+  filter: drop-shadow(0 0 8px var(--signal));
+}
+
+/* --------------------------------------------------------------------------
+   Chessground coordinate labels: scale with the board so the rank/file marks
    stay small and tucked at EVERY board size.
 
    chessground.base.css sizes and positions the coordinates in FIXED pixels
@@ -384,7 +430,7 @@ select:disabled,
    Fix: make each board a container and express the coord font-size in
    container-query units, but CAP it at the original 9px via min(), with every
    offset in `em` so it tracks the font-size. Any board wider than ~450px
-   (desktop Studio — the known-good reference) still resolves to exactly the
+   (desktop Studio: the known-good reference) still resolves to exactly the
    original 9px / -20px / 4px / 24px values, so Studio is byte-for-byte
    unchanged; smaller boards scale the whole label set down by the same
    proportion, so Showcase now matches Studio at every size. The min() cap also
@@ -392,7 +438,7 @@ select:disabled,
    the current 9px, whatever the container resolves to.
    -------------------------------------------------------------------------- */
 /* NOTE: chessground.base.css ships UNLAYERED, and this file's rules are in a
-   Tailwind cascade layer — so an unlayered `.cg-wrap coords { font-size: 9px }`
+   Tailwind cascade layer: so an unlayered `.cg-wrap coords { font-size: 9px }`
    beats these regardless of specificity. `!important` is required for the
    scaling to actually win the cascade (verified: without it the coords stay a
    fixed 9px and look huge on the small Showcase boards). */
@@ -412,12 +458,23 @@ body .cg-wrap coords.files {
   left: 2.6667em !important;
   height: 1.7778em !important;
 }
-/* chessground's brown theme colors coords with an alternating light/dark scheme
-   for per-square contrast, but the alternation lands inverted here — white
-   (rgba(255,255,255,.8)) labels end up on the LIGHT squares and wash out. Force
-   a single dark label color; dark reads well on BOTH brown-theme square colors
-   (beige ~11:1, tan ~6.7:1), with a faint light halo for polish. */
-body .cg-wrap coords coord {
-  color: rgba(38, 28, 18, 0.92) !important;
-  text-shadow: 0 0 2px rgba(255, 250, 240, 0.55) !important;
+/* Coordinate contrast, contextual per square + board orientation: reuse
+   chessground's own orientation-aware parity selectors (the same scheme Lichess
+   ships) so each rank/file label is colored to contrast with the square it sits
+   on. The labels that land on light (chalk) squares get a dark ink; those on
+   dark (walnut) squares get cream. Replaces the earlier forced-dark + text-shadow
+   hack, which flattened every label to one color plus a halo. */
+body .cg-wrap.orientation-white .ranks :nth-child(odd),
+body .cg-wrap.orientation-white .files :nth-child(even),
+body .cg-wrap.orientation-black .ranks :nth-child(even),
+body .cg-wrap.orientation-black .files :nth-child(odd) {
+  color: oklch(0.3 0.03 60) !important;
+  text-shadow: none !important;
+}
+body .cg-wrap.orientation-white .ranks :nth-child(even),
+body .cg-wrap.orientation-white .files :nth-child(odd),
+body .cg-wrap.orientation-black .ranks :nth-child(odd),
+body .cg-wrap.orientation-black .files :nth-child(even) {
+  color: oklch(0.93 0.02 90) !important;
+  text-shadow: none !important;
 }

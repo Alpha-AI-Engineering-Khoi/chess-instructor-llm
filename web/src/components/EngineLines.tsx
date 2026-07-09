@@ -54,7 +54,7 @@ export default function EngineLines({
     <section aria-label="Likely continuations">
       <div className="mb-2 flex items-baseline justify-between gap-2">
         <h3 className="text-sm font-medium text-ink">How it could continue</h3>
-        <span className="text-xs text-muted">Click a line to play it — or a move to go deeper</span>
+        <span className="text-xs text-muted">Click a move to play the line up to it</span>
       </div>
 
       <ul className="flex flex-col gap-1.5">
@@ -62,9 +62,9 @@ export default function EngineLines({
           const toks = lineTokens(m.pv, startNo, whiteToMove);
           const isRec = m.uci === recommendedUci;
           const top = idx === 0;
-          // The whole row is a click target that plays this variation's move; the
-          // per-move buttons inside stop propagation so they can jump deeper into
-          // the same line. (List semantics stay on <li>; the row is a role=button.)
+          // Each SAN token below is its OWN button (plays the line up to that move),
+          // so the row container is NOT interactive: no nested interactive control,
+          // no button inside a button. (List semantics stay on <li>.)
           const playLine = (count: number) => onPlayLine?.(m.pv, count);
           // The best line is distinguished by a slightly stronger surface + bolder
           // move weight (no accent border). Amber stays reserved for the coach's
@@ -72,32 +72,8 @@ export default function EngineLines({
           return (
             <li key={m.uci}>
               <div
-                role={playable ? "button" : undefined}
-                tabIndex={playable ? 0 : undefined}
-                aria-label={
-                  playable
-                    ? `${isRec ? "Recommended line. " : ""}Play this line, starting ${
-                        m.pv[0]
-                      }, evaluation ${fmtEval(m.cp)}`
-                    : undefined
-                }
-                onClick={playable ? () => playLine(1) : undefined}
-                onKeyDown={
-                  playable
-                    ? (e) => {
-                        if (e.key === "Enter" || e.key === " ") {
-                          e.preventDefault();
-                          playLine(1);
-                        }
-                      }
-                    : undefined
-                }
-                className={`flex items-start gap-2.5 rounded-[8px] border border-[color:var(--separator)] px-2.5 py-2 transition-colors ${
+                className={`flex items-start gap-2.5 rounded-[8px] border border-[color:var(--separator)] px-2.5 py-2 ${
                   top ? "bg-[color:var(--surface-tertiary)]/70" : "bg-[color:var(--surface-tertiary)]/40"
-                } ${
-                  playable
-                    ? "cursor-pointer hover:border-[color:var(--border)] hover:bg-[color:var(--surface-tertiary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/50"
-                    : ""
                 }`}
               >
                 <span

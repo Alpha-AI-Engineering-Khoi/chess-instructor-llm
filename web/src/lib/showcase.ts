@@ -23,7 +23,7 @@ export const TIERS: ShowcaseTier[] = ["beginner", "intermediate", "advanced"];
  * Fallback OURS version label, used ONLY when the loaded data carries no OURS
  * model name to parse. The real label is derived from the data at load time
  * (see deriveOursLabel + meta.ours), so switching the pipeline from v2 → v4
- * (1.7B → 32B) updates every "OURS · vN" label automatically — nothing here is
+ * (1.7B → 32B) updates every "OURS · vN" label automatically: nothing here is
  * hardcoded to a specific size or version.
  */
 export const MODEL_VERSION = "v2";
@@ -33,20 +33,20 @@ export type Split = "train" | "test";
 export type ModelKind = "ours" | "frontier" | "base" | "open";
 
 /* ------------------------------------------------------------------ */
-/* CONTRACT — exact shape of web/public/showcase.json (array)          */
+/* CONTRACT: exact shape of web/public/showcase.json (array)          */
 /* ------------------------------------------------------------------ */
 
 /**
  * One model's answer at one tier, as written by the showcase worker.
  *
  * Faithfulness is now a TWO-LAYER, post-GATE record (see data/showcase/gate_all_report.md):
- *  - `coaching`         — the GATED text that actually ships (the default to display).
- *  - `fabricated`       — the POST-gate deterministic verdict (0 / false for every cell
- *                         now — the fairness guarantee, not a claim of full truth).
- *  - `raw_coaching`     — the model's ORIGINAL pre-gate draft (a model-capacity artifact).
- *  - `raw_fabricated`   — whether that raw draft stated a false board fact (pre-gate).
- *  - `gate_attempts`    — how many drafts the model needed before one passed the gate.
- *  - `verified_fallback`— true when no draft passed and a deterministic engine-derived
+ *  - `coaching`        : the GATED text that actually ships (the default to display).
+ *  - `fabricated`      : the POST-gate deterministic verdict (0 / false for every cell
+ *                         now: the fairness guarantee, not a claim of full truth).
+ *  - `raw_coaching`    : the model's ORIGINAL pre-gate draft (a model-capacity artifact).
+ *  - `raw_fabricated`  : whether that raw draft stated a false board fact (pre-gate).
+ *  - `gate_attempts`   : how many drafts the model needed before one passed the gate.
+ *  - `verified_fallback`: true when no draft passed and a deterministic engine-derived
  *                         explanation (true by construction) was substituted.
  *
  * The objective flags (`sound`/`tier_fit`/`fabricated`) may be null when no objective row
@@ -58,7 +58,7 @@ export interface ShowcaseCell {
   sound: boolean | null;
   tier_fit: boolean | null;
   fabricated: boolean | null; // POST-gate deterministic verdict (false for all shipped cells)
-  coaching: string; // GATED text — the default to display
+  coaching: string; // GATED text: the default to display
   raw_coaching?: string | null; // original pre-gate model draft (capacity artifact)
   raw_fabricated?: boolean | null; // did the raw draft state a false board fact?
   gate_attempts?: number | null; // drafts sampled before one passed the gate
@@ -134,7 +134,7 @@ export interface ShowcaseContractPosition {
   ours_full_3tier_coverage?: boolean;
   /**
    * The curated "proof" flag: OURS adapts by level AND diverges from the best
-   * rival — the headline library subset. Optional; derived when absent.
+   * rival: the headline library subset. Optional; derived when absent.
    */
   focus?: boolean;
   /** Which pool the split was drawn from (worker bookkeeping; informational). */
@@ -142,7 +142,7 @@ export interface ShowcaseContractPosition {
   /**
    * Optional held-out context carried by the interim source so its view matches
    * the showdown one (student's mistake arrow, severity + benchmark chips). The
-   * full showcase.json may omit them — they degrade to null.
+   * full showcase.json may omit them: they degrade to null.
    */
   student_move?: { san: string | null; uci: string | null; severity: string | null } | null;
   severity?: string | null;
@@ -152,7 +152,7 @@ export interface ShowcaseContractPosition {
 export type ShowcaseContract = ShowcaseContractPosition[];
 
 /* ------------------------------------------------------------------ */
-/* VIEW MODEL — what the components actually consume                    */
+/* VIEW MODEL: what the components actually consume                    */
 /* ------------------------------------------------------------------ */
 
 export interface ViolationView {
@@ -168,7 +168,7 @@ export interface ViewCell {
   fabricated: boolean; // POST-gate deterministic verdict (false for every shipped cell)
   nViolations: number;
   violations: ViolationView[];
-  coaching: string; // GATED text — what actually ships / is displayed
+  coaching: string; // GATED text: what actually ships / is displayed
   rawCoaching: string | null; // the model's original pre-gate draft (capacity artifact)
   rawFabricated: boolean; // did that raw draft state a false board fact (pre-gate)?
   gateAttempts: number | null; // drafts the model needed before one passed the gate
@@ -230,7 +230,7 @@ export interface ViewPosition {
   oursDiffersFromBestFrontier: boolean;
   /**
    * The curated proof subset: OURS adapts by level AND diverges from the best
-   * frontier rival — the honest "our model does something the frontier doesn't"
+   * frontier rival: the honest "our model does something the frontier doesn't"
    * library. Read from the worker's `focus` when present, else derived.
    */
   isProof: boolean;
@@ -329,7 +329,7 @@ function shortName(name: string): string {
 }
 
 /**
- * Parse the OURS identity out of the loaded model name — the single place the
+ * Parse the OURS identity out of the loaded model name: the single place the
  * app learns its version/size. Handles "OURS-v2 (1.7B tuned)",
  * "OURS · chess-coach-v4 (32B)", a bare "chess-coach-v2", etc. Never hardcodes a
  * size or version; falls back to {@link MODEL_VERSION} only when the name is empty.
@@ -348,10 +348,10 @@ function sideToMove(fen: string): "white" | "black" {
 
 /**
  * A short PRINCIPLE TAG for the move hero, assembled ONLY from fields already in
- * the data — never invented. Prefers explicit `concepts_used`; otherwise a short
+ * the data: never invented. Prefers explicit `concepts_used`; otherwise a short
  * slice of the `takeaway`. Returns null when neither is present. This is the "tag"
- * half of the reframed hero ("Nf6 — develop a piece, contest e4"): the model's job
- * is the tier-appropriate MOVE, and this is the one-line reason attached to it —
+ * half of the reframed hero ("Nf6: develop a piece, contest e4"): the model's job
+ * is the tier-appropriate MOVE, and this is the one-line reason attached to it :
  * not a paragraph of prose.
  */
 export function principleTag(
@@ -409,7 +409,7 @@ export interface OursOutcome {
  * section. Only reports what the cells actually say.
  *
  * Item 3 (no double standard): the comparison is against the FRONTIER references
- * (GPT-5.5 / Claude / Gemini) ONLY — exactly the rule behind the headline
+ * (GPT-5.5 / Claude / Gemini) ONLY: exactly the rule behind the headline
  * `ours_wins` / `ours_loses` counts (see data/showcase/pipeline/assemble.py
  * `derive_wins`). That deliberately EXCLUDES OURS's own BASE baseline (beating our
  * untuned baseline is not a "win" over the field) and the wider open field, so the
@@ -432,7 +432,7 @@ export function describeOursOutcome(position: ViewPosition, tier: ShowcaseTier):
 
   // Wins: OURS is the sound tier move where a frontier model isn't; or OURS is
   // faithful where a frontier model fabricates. (Post-gate no cell fabricates, so
-  // in shipped data this reduces to the sound-tier-move comparison — as it should.)
+  // in shipped data this reduces to the sound-tier-move comparison: as it should.)
   const tierBeaten = frontier
     .filter((o) => oursTierFit && !(o.cell.sound && o.cell.tierFit))
     .map((o) => o.name);
@@ -485,7 +485,7 @@ export function primaryTier(position: ViewPosition): ShowcaseTier {
  * The tier a compact card should describe so its blurb matches the position's
  * headline status (item 3/4 consistency): if the position is a frontier win,
  * pick a tier where OURS actually wins; if it's a loss, a tier where it loses;
- * otherwise the primary tier. Always a real, honest per-tier outcome — the card
+ * otherwise the primary tier. Always a real, honest per-tier outcome: the card
  * labels which tier it is showing.
  */
 export function representativeTier(position: ViewPosition): ShowcaseTier {
@@ -505,7 +505,7 @@ export function representativeTier(position: ViewPosition): ShowcaseTier {
 /* ------------------------------------------------------------------ */
 
 /**
- * One comparable quality score for a cell — higher is better. Used both to pick
+ * One comparable quality score for a cell: higher is better. Used both to pick
  * the best rival at a position and to call OURS-vs-best at a tier. The objective
  * flags always count; the blinded council grades count when present (they only
  * arrive with showcase.json), so the ranking sharpens automatically then.
@@ -525,7 +525,7 @@ function cellQuality(cell: ViewCell): number {
  * actually scored at. Ties break toward the more serious kind (frontier > open),
  * then name. Returns null if no rival was scored.
  *
- * Item 6: BASE (OURS's own untuned baseline) is excluded — it is a baseline, not a
+ * Item 6: BASE (OURS's own untuned baseline) is excluded: it is a baseline, not a
  * rival, so it must never be surfaced as the "best other model". This mirrors the
  * worker's `best_other`, which is also chosen over the non-BASE field.
  */
@@ -564,7 +564,7 @@ function deriveBestOtherKey(models: ViewModel[]): string | null {
 
 /**
  * Match the contract's `best_other` (a key / name / short) to a rival model.
- * Item 6: OURS and BASE are never eligible — if the worker ever named BASE we drop
+ * Item 6: OURS and BASE are never eligible: if the worker ever named BASE we drop
  * it and let the caller fall back to the derived (also BASE-excluding) rival.
  */
 function resolveBestOtherKey(raw: string | null | undefined, models: ViewModel[]): string | null {
@@ -586,7 +586,7 @@ function resolveBestOtherKey(raw: string | null | undefined, models: ViewModel[]
  * OURS genuinely adapts by level: scored at all three tiers, each move sound and
  * tier-appropriate, and the recommended move actually varies across the tiers.
  * This is the fallback when the worker omits `ours_tier_differentiates`. In the
- * showdown source (one tier per position) it is always false — honestly so.
+ * showdown source (one tier per position) it is always false: honestly so.
  */
 function deriveTierDifferentiates(oursByTier: Record<ShowcaseTier, ViewCell | null>): boolean {
   const cells = TIERS.map((t) => oursByTier[t]);
@@ -644,7 +644,7 @@ function deriveBestFrontierKey(models: ViewModel[]): string | null {
 
 /**
  * True when OURS recommends a genuinely different move from the best frontier
- * rival at some tier both were scored at — the "our move isn't just the frontier
+ * rival at some tier both were scored at: the "our move isn't just the frontier
  * move" half of the proof. Only counts tiers where both actually have a move.
  */
 function deriveDiffersFromBest(
@@ -702,7 +702,7 @@ export interface TierDuelRow {
 }
 
 /**
- * OURS vs the position's best-other model, tier by tier — the honest indicator
+ * OURS vs the position's best-other model, tier by tier: the honest indicator
  * of whether OURS beats or trails the strongest rival at each level.
  */
 export function tierDuel(position: ViewPosition, otherKey: string | null): TierDuelRow[] {
@@ -721,13 +721,13 @@ export function tierDuel(position: ViewPosition, otherKey: string | null): TierD
 }
 
 /* ------------------------------------------------------------------ */
-/* Side-by-side tier matrix — every model's move at every level         */
+/* Side-by-side tier matrix: every model's move at every level         */
 /* ------------------------------------------------------------------ */
 
 /**
  * One model's recommended move at one tier, decorated for the side-by-side grid.
  * `changed` is true when this move differs from the model's REFERENCE move (the
- * first tier it was scored at) — the deterministic "the model picked a different
+ * first tier it was scored at): the deterministic "the model picked a different
  * move at this level" signal that makes per-level adaptation visible at a glance.
  */
 export interface MatrixCell {
@@ -753,18 +753,18 @@ export interface MatrixRow {
   distinctMoves: number;
   /** How many of the three tiers this model was actually scored at. */
   scoredTiers: number;
-  /** ≥2 distinct moves across the scored tiers — the model adapts the move by level. */
+  /** ≥2 distinct moves across the scored tiers: the model adapts the move by level. */
   adapts: boolean;
-  /** Scored at all three tiers yet repeats a single move — the flat / "one move" case. */
+  /** Scored at all three tiers yet repeats a single move: the flat / "one move" case. */
   flat: boolean;
 }
 
 /**
- * The full every-model × every-tier grid for one position — the headline
+ * The full every-model × every-tier grid for one position: the headline
  * side-by-side. Rows are ordered OURS → frontier → open → BASE (see orderModels),
  * so the tuned model leads and the visceral contrast (OURS varies its move by
  * level where the frontier repeats one) reads top-down. Purely a re-shaping of
- * the position's existing cells — no numbers are invented.
+ * the position's existing cells: no numbers are invented.
  */
 export interface TierMatrix {
   rows: MatrixRow[];
@@ -1083,7 +1083,7 @@ function buildFromShowdown(doc: ShowdownDoc): ShowcaseView {
       id: p.key,
       fen: p.fen,
       phase: p.phase,
-      split: "test", // every showdown position is held-out — the honest measure
+      split: "test", // every showdown position is held-out: the honest measure
       sideToMove: p.side_to_move,
       severity: p.severity ?? null,
       benchmark: p.benchmark,
@@ -1095,7 +1095,7 @@ function buildFromShowdown(doc: ShowdownDoc): ShowcaseView {
       models: orderModels(models),
       oursWins: Boolean(p.ours_wins),
       oursLoses,
-      // Item 4: "shine" is the CLEAN tier-differentiator subset — it requires all
+      // Item 4: "shine" is the CLEAN tier-differentiator subset: it requires all
       // three tiers scored per position. The showdown source scores one tier per
       // position, so shine is honestly false here (it must NOT be aliased to wins,
       // which would make the Shine lens a duplicate of "OURS wins").
@@ -1106,7 +1106,7 @@ function buildFromShowdown(doc: ShowdownDoc): ShowcaseView {
       bestOtherKey,
       bestFrontierKey,
       // One tier per position in the fallback, so a cross-tier "proof" can't be
-      // demonstrated — honestly false until showcase.json lands.
+      // demonstrated: honestly false until showcase.json lands.
       oursDiffersFromBestFrontier: false,
       isProof: false,
       oursSummary: null,
@@ -1161,19 +1161,19 @@ function metaModelInfo(positions: ViewPosition[]): { ours: OursLabel; modelCount
 }
 
 const NOTES: Record<string, string> = {
-  proof: "The proof set — positions where OURS gives a genuinely different, level-appropriate move across the three tiers AND diverges from the best frontier model’s move. The one-screen case that the tuned coach adapts by level in a way the frontier doesn’t.",
-  differentiates: "Distinct-tier — every position where OURS recommends a different move across Beginner / Intermediate / Advanced (each move sound and tier-fit). The broader adaptation set the proof subset is drawn from.",
-  shine: "Clean tier-differentiators — the subset where OURS gives a different, level-appropriate move across all three tiers, doesn’t lose to the frontier, and isn’t mis-directed.",
-  train: "Training sample — positions in-distribution for the tuned model. Expected to be strong; NOT a generalization test.",
-  test: "Test sample — held-out positions the model never trained on. This is the honest measure of the coach.",
+  proof: "The proof set: positions where OURS gives a genuinely different, level-appropriate move across the three tiers AND diverges from the best frontier model’s move. The one-screen case that the tuned coach adapts by level in a way the frontier doesn’t.",
+  differentiates: "Distinct-tier: every position where OURS recommends a different move across Beginner / Intermediate / Advanced (each move sound and tier-fit). The broader adaptation set the proof subset is drawn from.",
+  shine: "Clean tier-differentiators: the subset where OURS gives a different, level-appropriate move across all three tiers, doesn’t lose to the frontier, and isn’t mis-directed.",
+  train: "Training sample: positions in-distribution for the tuned model. Expected to be strong; NOT a generalization test.",
+  test: "Test sample: held-out positions the model never trained on. This is the honest measure of the coach.",
   // Item 7: make explicit that tier-fit is a TARGET-MATCH, not an emergent judgment.
-  tier_fit: "tier-fit = the move matches the canonical tier-appropriate target OURS is trained to produce for that rating band — a trained target match, not an emergent capability.",
-  fabricated: "Every model ships 0% user-visible fabrication after the verify-and-regenerate gate — a fairness floor applied equally to all, not a per-model differentiator. Where models actually differ is the semantic-judge truthfulness residual below.",
+  tier_fit: "tier-fit = the move matches the canonical tier-appropriate target OURS is trained to produce for that rating band: a trained target match, not an emergent capability.",
+  fabricated: "Every model ships 0% user-visible fabrication after the verify-and-regenerate gate: a fairness floor applied equally to all, not a per-model differentiator. Where models actually differ is the semantic-judge truthfulness residual below.",
   council: "Blinded council of judges grades each answer for move correctness and instructiveness, models anonymized.",
 };
 
 /* ------------------------------------------------------------------ */
-/* Per-model aggregate leaderboard — computed live from the loaded data */
+/* Per-model aggregate leaderboard: computed live from the loaded data */
 /* ------------------------------------------------------------------ */
 
 /**
@@ -1311,7 +1311,7 @@ export function computeLeaderboard(view: ShowcaseView, split?: Split): Leaderboa
 /* ------------------------------------------------------------------ */
 
 /** Mean number of DISTINCT moves a model gives across the three tiers, over the
- *  positions (in scope) where it was scored at all three — the deterministic
+ *  positions (in scope) where it was scored at all three: the deterministic
  *  "does it adapt the move to the level?" signal. */
 function meanDistinctMoves(view: ShowcaseView, kind: ModelKind, split: Split): { mean: number; n: number } {
   let sum = 0;
@@ -1333,13 +1333,13 @@ function meanDistinctMoves(view: ShowcaseView, kind: ModelKind, split: Split): {
 
 /**
  * The single honest headline the whole product now competes on: the tuned model
- * SELECTS THE TIER-APPROPRIATE MOVE where its own base — and the frontier — can't.
+ * SELECTS THE TIER-APPROPRIATE MOVE where its own base: and the frontier: can't.
  * Everything here is computed live from the loaded cells (held-out split), so it
  * always matches the OURS version on screen and never hardcodes a training figure.
  *   - tier-fit: OURS vs its own untuned BASE vs the best frontier model.
  *   - adaptation: mean distinct moves OURS gives across the three levels, on the
  *     SAME positions where the frontier repeats essentially one move.
- * Deliberately carries NO instructiveness "lift" — fine-tuning did not improve the
+ * Deliberately carries NO instructiveness "lift": fine-tuning did not improve the
  * prose (it regressed), so claiming it would be dishonest; the council grades stay
  * available in the leaderboard as context, not as the headline.
  */
@@ -1378,7 +1378,7 @@ export function moveSelectionHeadline(
 }
 
 /* ------------------------------------------------------------------ */
-/* Gate provenance badge (per cell) — honest, from the two-layer gate   */
+/* Gate provenance badge (per cell): honest, from the two-layer gate   */
 /* ------------------------------------------------------------------ */
 
 export type GateBadgeTone = "good" | "muted" | "caution";
@@ -1438,20 +1438,20 @@ export interface TruthfulnessRow {
   short: string;
   kind: ModelKind;
   cells: number;
-  /** ⚠ partial model — only a subset of cells exist (Bedrock throttling); rates are over the cells it DOES have. */
+  /** ⚠ partial model: only a subset of cells exist (Bedrock throttling); rates are over the cells it DOES have. */
   partial: boolean;
   /** Sampled cells fact-checked by the panel for this model. */
   judgeN: number;
-  /** STRICT lower bound — truthful iff all 3 judges agree (a single objection sinks the cell). */
+  /** STRICT lower bound: truthful iff all 3 judges agree (a single objection sinks the cell). */
   any: TruthRate;
-  /** Majority — truthful iff >=2 of 3 judges found it truthful. */
+  /** Majority: truthful iff >=2 of 3 judges found it truthful. */
   majority: TruthRate;
-  /** LENIENT upper bound — truthful unless all 3 judges object (only a unanimous objection sinks it). */
+  /** LENIENT upper bound: truthful unless all 3 judges object (only a unanimous objection sinks it). */
   unanimous: TruthRate;
 }
 
 export interface TruthfulnessData {
-  /** Deterministic post-gate residual, pooled over every shipped cell — the fairness guarantee. */
+  /** Deterministic post-gate residual, pooled over every shipped cell: the fairness guarantee. */
   determOverall: { n: number; pct: number };
   /** Semantic-judge residual pooled over sampled cells, under all three aggregations. */
   overall: { n: number; any: TruthRate; majority: TruthRate; unanimous: TruthRate };
@@ -1467,7 +1467,7 @@ export interface TruthfulnessData {
  * verify-and-regenerate gate, deterministic board-fact fabrication is 0% for
  * EVERY model (determOverall). The real, non-zero differentiator is the
  * cross-family semantic-judge residual, reported under three nested panel rules
- * — any (strict lower bound) / majority / unanimous (lenient upper bound), each
+ *: any (strict lower bound) / majority / unanimous (lenient upper bound), each
  * with a 95% CI. OURS trails the frontier here; that gap is shown, not hidden.
  */
 export const TRUTHFULNESS: TruthfulnessData = {
@@ -1517,13 +1517,13 @@ async function fetchContract(url: string, signal?: AbortSignal): Promise<Showcas
 
 /**
  * Load the Showcase view, preferring the richest source available:
- *   1. showcase.json  — the full curated slice (all models × 3 tiers + council),
+ *   1. showcase.json : the full curated slice (all models × 3 tiers + council),
  *      owned by the separate worker.
- *   2. showcase_interim.json — the same array contract, but only OURS is scored
+ *   2. showcase_interim.json: the same array contract, but only OURS is scored
  *      at all three tiers (re-run locally); rivals stay at their benchmarked tier
  *      and there are no council grades yet. Lets the tier-differentiation moat and
  *      the per-tier OURS-vs-best duel work before the full slice lands.
- *   3. showdown.json — the shipped held-out benchmark (one tier per position).
+ *   3. showdown.json: the shipped held-out benchmark (one tier per position).
  * Returns null only if none exists. Never throws for a missing file.
  */
 export async function loadShowcaseView(signal?: AbortSignal): Promise<ShowcaseView | null> {

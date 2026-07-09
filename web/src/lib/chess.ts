@@ -35,7 +35,7 @@ export function sideToMove(fen: string): Orientation {
 /**
  * Validate a drag (source -> target) against the position and return its UCI
  * (with a queen promotion when a pawn reaches the last rank), or null if the
- * move is not legal. The board itself is never mutated — the position stays put
+ * move is not legal. The board itself is never mutated: the position stays put
  * so the drag becomes an annotation ("the move you are unsure about").
  */
 export function legalDragUci(fen: string, from: string, to: string): string | null {

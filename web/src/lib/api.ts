@@ -74,7 +74,7 @@ export interface CoachAllRequest {
 }
 
 /** All three tiers from a single {@link postCoachAll} call, each the standard
- *  {@link CoachResponse} shape — the server computes the engine facts once and
+ *  {@link CoachResponse} shape: the server computes the engine facts once and
  *  runs the identical coach-gate pipeline per tier. */
 export interface CoachAllResponse {
   beginner: CoachResponse;
@@ -180,7 +180,7 @@ export interface PostCoachResilientOptions {
 const COLD_START = {
   /** Total time to keep retrying before giving up (~4 min). */
   totalBudgetMs: 240_000,
-  /** Per-attempt ceiling — just past Modal's 150s synchronous 303 cap. */
+  /** Per-attempt ceiling: just past Modal's 150s synchronous 303 cap. */
   perAttemptMs: 160_000,
   /** If the first attempt outlives this, assume a cold start and hint the UI. */
   earlyWakingMs: 30_000,
@@ -242,14 +242,14 @@ function linkTimeout(
 }
 
 /** Fire-and-forget GET /api/health to start waking a scaled-to-zero container
- *  early. Best-effort — nothing is awaited and all errors are swallowed. */
+ *  early. Best-effort: nothing is awaited and all errors are swallowed. */
 export function warmupCoach(): void {
   try {
     void fetch(`${API_BASE}/api/health`, { method: "GET" }).catch(() => {
-      /* a cold container may drop the first ping — that's expected */
+      /* a cold container may drop the first ping: that's expected */
     });
   } catch {
-    /* ignore — warmup is a nudge, not a dependency */
+    /* ignore: warmup is a nudge, not a dependency */
   }
 }
 
@@ -294,7 +294,7 @@ export async function postCoachResilient(
         lastError = err;
         // Outer cancellation → stop everything immediately.
         if (signal?.aborted) throw abortError();
-        // A hard client error won't resolve by waiting — surface it now.
+        // A hard client error won't resolve by waiting: surface it now.
         if (isNonColdError(err)) throw err;
         attempt += 1;
       } finally {
@@ -324,16 +324,16 @@ export async function postCoachResilient(
   throw lastError instanceof Error ? lastError : new Error("The coach didn’t respond in time.");
 }
 
-/** One batch attempt is generous — it generates all three tiers server-side, off
- *  a single Stockfish pass — so we give it well past a warm three-tier run. */
+/** One batch attempt is generous: it generates all three tiers server-side, off
+ *  a single Stockfish pass: so we give it well past a warm three-tier run. */
 const COACH_ALL_TIMEOUT_MS = 200_000;
 
-/** POST /api/coach_all — coach a position at every tier in one round-trip.
+/** POST /api/coach_all: coach a position at every tier in one round-trip.
  *
  * A SINGLE attempt with a generous timeout plus the same early-"waking" hint the
  * per-tier path uses, so the cold-start UI still shows progress. It deliberately
- * does NOT retry: any failure — a 404 before this endpoint is deployed, a
- * cold-start timeout, a network error, a hard 4xx — is thrown so the caller can
+ * does NOT retry: any failure: a 404 before this endpoint is deployed, a
+ * cold-start timeout, a network error, a hard 4xx: is thrown so the caller can
  * fall back to the proven per-tier {@link postCoachResilient} path, which keeps
  * its own progressive, cold-start-resilient loading. That fallback is why the
  * Studio never breaks when the batch route is missing or slow.

@@ -88,7 +88,7 @@ export default function PositionLibrary({
               {f.label}
               <span
                 className={
-                  active ? "text-[color:var(--signal-ink)] tnum" : "text-faint tnum"
+                  active ? "text-[color:var(--signal-ink)] tnum" : "text-muted tnum"
                 }
               >
                 {count}
@@ -160,7 +160,7 @@ export default function PositionLibrary({
                         </span>
                       </div>
                       <div className="flex shrink-0 items-baseline gap-1.5">
-                        <span className="text-xs text-faint">coach</span>
+                        <span className="text-xs text-muted">coach</span>
                         <span className="font-serif text-base font-semibold text-signal tnum">
                           {e.coach.recommended_move_san}
                         </span>
