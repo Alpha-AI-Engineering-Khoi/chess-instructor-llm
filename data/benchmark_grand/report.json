@@ -1,0 +1,948 @@
+{
+  "generated_utc": "2026-07-09T02:53:20.506315+00:00",
+  "n_val_positions": 120,
+  "n_val_scenarios": 360,
+  "field": [
+    "ours_v5",
+    "ours_v4",
+    "ours_v3",
+    "ours",
+    "ours_4b",
+    "q3_32b",
+    "base",
+    "base_4b",
+    "pbase_4b",
+    "gpt",
+    "claude",
+    "gemini",
+    "q3_next80b",
+    "gemma3_27b",
+    "llama33_70b",
+    "dsv32",
+    "glm5",
+    "mistral3",
+    "kimi25",
+    "dsr1"
+  ],
+  "fresh_vs_reused": {
+    "ours_v5": "FRESH",
+    "ours_v4": "reused",
+    "ours_v3": "reused",
+    "ours": "reused",
+    "ours_4b": "reused",
+    "q3_32b": "FRESH",
+    "base": "reused",
+    "base_4b": "reused",
+    "pbase_4b": "reused",
+    "gpt": "FRESH",
+    "claude": "FRESH",
+    "gemini": "FRESH",
+    "q3_next80b": "FRESH",
+    "gemma3_27b": "FRESH",
+    "llama33_70b": "FRESH",
+    "dsv32": "FRESH",
+    "glm5": "FRESH",
+    "mistral3": "FRESH",
+    "kimi25": "FRESH",
+    "dsr1": "FRESH"
+  },
+  "gen_method": {
+    "ours_v5": "Modal-adapter FRESH (finish-v5 controller Volume gen)",
+    "ours_v4": "Modal-adapter reuse (honest val, deterministic)",
+    "ours_v3": "Modal-adapter reuse (gap803, deterministic)",
+    "ours": "MLX-local reuse (gap803, greedy deterministic)",
+    "ours_4b": "Modal reuse (honest val, gated pipeline)",
+    "q3_32b": "TFY FRESH (aws-bedrock qwen3-32b)",
+    "base": "MLX-local reuse (gap803, greedy deterministic)",
+    "base_4b": "Modal reuse (honest val, gated pipeline)",
+    "pbase_4b": "Modal reuse (honest val, gated pipeline)",
+    "gpt": "TFY FRESH",
+    "claude": "TFY FRESH",
+    "gemini": "TFY FRESH",
+    "q3_next80b": "TFY FRESH",
+    "gemma3_27b": "TFY FRESH",
+    "llama33_70b": "TFY FRESH",
+    "dsv32": "TFY FRESH",
+    "glm5": "TFY FRESH",
+    "mistral3": "TFY FRESH",
+    "kimi25": "TFY FRESH",
+    "dsr1": "TFY FRESH"
+  },
+  "council": {
+    "n_items": 225,
+    "n_judges": 3,
+    "n_gradings": 675,
+    "n_positions": 75,
+    "scale": "0-10 move + instr (absolute), blinded cross-family panel"
+  },
+  "spend_usd": {
+    "gen": 21.61,
+    "council": 32.35,
+    "total": 53.96,
+    "council_scn": 225,
+    "council_pos": 75,
+    "per_scn": 0.1438,
+    "full_council_est": 51.77,
+    "full_total_est": 73.37
+  },
+  "reachability": {
+    "reachable_tfy": [
+      "gpt",
+      "claude",
+      "gemini",
+      "q3_32b",
+      "q3_next80b",
+      "gemma3_27b",
+      "llama33_70b",
+      "dsv32",
+      "glm5",
+      "mistral3",
+      "kimi25",
+      "dsr1"
+    ],
+    "blocked": {
+      "aws-bedrock/us.meta.llama4-maverick-17b-instruct-v1-0": "400 Meta Llama access denied",
+      "aws-bedrock/moonshotai.kimi-k2-thinking": "403 not authorized (spends budget reasoning, no coaching)"
+    },
+    "note": "14-model frontier lineup = 3 frontier APIs + 11 open candidates; 12 reachable (dsr1 via bedrock-oss-group/deepseek-r1), 2 blocked."
+  },
+  "vs_frontier_proof": {
+    "ours": {
+      "n_positions_total": 120,
+      "wins": 25,
+      "losses": 17,
+      "ties": 6,
+      "n_distinct": 51,
+      "n_distinct_and_diverge": 48,
+      "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
+    },
+    "ours_4b": {
+      "n_positions_total": 120,
+      "wins": 5,
+      "losses": 13,
+      "ties": 4,
+      "n_distinct": 24,
+      "n_distinct_and_diverge": 22,
+      "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
+    },
+    "ours_v3": {
+      "n_positions_total": 120,
+      "wins": 23,
+      "losses": 10,
+      "ties": 9,
+      "n_distinct": 46,
+      "n_distinct_and_diverge": 42,
+      "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
+    },
+    "ours_v4": {
+      "n_positions_total": 120,
+      "wins": 51,
+      "losses": 5,
+      "ties": 6,
+      "n_distinct": 68,
+      "n_distinct_and_diverge": 62,
+      "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
+    },
+    "ours_v5": {
+      "n_positions_total": 120,
+      "wins": 22,
+      "losses": 8,
+      "ties": 12,
+      "n_distinct": 45,
+      "n_distinct_and_diverge": 42,
+      "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
+    }
+  },
+  "per_model": {
+    "ours_v5": {
+      "display": "OURS-v5 (Qwen3-32B tuned, v5)",
+      "family": "ours",
+      "fresh": true,
+      "how": "Modal-adapter FRESH (finish-v5 controller Volume gen)",
+      "instr_rank": 14.367,
+      "instr_grade": 3.86,
+      "instr_grade_ci95": {
+        "mean": 3.863,
+        "ci_lo": 3.53,
+        "ci_hi": 4.188,
+        "n": 225
+      },
+      "move_grade": 7.25,
+      "tier_fit": 0.5444,
+      "tier_fit_by_tier": {
+        "beginner": 0.4583,
+        "intermediate": 0.5417,
+        "advanced": 0.6333
+      },
+      "move_sound": 0.9333,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.65,
+        "collapsed_BA": 35
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 0.9778,
+        "well_formed": 0.8972,
+        "move_sound": 0.8306,
+        "verify_pass_draft1": 0.575
+      },
+      "coherence": 0.3,
+      "flat_rate": 0.2583,
+      "gated_soundness": {
+        "n": 360,
+        "gated_move_sound": 1.0,
+        "gated_no_engine_speak": 0.9917,
+        "gated_well_formed": 1.0,
+        "gated_fallback_rate": 0.4444
+      }
+    },
+    "ours_v4": {
+      "display": "OURS-v4 (Qwen3-32B tuned)",
+      "family": "ours",
+      "fresh": false,
+      "how": "Modal-adapter reuse (honest val, deterministic)",
+      "instr_rank": 12.656,
+      "instr_grade": 4.53,
+      "instr_grade_ci95": {
+        "mean": 4.528,
+        "ci_lo": 4.168,
+        "ci_hi": 4.875,
+        "n": 225
+      },
+      "move_grade": 7.66,
+      "tier_fit": 0.7917,
+      "tier_fit_by_tier": {
+        "beginner": 0.75,
+        "intermediate": 0.7583,
+        "advanced": 0.8667
+      },
+      "move_sound": 0.9861,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.75,
+        "collapsed_BA": 25
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 0.9778,
+        "well_formed": 0.9556,
+        "move_sound": 0.9417,
+        "verify_pass_draft1": 0.5889
+      },
+      "coherence": 0.1417,
+      "flat_rate": 0.2917,
+      "gated_soundness": {
+        "n": 360,
+        "gated_move_sound": 1.0,
+        "gated_no_engine_speak": 0.9833,
+        "gated_well_formed": 1.0,
+        "gated_fallback_rate": 0.4444
+      }
+    },
+    "ours_v3": {
+      "display": "OURS-v3 (Qwen3-32B tuned)",
+      "family": "ours",
+      "fresh": false,
+      "how": "Modal-adapter reuse (gap803, deterministic)",
+      "instr_rank": 7.764,
+      "instr_grade": 6.43,
+      "instr_grade_ci95": {
+        "mean": 6.428,
+        "ci_lo": 6.131,
+        "ci_hi": 6.738,
+        "n": 225
+      },
+      "move_grade": 8.54,
+      "tier_fit": 0.5667,
+      "tier_fit_by_tier": {
+        "beginner": 0.4583,
+        "intermediate": 0.5083,
+        "advanced": 0.7333
+      },
+      "move_sound": 0.9778,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.57,
+        "collapsed_BA": 43
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 0.9639,
+        "well_formed": 0.9694,
+        "move_sound": 0.9472,
+        "verify_pass_draft1": 0.9417
+      },
+      "coherence": 0.275,
+      "flat_rate": 0.4083,
+      "gated_soundness": {
+        "n": 360,
+        "gated_move_sound": 1.0,
+        "gated_no_engine_speak": 0.9694,
+        "gated_well_formed": 1.0,
+        "gated_fallback_rate": 0.1806
+      }
+    },
+    "ours": {
+      "display": "OURS-v2 (Qwen3-1.7B tuned)",
+      "family": "ours",
+      "fresh": false,
+      "how": "MLX-local reuse (gap803, greedy deterministic)",
+      "instr_rank": 13.58,
+      "instr_grade": 4.32,
+      "instr_grade_ci95": {
+        "mean": 4.323,
+        "ci_lo": 3.983,
+        "ci_hi": 4.662,
+        "n": 225
+      },
+      "move_grade": 8.05,
+      "tier_fit": 0.5694,
+      "tier_fit_by_tier": {
+        "beginner": 0.7,
+        "intermediate": 0.6083,
+        "advanced": 0.4
+      },
+      "move_sound": 0.9861,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.45,
+        "collapsed_BA": 55
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0,
+        "move_sound": 0.9861,
+        "verify_pass_draft1": 0.6889
+      },
+      "coherence": 0.1667,
+      "flat_rate": 0.4417,
+      "gated_soundness": {
+        "n": 360,
+        "gated_move_sound": 1.0,
+        "gated_no_engine_speak": 1.0,
+        "gated_well_formed": 1.0,
+        "gated_fallback_rate": 0.3583
+      }
+    },
+    "ours_4b": {
+      "display": "OURS-4B (Qwen3-4B tuned)",
+      "family": "ours",
+      "fresh": false,
+      "how": "Modal reuse (honest val, gated pipeline)",
+      "instr_rank": 10.373,
+      "instr_grade": 5.83,
+      "instr_grade_ci95": {
+        "mean": 5.828,
+        "ci_lo": 5.608,
+        "ci_hi": 6.04,
+        "n": 225
+      },
+      "move_grade": 8.93,
+      "tier_fit": 0.3861,
+      "tier_fit_by_tier": {
+        "beginner": 0.3583,
+        "intermediate": 0.425,
+        "advanced": 0.375
+      },
+      "move_sound": 1.0,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.26,
+        "collapsed_BA": 74
+      },
+      "gate": {
+        "gated": true,
+        "n": 360,
+        "mean_attempts": 1.194,
+        "fallback_rate": 0.0083,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0
+      },
+      "coherence": 0.3417,
+      "flat_rate": 0.675,
+      "gated_soundness": {
+        "n": 360,
+        "gated_move_sound": 1.0,
+        "gated_no_engine_speak": 1.0,
+        "gated_well_formed": 1.0,
+        "gated_fallback_rate": 0.0
+      }
+    },
+    "q3_32b": {
+      "display": "BASE (Qwen3-32B untuned)",
+      "family": "base",
+      "fresh": true,
+      "how": "TFY FRESH (aws-bedrock qwen3-32b)",
+      "instr_rank": 11.629,
+      "instr_grade": 5.49,
+      "instr_grade_ci95": {
+        "mean": 5.493,
+        "ci_lo": 5.286,
+        "ci_hi": 5.689,
+        "n": 225
+      },
+      "move_grade": 8.95,
+      "tier_fit": 0.3556,
+      "tier_fit_by_tier": {
+        "beginner": 0.325,
+        "intermediate": 0.4,
+        "advanced": 0.3417
+      },
+      "move_sound": 1.0,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.26,
+        "collapsed_BA": 74
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 0.9917,
+        "well_formed": 0.9944,
+        "move_sound": 0.9944,
+        "verify_pass_draft1": 0.9389
+      },
+      "coherence": 0.45,
+      "flat_rate": 0.5917,
+      "gated_soundness": null
+    },
+    "base": {
+      "display": "BASE (Qwen3-1.7B untuned)",
+      "family": "base",
+      "fresh": false,
+      "how": "MLX-local reuse (gap803, greedy deterministic)",
+      "instr_rank": 18.711,
+      "instr_grade": 1.94,
+      "instr_grade_ci95": {
+        "mean": 1.939,
+        "ci_lo": 1.779,
+        "ci_hi": 2.107,
+        "n": 225
+      },
+      "move_grade": 6.95,
+      "tier_fit": 0.3028,
+      "tier_fit_by_tier": {
+        "beginner": 0.4083,
+        "intermediate": 0.375,
+        "advanced": 0.125
+      },
+      "move_sound": 0.9278,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.55,
+        "collapsed_BA": 45
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 0.9639,
+        "well_formed": 1.0,
+        "move_sound": 0.9278,
+        "verify_pass_draft1": 0.8583
+      },
+      "coherence": 0.3583,
+      "flat_rate": 0.3667,
+      "gated_soundness": null
+    },
+    "base_4b": {
+      "display": "BASE-4B (Qwen3-4B untuned)",
+      "family": "base",
+      "fresh": false,
+      "how": "Modal reuse (honest val, gated pipeline)",
+      "instr_rank": 13.938,
+      "instr_grade": 4.72,
+      "instr_grade_ci95": {
+        "mean": 4.723,
+        "ci_lo": 4.526,
+        "ci_hi": 4.927,
+        "n": 225
+      },
+      "move_grade": 8.75,
+      "tier_fit": 0.3472,
+      "tier_fit_by_tier": {
+        "beginner": 0.3333,
+        "intermediate": 0.3917,
+        "advanced": 0.3167
+      },
+      "move_sound": 1.0,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.22,
+        "collapsed_BA": 78
+      },
+      "gate": {
+        "gated": true,
+        "n": 360,
+        "mean_attempts": 1.156,
+        "fallback_rate": 0.0,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0
+      },
+      "coherence": 0.3917,
+      "flat_rate": 0.7417,
+      "gated_soundness": null
+    },
+    "pbase_4b": {
+      "display": "PROMPT-BASE-4B (Qwen3-4B engineered)",
+      "family": "base",
+      "fresh": false,
+      "how": "Modal reuse (honest val, gated pipeline)",
+      "instr_rank": 13.518,
+      "instr_grade": 4.8,
+      "instr_grade_ci95": {
+        "mean": 4.799,
+        "ci_lo": 4.592,
+        "ci_hi": 5.011,
+        "n": 225
+      },
+      "move_grade": 8.81,
+      "tier_fit": 0.35,
+      "tier_fit_by_tier": {
+        "beginner": 0.3083,
+        "intermediate": 0.4,
+        "advanced": 0.3417
+      },
+      "move_sound": 1.0,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.46,
+        "collapsed_BA": 54
+      },
+      "gate": {
+        "gated": true,
+        "n": 360,
+        "mean_attempts": 1.167,
+        "fallback_rate": 0.0028,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0
+      },
+      "coherence": 0.3917,
+      "flat_rate": 0.5,
+      "gated_soundness": null
+    },
+    "gpt": {
+      "display": "GPT-5.5",
+      "family": "frontier",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 3.024,
+      "instr_grade": 7.98,
+      "instr_grade_ci95": {
+        "mean": 7.984,
+        "ci_lo": 7.869,
+        "ci_hi": 8.098,
+        "n": 225
+      },
+      "move_grade": 9.38,
+      "tier_fit": 0.4472,
+      "tier_fit_by_tier": {
+        "beginner": 0.375,
+        "intermediate": 0.4583,
+        "advanced": 0.5083
+      },
+      "move_sound": 0.9694,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.3,
+        "collapsed_BA": 70
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0,
+        "move_sound": 0.9694,
+        "verify_pass_draft1": 0.9861
+      },
+      "coherence": 0.3417,
+      "flat_rate": 0.6,
+      "gated_soundness": null
+    },
+    "claude": {
+      "display": "Claude Opus 4.8",
+      "family": "frontier",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 6.011,
+      "instr_grade": 7.06,
+      "instr_grade_ci95": {
+        "mean": 7.062,
+        "ci_lo": 6.876,
+        "ci_hi": 7.249,
+        "n": 225
+      },
+      "move_grade": 9.16,
+      "tier_fit": 0.45,
+      "tier_fit_by_tier": {
+        "beginner": 0.3583,
+        "intermediate": 0.4333,
+        "advanced": 0.5583
+      },
+      "move_sound": 0.9667,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.25,
+        "collapsed_BA": 75
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0,
+        "move_sound": 0.9667,
+        "verify_pass_draft1": 0.9444
+      },
+      "coherence": 0.3333,
+      "flat_rate": 0.6833,
+      "gated_soundness": null
+    },
+    "gemini": {
+      "display": "Gemini 3.1 Pro",
+      "family": "frontier",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 6.838,
+      "instr_grade": 6.9,
+      "instr_grade_ci95": {
+        "mean": 6.902,
+        "ci_lo": 6.721,
+        "ci_hi": 7.08,
+        "n": 225
+      },
+      "move_grade": 9.11,
+      "tier_fit": 0.5306,
+      "tier_fit_by_tier": {
+        "beginner": 0.4,
+        "intermediate": 0.575,
+        "advanced": 0.6167
+      },
+      "move_sound": 0.9833,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.23,
+        "collapsed_BA": 77
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 0.9972,
+        "well_formed": 0.9944,
+        "move_sound": 0.9778,
+        "verify_pass_draft1": 0.9583
+      },
+      "coherence": 0.3083,
+      "flat_rate": 0.6917,
+      "gated_soundness": null
+    },
+    "q3_next80b": {
+      "display": "Qwen3-Next-80B-A3B",
+      "family": "open",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 10.353,
+      "instr_grade": 5.87,
+      "instr_grade_ci95": {
+        "mean": 5.875,
+        "ci_lo": 5.654,
+        "ci_hi": 6.092,
+        "n": 225
+      },
+      "move_grade": 8.95,
+      "tier_fit": 0.2778,
+      "tier_fit_by_tier": {
+        "beginner": 0.25,
+        "intermediate": 0.2917,
+        "advanced": 0.2917
+      },
+      "move_sound": 0.9972,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.24,
+        "collapsed_BA": 76
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0,
+        "move_sound": 0.9972,
+        "verify_pass_draft1": 0.9528
+      },
+      "coherence": 0.3333,
+      "flat_rate": 0.6833,
+      "gated_soundness": null
+    },
+    "gemma3_27b": {
+      "display": "Gemma-3-27B-it",
+      "family": "open",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 10.624,
+      "instr_grade": 5.78,
+      "instr_grade_ci95": {
+        "mean": 5.778,
+        "ci_lo": 5.553,
+        "ci_hi": 5.981,
+        "n": 225
+      },
+      "move_grade": 9.01,
+      "tier_fit": 0.2861,
+      "tier_fit_by_tier": {
+        "beginner": 0.2,
+        "intermediate": 0.3333,
+        "advanced": 0.325
+      },
+      "move_sound": 1.0,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.2,
+        "collapsed_BA": 80
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0,
+        "move_sound": 1.0,
+        "verify_pass_draft1": 0.9694
+      },
+      "coherence": 0.4167,
+      "flat_rate": 0.8083,
+      "gated_soundness": null
+    },
+    "llama33_70b": {
+      "display": "Llama-3.3-70B",
+      "family": "open",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 9.327,
+      "instr_grade": 6.26,
+      "instr_grade_ci95": {
+        "mean": 6.262,
+        "ci_lo": 6.095,
+        "ci_hi": 6.422,
+        "n": 225
+      },
+      "move_grade": 9.16,
+      "tier_fit": 0.3556,
+      "tier_fit_by_tier": {
+        "beginner": 0.2667,
+        "intermediate": 0.3583,
+        "advanced": 0.4417
+      },
+      "move_sound": 1.0,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.16,
+        "collapsed_BA": 84
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0,
+        "move_sound": 1.0,
+        "verify_pass_draft1": 0.9972
+      },
+      "coherence": 0.4167,
+      "flat_rate": 0.8167,
+      "gated_soundness": null
+    },
+    "dsv32": {
+      "display": "DeepSeek-V3.2",
+      "family": "open",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 10.089,
+      "instr_grade": 5.86,
+      "instr_grade_ci95": {
+        "mean": 5.859,
+        "ci_lo": 5.612,
+        "ci_hi": 6.107,
+        "n": 225
+      },
+      "move_grade": 8.9,
+      "tier_fit": 0.3944,
+      "tier_fit_by_tier": {
+        "beginner": 0.275,
+        "intermediate": 0.4083,
+        "advanced": 0.5
+      },
+      "move_sound": 0.9944,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.28,
+        "collapsed_BA": 72
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 0.9917,
+        "move_sound": 0.9861,
+        "verify_pass_draft1": 0.95
+      },
+      "coherence": 0.3917,
+      "flat_rate": 0.6333,
+      "gated_soundness": null
+    },
+    "glm5": {
+      "display": "GLM-5",
+      "family": "open",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 6.78,
+      "instr_grade": 6.87,
+      "instr_grade_ci95": {
+        "mean": 6.875,
+        "ci_lo": 6.685,
+        "ci_hi": 7.068,
+        "n": 225
+      },
+      "move_grade": 9.15,
+      "tier_fit": 0.3944,
+      "tier_fit_by_tier": {
+        "beginner": 0.3333,
+        "intermediate": 0.4333,
+        "advanced": 0.4167
+      },
+      "move_sound": 0.9917,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.28,
+        "collapsed_BA": 72
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 0.9972,
+        "well_formed": 0.9972,
+        "move_sound": 0.9889,
+        "verify_pass_draft1": 0.9056
+      },
+      "coherence": 0.35,
+      "flat_rate": 0.6167,
+      "gated_soundness": null
+    },
+    "mistral3": {
+      "display": "Mistral-Large-3 (675B)",
+      "family": "open",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 12.136,
+      "instr_grade": 5.22,
+      "instr_grade_ci95": {
+        "mean": 5.217,
+        "ci_lo": 4.982,
+        "ci_hi": 5.436,
+        "n": 225
+      },
+      "move_grade": 8.77,
+      "tier_fit": 0.3361,
+      "tier_fit_by_tier": {
+        "beginner": 0.3167,
+        "intermediate": 0.3917,
+        "advanced": 0.3
+      },
+      "move_sound": 0.9972,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.38,
+        "collapsed_BA": 62
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 0.9972,
+        "move_sound": 0.9944,
+        "verify_pass_draft1": 0.9194
+      },
+      "coherence": 0.4083,
+      "flat_rate": 0.55,
+      "gated_soundness": null
+    },
+    "kimi25": {
+      "display": "Kimi-K2.5",
+      "family": "open",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 8.758,
+      "instr_grade": 6.27,
+      "instr_grade_ci95": {
+        "mean": 6.266,
+        "ci_lo": 6.058,
+        "ci_hi": 6.47,
+        "n": 225
+      },
+      "move_grade": 9.07,
+      "tier_fit": 0.3306,
+      "tier_fit_by_tier": {
+        "beginner": 0.2917,
+        "intermediate": 0.3583,
+        "advanced": 0.3417
+      },
+      "move_sound": 1.0,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.42,
+        "collapsed_BA": 58
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 0.9972,
+        "move_sound": 0.9972,
+        "verify_pass_draft1": 0.875
+      },
+      "coherence": 0.5083,
+      "flat_rate": 0.45,
+      "gated_soundness": null
+    },
+    "dsr1": {
+      "display": "DeepSeek-R1 (reasoning)",
+      "family": "open",
+      "fresh": true,
+      "how": "TFY FRESH",
+      "instr_rank": 9.524,
+      "instr_grade": 6.12,
+      "instr_grade_ci95": {
+        "mean": 6.117,
+        "ci_lo": 5.906,
+        "ci_hi": 6.319,
+        "n": 225
+      },
+      "move_grade": 9.06,
+      "tier_fit": 0.4306,
+      "tier_fit_by_tier": {
+        "beginner": 0.3667,
+        "intermediate": 0.4667,
+        "advanced": 0.4583
+      },
+      "move_sound": 0.9972,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.37,
+        "collapsed_BA": 63
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0,
+        "move_sound": 0.9972,
+        "verify_pass_draft1": 0.9778
+      },
+      "coherence": 0.3083,
+      "flat_rate": 0.6083,
+      "gated_soundness": null
+    }
+  }
+}
