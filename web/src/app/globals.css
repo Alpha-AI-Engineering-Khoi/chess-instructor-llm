@@ -2,15 +2,13 @@
 @import "@heroui/styles";
 
 /*
-  THE BENCH INSTRUMENT
-  A focused club player at a dark desk late at night, replaying the game they
-  just lost on one calm screen — a precision instrument that MEASURES the
+  THE TOURNAMENT HALL
+  A local-first AI chess coach: a precision instrument that MEASURES the
   position and hands back a single, confident verdict.
 
-  Cool graphite canvas (blue-tinted, hue ~258), one warm signal accent (amber)
-  reserved for the recommended move / selection / focus, and a cool "engine"
-  tint for raw measured data. Color encodes the product thesis: cool = engine
-  truth, one warm signal = the human verdict. All OKLCH; never pure #000/#fff.
+  A drenched deep tournament-felt green surface, one warm brass/gold signal accent
+  reserved for the recommended move / selection / focus, and cream/parchment ink.
+  All OKLCH; never pure #000/#fff.
 */
 
 @theme inline {
@@ -18,8 +16,9 @@
   --font-sans: var(--font-ui);
   --font-display: var(--font-ui);
   --font-mono: var(--font-data);
+  --font-serif: var(--font-notation); /* NEW: Notation Serif */
 
-  /* Custom tokens exposed to Tailwind (bg-signal, text-engine, ...) */
+  /* Custom tokens exposed to Tailwind */
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
@@ -40,44 +39,50 @@
 
 /* Scene tokens (mode-agnostic; this is a single, committed dark instrument). */
 :root {
-  --ink: oklch(0.948 0.006 258);
-  --muted: oklch(0.752 0.014 258);
-  --faint: oklch(0.702 0.014 258);
+  /* Tournament Felt Green */
+  --ink: oklch(0.93 0.02 90); /* Cream/Parchment */
+  --muted: oklch(0.78 0.02 90);
+  --faint: oklch(0.60 0.02 90);
 
-  --signal: oklch(0.802 0.163 66);
-  --signal-ink: oklch(0.24 0.03 66);
-  --engine: oklch(0.735 0.09 236);
+  /* Warm Brass/Gold Signal */
+  --signal: oklch(0.78 0.13 85);
+  --signal-ink: oklch(0.24 0.03 85);
+  
+  --engine: oklch(0.735 0.09 236); /* Keep cool for engine lines if needed, or adapt */
   --your-move: oklch(0.706 0.135 32);
   --caution: oklch(0.808 0.12 78);
-  --good: oklch(0.742 0.115 158);
+  --good: oklch(0.742 0.115 158); /* Win-green */
 
-  --board-light: oklch(0.86 0.03 91);
-  --board-dark: oklch(0.44 0.05 121);
+  /* Chalk and Walnut Board */
+  --board-light: oklch(0.90 0.02 90);
+  --board-dark: oklch(0.42 0.05 60);
 }
 
-/* Map HeroUI's semantic tokens onto the Bench Instrument palette (cool, dark). */
+/* Map HeroUI's semantic tokens onto the Tournament Hall palette. */
 .dark,
 [data-theme="dark"] {
   color-scheme: dark;
 
   --radius: 0.75rem;
 
-  --background: oklch(0.171 0.012 258);
+  /* Deep Felt Green Background */
+  --background: oklch(0.28 0.045 155);
   --foreground: var(--ink);
 
-  --surface: oklch(0.216 0.014 258);
+  /* Elevated Felt Panels */
+  --surface: oklch(0.32 0.04 155);
   --surface-foreground: var(--foreground);
-  --surface-secondary: oklch(0.252 0.016 258);
+  --surface-secondary: oklch(0.35 0.04 155);
   --surface-secondary-foreground: var(--foreground);
-  --surface-tertiary: oklch(0.288 0.017 258);
+  --surface-tertiary: oklch(0.38 0.04 155);
   --surface-tertiary-foreground: var(--foreground);
 
-  --overlay: oklch(0.236 0.016 258);
+  --overlay: oklch(0.34 0.04 155);
   --overlay-foreground: var(--foreground);
 
-  --muted: oklch(0.752 0.014 258);
+  --muted: oklch(0.78 0.02 90);
 
-  --default: oklch(0.288 0.016 258);
+  --default: oklch(0.35 0.04 155);
   --default-foreground: var(--foreground);
 
   --accent: var(--signal);
@@ -89,27 +94,27 @@
   --warning: var(--caution);
   --warning-foreground: oklch(0.2 0.02 78);
 
-  --danger: oklch(0.64 0.17 25);
-  --danger-foreground: oklch(0.97 0.02 258);
+  --danger: oklch(0.64 0.17 25); /* Clay-red for loss */
+  --danger-foreground: oklch(0.97 0.02 25);
 
-  --field-background: oklch(0.232 0.014 258);
+  --field-background: oklch(0.30 0.04 155);
   --field-foreground: var(--foreground);
-  --field-placeholder: oklch(0.665 0.014 258);
-  --field-border: oklch(0.38 0.014 258);
+  --field-placeholder: oklch(0.665 0.02 90);
+  --field-border: oklch(0.40 0.04 155);
 
-  --segment: oklch(0.252 0.016 258);
+  --segment: oklch(0.32 0.04 155);
   --segment-foreground: var(--foreground);
 
-  --border: oklch(0.352 0.013 258);
-  --separator: oklch(0.312 0.011 258);
+  --border: oklch(0.40 0.04 155);
+  --separator: oklch(0.38 0.04 155);
   --focus: var(--signal);
   --link: var(--signal);
 
-  --backdrop: color-mix(in oklab, oklch(0.11 0.01 258) 64%, transparent);
+  --backdrop: color-mix(in oklab, oklch(0.20 0.04 155) 64%, transparent);
 
   /* Flat surfaces — no drop shadow on cards/panels (only floating overlays keep depth). */
   --surface-shadow: none;
-  --overlay-shadow: 0 24px 60px -30px oklch(0.03 0.01 258);
+  --overlay-shadow: 0 24px 60px -30px oklch(0.15 0.04 155);
 }
 
 /* The app background is carried by html AND body so scrolling past the page (or an
@@ -120,20 +125,19 @@ html {
   overscroll-behavior: none;
 }
 
-/* Cool depth: one quiet vertical lightening at the top + a faint signal ember
-   low-right, like an instrument's indicator. No grain, no lamp, no parchment. */
+/* Felt atmosphere/vignette. */
 body {
   overscroll-behavior: none;
   background-color: var(--background);
   background-image:
     radial-gradient(
       120% 80% at 50% -12%,
-      color-mix(in oklab, var(--engine) 6%, transparent),
+      color-mix(in oklab, oklch(0.35 0.04 155) 15%, transparent),
       transparent 60%
     ),
     radial-gradient(
       90% 70% at 112% 118%,
-      color-mix(in oklab, var(--signal) 5%, transparent),
+      color-mix(in oklab, var(--signal) 8%, transparent),
       transparent 55%
     );
   background-attachment: fixed;
