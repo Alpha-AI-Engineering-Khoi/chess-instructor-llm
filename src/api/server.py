@@ -149,11 +149,32 @@ _FORMAT_SUFFIX: str = (
 )
 SYSTEM_PROMPT: str = _COACH_SYSTEM + _GROUNDING + _FORMAT_SUFFIX
 
-#: Origins the Next.js dev/preview server runs on.
+#: Browser origins allowed to call this API cross-origin (the CORS allowlist).
+#:
+#: The LIVE demo is a Hugging Face **Static Space** whose exported Next.js client
+#: fetches this API DIRECTLY from the browser (see ``web/next.config.ts`` ->
+#: ``NEXT_PUBLIC_API_BASE`` points at the Modal endpoint). Because that fetch is
+#: cross-origin and sends ``Content-Type: application/json``, the browser issues a
+#: CORS *preflight* (OPTIONS) first; if the Space origin is not on this list the
+#: preflight is rejected ("Disallowed CORS origin", no ``Access-Control-Allow-Origin``)
+#: and the live coach never responds. So the deployed Space origin MUST be allowed
+#: here (localhost stays for ``next dev`` / preview). This same module is imported
+#: verbatim by the Modal serve scripts (``src/serve/serve_v4_4bit_modal.py`` does
+#: ``self._app = server.app``), so listing the origin here fixes the deployed app.
+#: Extra origins can be added at deploy time via ``COACH_CORS_ORIGINS``
+#: (comma-separated) without a code change — handy if the Space is ever renamed.
 CORS_ORIGINS: List[str] = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    # Live Hugging Face Static Space — the browser origin of the shipped demo.
+    "https://khoilamalphaai-chess-coach-studio.static.hf.space",
 ]
+_EXTRA_CORS: str = os.environ.get("COACH_CORS_ORIGINS", "")
+if _EXTRA_CORS.strip():
+    for _o in _EXTRA_CORS.split(","):
+        _o = _o.strip()
+        if _o and _o not in CORS_ORIGINS:
+            CORS_ORIGINS.append(_o)
 
 
 # --------------------------------------------------------------------------- #
