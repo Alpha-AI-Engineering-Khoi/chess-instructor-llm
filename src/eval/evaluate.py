@@ -88,6 +88,7 @@ if str(_ROOT) not in sys.path:
 
 from config import schema, settings  # noqa: E402
 from src.engine import maia_engine, stockfish_engine  # noqa: E402
+from src.teacher.coach_gate import pick_recommendation  # noqa: E402
 
 # --------------------------------------------------------------------------- #
 # Constants
@@ -450,15 +451,25 @@ def extract_recommended_move(
 ) -> Tuple[Optional[str], Optional[str]]:
     """Best-effort extraction of the coach's recommended move as ``(san, uci)``.
 
-    Strategy (deterministic, mirrors how the filter reads a recommendation):
+    Strategy (deterministic; shares its avoid-framing-aware core with the shipped
+    coach in :func:`src.teacher.coach_gate.pick_recommendation`):
       1. If the output embeds a JSON object with ``recommended_move_uci`` /
          ``recommended_move_san`` (a tuned model may emit structured output), use
          it when legal.
-      2. Otherwise scan prose left-to-right and take the first *legal* SAN whose
-         move differs from the student's own move — coaches restate the mistake
-         first ("Your Bxd6 ...") and then give the pick ("instead, Nf3").
+      2. Otherwise return the coach's ACTUAL recommended move via
+         :func:`pick_recommendation` — the move after an explicit "I'd play X" /
+         "the move: X" / "Play X again" cue (even if it equals the student's own
+         move, e.g. the student already played the best move), else the first
+         non-student move that is NOT framed as one to avoid.
 
-    Returns ``(None, None)`` when no legal move can be recovered.
+    Crucially, a move the coach frames as one to AVOID ("rather than ...b2+",
+    "a forcing move like ...b2+"), an opponent reply / continuation ("if White
+    plays Ke4", "after d2+ ...f3"), or a bare square reference ("the rook goes to
+    h3") is never mistaken for the recommendation. Any legal move is accepted (the
+    move need not be sound — soundness is scored separately), so an unsound pick
+    is reported honestly rather than hidden.
+
+    Returns ``(None, None)`` when no recommended move can be recovered.
     """
     board = chess.Board(fen)
 
@@ -478,20 +489,8 @@ def extract_recommended_move(
             if got is not None:
                 return board.san(chess.Move.from_uci(got)), got
 
-    fallback: Optional[Tuple[str, str]] = None
-    for raw in text.split():
-        tok = _clean_token(raw)
-        if not tok or not _SAN_SHAPE.fullmatch(tok):
-            continue
-        uci = _legal_uci(board, tok)
-        if uci is None:
-            continue
-        san = board.san(chess.Move.from_uci(uci))
-        if uci != student_uci:
-            return san, uci
-        if fallback is None:
-            fallback = (san, uci)
-    return fallback if fallback is not None else (None, None)
+    picked = pick_recommendation(text, board, student_uci, accept=lambda _u: True)
+    return picked if picked is not None else (None, None)
 
 
 def find_engine_speak(text: str) -> List[str]:

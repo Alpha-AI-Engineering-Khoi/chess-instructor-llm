@@ -125,35 +125,40 @@ def _split_coaching(text: str) -> Tuple[str, str]:
 def extract_recommended_mode(
     text: str, board: chess.Board, pool: List[Dict[str, Any]], student_uci: str
 ) -> Tuple[Optional[str], Optional[str], str]:
-    """server._extract_recommended, instrumented to return HOW the move was found.
+    """The live API's recommended-move extraction, instrumented to return HOW the
+    move was found.
 
-    mode:
-      "cue"            -> named right after a cue phrase ("I'd play Nf3")
-      "prose"          -> first sound SAN named anywhere in the prose
-      "fallback_pool0" -> model named no sound move; API would show engine best
+    Delegates to the SHARED, avoid-framing-aware core
+    (:func:`src.teacher.coach_gate.pick_recommendation`) so this analysis and the
+    shipped coach can never diverge. ``mode``:
+
+      "cue"            -> named right after an explicit endorsement cue ("I'd play X")
+      "prose"          -> the coach's pick named elsewhere in the prose (non-avoid)
+      "fallback_pool0" -> model named no sound, non-avoid move; API shows engine best
       "none"           -> empty pool (shouldn't happen)
     """
+    from src.teacher.coach_gate import (
+        _endorsed_indices,
+        _is_avoid_framed,
+        _san_candidates,
+        pick_recommendation,
+    )
+
     pool_ucis = {m["uci"] for m in pool}
-
-    def _try(token: str) -> Optional[Tuple[str, str]]:
-        try:
-            move = board.parse_san(token)
-        except ValueError:
-            return None
-        return board.san(move), move.uci()
-
-    for cue in _CUE_RE.finditer(text):
-        window = text[cue.end() : cue.end() + 16]
-        m = _SAN_RE.search(window)
-        if m:
-            parsed = _try(m.group(1))
-            if parsed and parsed[1] != student_uci and parsed[1] in pool_ucis:
-                return parsed[0], parsed[1], "cue"
-
-    for m in _SAN_RE.finditer(text):
-        parsed = _try(m.group(1))
-        if parsed and parsed[1] != student_uci and parsed[1] in pool_ucis:
-            return parsed[0], parsed[1], "prose"
+    picked = pick_recommendation(
+        text, board, student_uci, accept=lambda u: u in pool_ucis
+    )
+    if picked is not None:
+        san, uci = picked
+        cands = [t for t in _san_candidates(board, text) if t[3] in pool_ucis]
+        endorsed = _endorsed_indices(text, cands)
+        avoid = [_is_avoid_framed(text, s, e) for (s, e, _s, _u) in cands]
+        mode = "prose"
+        for i, (_s, _e, _san, u) in enumerate(cands):
+            if u == uci and not avoid[i]:
+                mode = "cue" if i in endorsed else "prose"
+                break
+        return san, uci, mode
 
     if pool:
         return pool[0]["san"], pool[0]["uci"], "fallback_pool0"

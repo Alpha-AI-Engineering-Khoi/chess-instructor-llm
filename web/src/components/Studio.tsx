@@ -34,15 +34,19 @@ import { FlipVerticalIcon, ResetIcon, UndoIcon } from "./icons";
 
 type Status = "idle" | "loading" | "done" | "error";
 
-// DEFAULT is a moat demo verified on the LIVE served model: on this held-out
-// rook endgame the coach gives a DIFFERENT, level-appropriate move for each tier
-//: g5 (beginner) · Ra1 (intermediate) · h5 (advanced). Switching tiers on load
-// is the one-screen proof that the fine-tune adapts the move to the player's
-// level. No student move: the point is the recommendation per tier.
+// DEFAULT is a GENUINE, THREE-way per-tier fork, verified on the held-out v4
+// generations (the same tuned model the demo serves) with the avoid-framing-aware
+// extractor. On this king-and-pawn endgame the student's Ne2 was fine but passive,
+// and the coach hands back a DIFFERENT, engine-sound, tier-canonical move for each
+// level: Ne6+ (beginner — a forcing check) · h6 (intermediate — a passed-pawn
+// push) · Kd2 (advanced — the quiet king improvement). Every tier switch changes
+// the move, so it is the one-screen proof that the fine-tune adapts the move to
+// the player's level. (The previous default's "h5" advanced move was an
+// extraction artifact — the coach actually converged there — so it was replaced.)
 const DEFAULT = {
-  fen: "r5kr/6pp/p7/8/6PP/8/8/5RK1 w - - 1 39",
+  fen: "8/7b/5p2/P1kp3P/2pN1P2/4K3/8/8 w - - 1 39",
   tier: "beginner" as Tier,
-  move: "",
+  move: "Ne2",
 };
 const DEFAULT_STUDENT_UCI = moveToUci(DEFAULT.fen, DEFAULT.move);
 const TIERS: Tier[] = ["beginner", "intermediate", "advanced"];
@@ -54,14 +58,28 @@ interface Preset {
   move?: string;
 }
 
-// A few one-click positions: a "moat" demo (a held-out position where the live
-// served model gives a distinct move per level), a handful of recognizable
-// openings, and the classic beginner blunder.
+// A few one-click positions: three "moat" demos (held-out positions where the
+// tuned model gives a GENUINELY distinct move per level — verified on the v4
+// generations with the avoid-framing-aware extractor, one per game phase), a
+// handful of recognizable openings, and the classic beginner blunder.
 const PRESETS: Preset[] = [
   {
+    label: "Moat · opening",
+    hint: "Held-out opening: Beginner/Intermediate keep the recapture Nxd4, but the tuned model steers Advanced to Bxf6 first. Switch tiers to watch the move change.",
+    fen: "r2q1rk1/ppp2ppp/5nb1/2b2NB1/2Bn4/2NP4/PPP3PP/R2QKR2 w Q - 3 13",
+    move: "Nxd4",
+  },
+  {
+    label: "Moat · middlegame",
+    hint: "Your Qh5+ is right for Beginner/Intermediate; Advanced prefers the quiet f6. A verified per-level fork on a held-out position.",
+    fen: "r4rk1/1p3ppp/pQp1n2q/4P3/2P2n2/P3BK2/7P/R4B1R b - - 0 21",
+    move: "Qh5",
+  },
+  {
     label: "Moat · rook endgame",
-    hint: "The default demo: the live model adapts g5 / Ra1 / h5 by level; switch tiers to watch the move change.",
-    fen: "r5kr/6pp/p7/8/6PP/8/8/5RK1 w - - 1 39",
+    hint: "Beginner/Intermediate get the simpler Ng3; Advanced endorses the student's own Nf2. A verified per-level fork.",
+    fen: "8/8/8/4k3/4NRK1/7p/8/7r w - - 0 52",
+    move: "Nf2",
   },
   {
     label: "Italian Game",
@@ -791,8 +809,8 @@ export default function Studio() {
                   })}
                 </div>
                 <p className="text-[11px] leading-relaxed text-faint">
-                  Recognizable openings plus two “moat” demos where the tuned model adapts the move
-                  by level. Loads instantly and re-coaches all three tiers.
+                  Recognizable openings plus three “moat” demos (one per game phase) where the tuned
+                  model adapts the move by level. Loads instantly and re-coaches all three tiers.
                 </p>
               </div>
 

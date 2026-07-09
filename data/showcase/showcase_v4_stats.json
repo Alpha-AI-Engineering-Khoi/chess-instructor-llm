@@ -1,8 +1,8 @@
 {
-  "positions": 60,
-  "ours_wins": 58,
-  "ours_loses": 17,
-  "shine": 43,
+  "positions": 63,
+  "ours_wins": 62,
+  "ours_loses": 12,
+  "shine": 51,
   "all_tier_differentiate": true,
   "models": [
     "ours_v4",
@@ -13,5 +13,5 @@
   ],
   "ours": "ours_v4",
   "filter": "ours_tier_differentiates AND ours diverges from best-frontier move",
-  "generated_utc": "2026-07-08T18:19:51.491204+00:00"
+  "generated_utc": "2026-07-09T06:15:49.857965+00:00"
 }

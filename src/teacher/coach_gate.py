@@ -37,6 +37,7 @@ from src.engine.position_facts import move_facts
 
 __all__ = [
     "extract_recommended",
+    "pick_recommendation",
     "split_coaching",
     "pick_fallback_move",
     "verified_coaching",
@@ -52,13 +53,58 @@ __all__ = [
 #: SAN token (incl. castling / promotion / check markers).
 _SAN_RE = re.compile(r"(O-O-O|O-O|[KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](?:=[QRBN])?[+#]?)")
 
-#: Phrases that typically precede the coach's recommended move.
-_CUE_RE = re.compile(
+#: EXPLICIT, first-person / imperative recommendation cues. A move named right
+#: after one of these is the coach's OWN pick — even when it equals the student's
+#: move (a coach can endorse a good move: "I'd play Kd6" when the student played
+#: Kd6). Deliberately NOT bare "play"/"consider": those also match "you played"
+#: (the mistake being restated) and "if White plays" (the opponent's reply).
+_ENDORSE_CUE_RE = re.compile(
     r"(?:i['\u2019]?d\s+play|i\s+would\s+play|i['\u2019]?ll\s+play|i\s+play|"
-    r"recommend(?:ed)?(?:\s+move)?(?:\s+is)?|best\s+move\s+is|go\s+with|"
-    r"choose|consider|play)\s*[:\-]?\s*",
+    r"i\s+recommend|recommend(?:ed)?(?:\s+move)?(?:\s+is)?|"
+    r"(?:the\s+)?move\s*(?:is|:)|/move\s*:|best\s+move\s+is|go\s+with|choose|"
+    r"leads?\s+you\s+to|points?\s+you\s+to|improvement\s+is|better\s+is)"
+    r"\s*[:\-]?\s*",
     re.IGNORECASE,
 )
+
+#: Framing that marks the FOLLOWING move as one to AVOID / NOT the pick
+#: ("rather than ...b2+", "instead of Rh8", "a forcing move like ...b2+").
+_AVOID_CUE_RE = re.compile(
+    r"rather than|instead of|such as|\bavoid\w*|\blike\b|\bnot\b|\bnever\b|"
+    r"n['\u2019]?t\b|don['\u2019]?t|do not|rush\w*\s+into|forcing[- ]?looking",
+    re.IGNORECASE,
+)
+
+#: Hypothetical / opponent-reply / continuation framing (also NOT the pick):
+#: "if White plays Ke4", "after d2+ ...f3", "you have Bc4", "for example ...".
+_HYPO_CUE_RE = re.compile(
+    r"\bif\b|\bafter\b|\bthen\b|for\s+example|follow[- ]?up|followed\s+by|"
+    r"you\s+have|you['\u2019]?ll\s+have|\breplies\b|\brespond|\bnext\b|continu|"
+    r"(?:white|black)\s+(?:plays|has|goes|replies)",
+    re.IGNORECASE,
+)
+
+#: A move token that is really a SQUARE reference, not a recommendation:
+#: "the rook goes to h3", "the pawn on d6", "the g4-pawn".
+_COORD_BEFORE_RE = re.compile(r"\b(?:on|to)\b\W*$", re.IGNORECASE)
+_COORD_AFTER_RE = re.compile(r"^[- ]?(?:pawn|square|file|rank)s?\b", re.IGNORECASE)
+
+#: A move immediately CONCEDED then dismissed ("Kd5 was already active, but ...").
+_CONCESSION_AFTER_RE = re.compile(
+    r"^\W{0,3}(?:was|is|were|are)\s+(?:already\s+|also\s+)?"
+    r"(?:playable|possible|fine|active|ok|okay|tempting|reasonable)",
+    re.IGNORECASE,
+)
+
+#: A sentence boundary: a terminator followed by whitespace, or a newline. NOT a
+#: comma, so an avoided LIST keeps its framing across commas ("a quiet rook move
+#: like Rh8, Ra8, or even Re8+" marks ALL of Rh8/Ra8/Re8+ as moves to avoid). A
+#: genuine pick that follows a list/avoid cue is recovered instead by an EXPLICIT
+#: endorsement cue right before it ("...such as Nc3, the move is Nf3"), which is
+#: localized in :func:`_endorsed_indices`. Deliberately does NOT fire on the dots
+#: of a chess ellipsis ("...b2+") or a move number ("12."), so avoid/hypothetical
+#: framing before a "...move" is kept.
+_CLAUSE_BOUNDARY_RE = re.compile(r"[.!?:;](?=\s)|\n")
 
 #: Splits the coaching body from the trailing "Takeaway:" line.
 _TAKEAWAY_RE = re.compile(r"\b(?:key\s+)?take[-\s]?away\s*:\s*", re.IGNORECASE)
@@ -67,43 +113,138 @@ _TAKEAWAY_RE = re.compile(r"\b(?:key\s+)?take[-\s]?away\s*:\s*", re.IGNORECASE)
 _HR_LINE_RE = re.compile(r"(?m)^[ \t]*[-*_]{3,}[ \t]*$")
 
 
+def _clause_before(text: str, start: int, span: int = 90) -> str:
+    """The clause immediately preceding ``start`` — everything after the last real
+    sentence boundary within ``span`` chars. Used to read a move's framing without
+    being fooled by the dots of a chess ellipsis ("...b2+")."""
+    pre = text[max(0, start - span) : start]
+    last = -1
+    for m in _CLAUSE_BOUNDARY_RE.finditer(pre):
+        last = m.end()
+    return pre[last:] if last != -1 else pre
+
+
+def _san_candidates(
+    board: chess.Board, text: str
+) -> List[Tuple[int, int, str, str]]:
+    """Every legally-parseable SAN token in ``text`` as (start, end, san, uci)."""
+    out: List[Tuple[int, int, str, str]] = []
+    for m in _SAN_RE.finditer(text):
+        try:
+            mv = board.parse_san(m.group(1))
+        except ValueError:
+            continue
+        out.append((m.start(), m.end(), board.san(mv), mv.uci()))
+    return out
+
+
+def _is_avoid_framed(text: str, start: int, end: int) -> bool:
+    """True if the SAN at ``[start, end)`` is framed as a move to AVOID / not the
+    coach's pick: an avoid cue ("rather than", "like", "instead of"), a
+    hypothetical/continuation ("if White plays", "after ... "), a bare square
+    reference ("the rook goes to h3", "the g4-pawn"), or a dismissed concession."""
+    pre = _clause_before(text, start)
+    if _AVOID_CUE_RE.search(pre) or _HYPO_CUE_RE.search(pre):
+        return True
+    tok = text[start:end]
+    if tok[:1] in "abcdefgh" and "x" not in tok:  # bare pawn move -> maybe a square ref
+        if _COORD_BEFORE_RE.search(text[max(0, start - 6) : start]):
+            return True
+        if _COORD_AFTER_RE.search(text[end : end + 8]):
+            return True
+    if _CONCESSION_AFTER_RE.search(text[end : end + 26]):
+        return True
+    return False
+
+
+def _endorsed_indices(
+    text: str, cands: Sequence[Tuple[int, int, str, str]]
+) -> set:
+    """Indices of candidates the coach explicitly ENDORSES as its own pick — named
+    right after an endorsement cue ("I'd play X", "the move: X"), or in the
+    imperative "Play X again" pattern. The endorsement is LOCALIZED: the move must
+    sit right after the cue with no avoid/hypothetical framing in between, so
+    "...such as Nc3, the move is Nf3" endorses Nf3 (the cue is right before it)
+    without being fooled by the earlier "such as". Because it is this tightly
+    scoped, an endorsed move is trusted even when the wider sentence opened with a
+    list/avoid cue — that is how a genuine pick after an avoided list is recovered.
+    May be the student's own move (a coach can endorse a move it agrees with)."""
+    endorsed: set = set()
+    for cue in _ENDORSE_CUE_RE.finditer(text):
+        lo, hi = cue.end(), cue.end() + 16
+        for i, (s, _e, _san, _uci) in enumerate(cands):
+            if lo <= s <= hi:
+                between = text[cue.end() : s]
+                if not (_AVOID_CUE_RE.search(between) or _HYPO_CUE_RE.search(between)):
+                    endorsed.add(i)
+                break
+    for i, (s, e, _san, _uci) in enumerate(cands):
+        if "again" in text[e : e + 10].lower() and "play" in text[max(0, s - 8) : s].lower():
+            endorsed.add(i)
+    return endorsed
+
+
+def pick_recommendation(
+    text: str,
+    board: chess.Board,
+    student_uci: str,
+    accept: Callable[[str], bool],
+) -> Optional[Tuple[str, str]]:
+    """Return (SAN, UCI) of the coach's ACTUAL recommended move, or ``None``.
+
+    ``accept(uci) -> bool`` is the caller's move filter (in the Stockfish sound
+    pool for the shipped coach; any legal move for the honest metrics extractor).
+    In order of preference the recommendation is:
+
+    1. a move named right after an EXPLICIT endorsement cue ("I'd play X",
+       "the move: X", "Play X again") — even when it equals the student's own
+       move, because the coach can endorse a good move it agrees with;
+    2. otherwise the first non-student move that is NOT framed as one to avoid;
+    3. otherwise the student's own move if it is stated approvingly (non-avoid).
+
+    Moves framed as things to AVOID ("rather than ...b2+", "instead of Rh8",
+    "a forcing move like ...b2+"), opponent replies / continuations ("if White
+    plays Ke4", "after d2+ ...f3"), and bare square references ("the rook goes to
+    h3") are never chosen. That avoid-framing class is the bug this fixes: the old
+    scanner grabbed the first non-student legal SAN, which — when the coach agreed
+    with the student's move — was often a move the coach told the student NOT to
+    play, corrupting the shown move and faking a tier "fork".
+    """
+    cands = [t for t in _san_candidates(board, text) if accept(t[3])]
+    if not cands:
+        return None
+    avoid = [_is_avoid_framed(text, s, e) for (s, e, _san, _uci) in cands]
+    endorsed = _endorsed_indices(text, cands)
+
+    for i, (_s, _e, san, uci) in enumerate(cands):  # 1) explicitly endorsed pick
+        if i in endorsed:  # endorsement is already localized (avoid-free span)
+            return san, uci
+    for i, (_s, _e, san, uci) in enumerate(cands):  # 2) first clean alternative
+        if uci != student_uci and not avoid[i]:
+            return san, uci
+    for i, (_s, _e, san, uci) in enumerate(cands):  # 3) approvingly-stated student move
+        if uci == student_uci and not avoid[i]:
+            return san, uci
+    return None
+
+
 def extract_recommended(
     text: str, board: chess.Board, pool: Sequence[Any], student_uci: str
 ) -> Tuple[Optional[str], Optional[str]]:
-    """Extract the recommended move (SAN, UCI) from the coach's free text.
+    """Extract the coach's recommended *sound* move as ``(SAN, UCI)``.
 
-    The recommendation is always a *sound* move that is NOT the student's own
-    move. Strategy: a sound move right after a cue phrase ("I'd play ..."), then
-    the first sound move named anywhere in the prose, and finally the engine's
-    best sound move. We never return the student's move (a coach that phrases the
-    pick as "develop the knight to f3" rather than "Nf3" must not be mis-read as
-    recommending the mistake the student just played).
+    Uses :func:`pick_recommendation` restricted to the Stockfish sound pool, then
+    falls back to the engine-best sound move if the coach named no sound pick.
+    Unlike the previous scanner this can return the student's own move when the
+    coach explicitly endorses it (e.g. the student already played the best move),
+    and it never returns a move the coach framed as one to avoid.
     """
     pool_ucis = {m["uci"] for m in pool}
-
-    def _try(token: str) -> Optional[Tuple[str, str]]:
-        try:
-            move = board.parse_san(token)
-        except ValueError:
-            return None
-        return board.san(move), move.uci()
-
-    # 1) Cue phrase -> a move that is not the student's.
-    for cue in _CUE_RE.finditer(text):
-        window = text[cue.end() : cue.end() + 16]
-        match = _SAN_RE.search(window)
-        if match:
-            parsed = _try(match.group(1))
-            if parsed and parsed[1] != student_uci and parsed[1] in pool_ucis:
-                return parsed
-
-    # 2) First sound move named anywhere in the prose (never the student's).
-    for match in _SAN_RE.finditer(text):
-        parsed = _try(match.group(1))
-        if parsed and parsed[1] != student_uci and parsed[1] in pool_ucis:
-            return parsed
-
-    # 3) Fallback: the engine's best sound move (guaranteed != the mistake).
+    picked = pick_recommendation(
+        text, board, student_uci, accept=lambda u: u in pool_ucis
+    )
+    if picked is not None:
+        return picked
     if pool:
         return pool[0]["san"], pool[0]["uci"]
     return None, None
