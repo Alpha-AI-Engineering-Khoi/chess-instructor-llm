@@ -21,17 +21,17 @@
     "core_axes": [
       {
         "axis": "tier_fit_mean",
-        "ours_v4": 0.79,
-        "ours_4b": 0.3861,
-        "delta_v4_minus_4b": 0.404,
+        "ours_v4": 0.7667,
+        "ours_4b": 0.3972,
+        "delta_v4_minus_4b": 0.3695,
         "higher_better": true,
         "v4_not_worse": true
       },
       {
         "axis": "distinct_moves_per_level",
-        "ours_v4": 0.75,
-        "ours_4b": 0.26,
-        "delta_v4_minus_4b": 0.49,
+        "ours_v4": 0.7849,
+        "ours_4b": 0.28,
+        "delta_v4_minus_4b": 0.5049,
         "higher_better": true,
         "v4_not_worse": true
       },
@@ -45,9 +45,9 @@
       },
       {
         "axis": "coherence_violation_rate",
-        "ours_v4": 0.1417,
-        "ours_4b": 0.3417,
-        "delta_v4_minus_4b": -0.2,
+        "ours_v4": 0.1402,
+        "ours_4b": 0.325,
+        "delta_v4_minus_4b": -0.1848,
         "higher_better": false,
         "v4_not_worse": true
       }
@@ -90,15 +90,15 @@
   },
   "v4_vs_untuned_base": {
     "untuned_base": "q3_32b",
-    "tier_fit_delta": 0.448,
+    "tier_fit_delta": 0.4195,
     "instr_rank_delta": 0.257,
-    "distinct_delta": 0.45,
+    "distinct_delta": 0.4949,
     "instr_grade_delta": -0.55
   },
   "v4_vs_prompt_base": {
     "prompt_base": "pbase_4b",
     "instr_rank_delta": -0.92,
-    "tier_fit_delta": 0.44
+    "tier_fit_delta": 0.3889
   },
   "distance_to_frontier": {
     "best_frontier": [
@@ -120,7 +120,7 @@
     "wins": 51,
     "losses": 5,
     "ties": 6,
-    "n_distinct": 68,
+    "n_distinct": 67,
     "n_distinct_and_diverge": 62,
     "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
   },
@@ -135,17 +135,17 @@
         "n": 360
       },
       "move_grade": 7.9,
-      "tier_fit": 0.7917,
+      "tier_fit": 0.7667,
       "tier_fit_by_tier": {
-        "beginner": 0.75,
-        "intermediate": 0.7583,
-        "advanced": 0.8667
+        "beginner": 0.725,
+        "intermediate": 0.7333,
+        "advanced": 0.8417
       },
-      "move_sound": 0.9861,
+      "move_sound": 0.9417,
       "distinct": {
-        "differentiating_n": 100,
-        "distinct_rate": 0.75,
-        "collapsed_BA": 25
+        "differentiating_n": 93,
+        "distinct_rate": 0.7849,
+        "collapsed_BA": 20
       },
       "gate": {
         "gated": false,
@@ -155,8 +155,8 @@
         "move_sound": 0.9417,
         "verify_pass_draft1": 0.5889
       },
-      "coherence": 0.1417,
-      "flat_rate": 0.2917
+      "coherence": 0.1402,
+      "flat_rate": 0.2523
     },
     "ours_4b": {
       "instr_rank": 5.622,
@@ -168,17 +168,17 @@
         "n": 360
       },
       "move_grade": 8.97,
-      "tier_fit": 0.3861,
+      "tier_fit": 0.3972,
       "tier_fit_by_tier": {
-        "beginner": 0.3583,
-        "intermediate": 0.425,
+        "beginner": 0.375,
+        "intermediate": 0.4417,
         "advanced": 0.375
       },
       "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.26,
-        "collapsed_BA": 74
+        "distinct_rate": 0.28,
+        "collapsed_BA": 72
       },
       "gate": {
         "gated": true,
@@ -188,8 +188,8 @@
         "no_engine_speak": 1.0,
         "well_formed": 1.0
       },
-      "coherence": 0.3417,
-      "flat_rate": 0.675
+      "coherence": 0.325,
+      "flat_rate": 0.6583
     },
     "base_4b": {
       "instr_rank": 7.133,
@@ -201,17 +201,17 @@
         "n": 360
       },
       "move_grade": 8.78,
-      "tier_fit": 0.3472,
+      "tier_fit": 0.3528,
       "tier_fit_by_tier": {
-        "beginner": 0.3333,
+        "beginner": 0.35,
         "intermediate": 0.3917,
         "advanced": 0.3167
       },
       "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.22,
-        "collapsed_BA": 78
+        "distinct_rate": 0.23,
+        "collapsed_BA": 77
       },
       "gate": {
         "gated": true,
@@ -221,8 +221,8 @@
         "no_engine_speak": 1.0,
         "well_formed": 1.0
       },
-      "coherence": 0.3917,
-      "flat_rate": 0.7417
+      "coherence": 0.375,
+      "flat_rate": 0.725
     },
     "pbase_4b": {
       "instr_rank": 6.996,
@@ -234,10 +234,10 @@
         "n": 360
       },
       "move_grade": 8.79,
-      "tier_fit": 0.35,
+      "tier_fit": 0.3778,
       "tier_fit_by_tier": {
-        "beginner": 0.3083,
-        "intermediate": 0.4,
+        "beginner": 0.3667,
+        "intermediate": 0.425,
         "advanced": 0.3417
       },
       "move_sound": 1.0,
@@ -254,8 +254,8 @@
         "no_engine_speak": 1.0,
         "well_formed": 1.0
       },
-      "coherence": 0.3917,
-      "flat_rate": 0.5
+      "coherence": 0.3333,
+      "flat_rate": 0.4917
     },
     "q3_32b": {
       "instr_rank": 5.819,
@@ -267,27 +267,27 @@
         "n": 360
       },
       "move_grade": 9.01,
-      "tier_fit": 0.3417,
+      "tier_fit": 0.3472,
       "tier_fit_by_tier": {
         "beginner": 0.3,
-        "intermediate": 0.375,
-        "advanced": 0.35
+        "intermediate": 0.3833,
+        "advanced": 0.3583
       },
-      "move_sound": 0.9917,
+      "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.3,
-        "collapsed_BA": 70
+        "distinct_rate": 0.29,
+        "collapsed_BA": 71
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 0.9917,
         "well_formed": 1.0,
-        "move_sound": 0.9917,
+        "move_sound": 1.0,
         "verify_pass_draft1": 0.95
       },
-      "coherence": 0.4917,
+      "coherence": 0.5,
       "flat_rate": 0.5583
     },
     "ours_v3": {
@@ -300,28 +300,28 @@
         "n": 360
       },
       "move_grade": 8.63,
-      "tier_fit": 0.525,
+      "tier_fit": 0.5583,
       "tier_fit_by_tier": {
-        "beginner": 0.3,
-        "intermediate": 0.4583,
-        "advanced": 0.8167
+        "beginner": 0.4583,
+        "intermediate": 0.4833,
+        "advanced": 0.7333
       },
-      "move_sound": 1.0,
+      "move_sound": 0.95,
       "distinct": {
-        "differentiating_n": 100,
-        "distinct_rate": 0.31,
-        "collapsed_BA": 69
+        "differentiating_n": 94,
+        "distinct_rate": 0.5851,
+        "collapsed_BA": 39
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 0.9639,
-        "well_formed": 0.0,
-        "move_sound": 0.9472,
+        "well_formed": 0.9583,
+        "move_sound": 0.95,
         "verify_pass_draft1": 0.9417
       },
-      "coherence": 0.3583,
-      "flat_rate": 0.6
+      "coherence": 0.2294,
+      "flat_rate": 0.4128
     },
     "gpt": {
       "instr_rank": 2.128,
@@ -333,44 +333,11 @@
         "n": 360
       },
       "move_grade": 9.5,
-      "tier_fit": 0.425,
+      "tier_fit": 0.4944,
       "tier_fit_by_tier": {
-        "beginner": 0.2833,
-        "intermediate": 0.45,
-        "advanced": 0.5417
-      },
-      "move_sound": 1.0,
-      "distinct": {
-        "differentiating_n": 100,
-        "distinct_rate": 0.22,
-        "collapsed_BA": 78
-      },
-      "gate": {
-        "gated": false,
-        "n": 360,
-        "no_engine_speak": 1.0,
-        "well_formed": 0.0,
-        "move_sound": 0.9806,
-        "verify_pass_draft1": 0.9667
-      },
-      "coherence": 0.4417,
-      "flat_rate": 0.6917
-    },
-    "claude": {
-      "instr_rank": 3.587,
-      "instr_grade": 6.99,
-      "instr_grade_ci95": {
-        "mean": 6.993,
-        "ci_lo": 6.833,
-        "ci_hi": 7.161,
-        "n": 360
-      },
-      "move_grade": 9.3,
-      "tier_fit": 0.4528,
-      "tier_fit_by_tier": {
-        "beginner": 0.2917,
-        "intermediate": 0.475,
-        "advanced": 0.5917
+        "beginner": 0.4,
+        "intermediate": 0.525,
+        "advanced": 0.5583
       },
       "move_sound": 1.0,
       "distinct": {
@@ -382,12 +349,45 @@
         "gated": false,
         "n": 360,
         "no_engine_speak": 1.0,
-        "well_formed": 0.0,
-        "move_sound": 0.9667,
-        "verify_pass_draft1": 0.95
+        "well_formed": 1.0,
+        "move_sound": 1.0,
+        "verify_pass_draft1": 0.9861
       },
-      "coherence": 0.3917,
-      "flat_rate": 0.6917
+      "coherence": 0.3417,
+      "flat_rate": 0.6083
+    },
+    "claude": {
+      "instr_rank": 3.587,
+      "instr_grade": 6.99,
+      "instr_grade_ci95": {
+        "mean": 6.993,
+        "ci_lo": 6.833,
+        "ci_hi": 7.161,
+        "n": 360
+      },
+      "move_grade": 9.3,
+      "tier_fit": 0.5083,
+      "tier_fit_by_tier": {
+        "beginner": 0.3583,
+        "intermediate": 0.5083,
+        "advanced": 0.6583
+      },
+      "move_sound": 1.0,
+      "distinct": {
+        "differentiating_n": 100,
+        "distinct_rate": 0.2,
+        "collapsed_BA": 80
+      },
+      "gate": {
+        "gated": false,
+        "n": 360,
+        "no_engine_speak": 1.0,
+        "well_formed": 1.0,
+        "move_sound": 1.0,
+        "verify_pass_draft1": 0.9444
+      },
+      "coherence": 0.3083,
+      "flat_rate": 0.7917
     },
     "gemini": {
       "instr_rank": 3.538,
@@ -399,34 +399,34 @@
         "n": 360
       },
       "move_grade": 9.38,
-      "tier_fit": 0.5028,
+      "tier_fit": 0.5528,
       "tier_fit_by_tier": {
-        "beginner": 0.3083,
-        "intermediate": 0.5167,
-        "advanced": 0.6833
+        "beginner": 0.3917,
+        "intermediate": 0.5917,
+        "advanced": 0.675
       },
       "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.27,
-        "collapsed_BA": 73
+        "distinct_rate": 0.21,
+        "collapsed_BA": 79
       },
       "gate": {
         "gated": false,
         "n": 360,
-        "no_engine_speak": 1.0,
-        "well_formed": 0.0,
-        "move_sound": 0.9806,
-        "verify_pass_draft1": 0.9611
+        "no_engine_speak": 0.9972,
+        "well_formed": 1.0,
+        "move_sound": 1.0,
+        "verify_pass_draft1": 0.9583
       },
-      "coherence": 0.3667,
-      "flat_rate": 0.7
+      "coherence": 0.2917,
+      "flat_rate": 0.7583
     }
   },
   "vs_frontier_candidates": [
     {
       "pos_id": "0bFEeDLi_49",
-      "best_frontier": "claude",
+      "best_frontier": "gpt",
       "diverge_tiers": [
         "advanced"
       ],
@@ -489,28 +489,6 @@
       }
     },
     {
-      "pos_id": "2nU30OSl_96",
-      "best_frontier": "gemini",
-      "diverge_tiers": [
-        "intermediate",
-        "advanced"
-      ],
-      "ours_moat": [
-        1,
-        3
-      ],
-      "frontier_moat": [
-        2,
-        3
-      ],
-      "verdict": "loss",
-      "ours_moves": {
-        "beginner": "d3d2",
-        "intermediate": "f4f3",
-        "advanced": "c8h8"
-      }
-    },
-    {
       "pos_id": "3ScuG09o_76",
       "best_frontier": "gpt",
       "diverge_tiers": [
@@ -532,46 +510,23 @@
       }
     },
     {
-      "pos_id": "40XRvJ1w_25",
-      "best_frontier": "gpt",
+      "pos_id": "4TNaTWzi_20",
+      "best_frontier": "gemini",
       "diverge_tiers": [
-        "beginner",
-        "intermediate"
+        "beginner"
       ],
       "ours_moat": [
         3,
         3
       ],
       "frontier_moat": [
-        1,
+        2,
         3
       ],
       "verdict": "win",
       "ours_moves": {
-        "beginner": "g3g4",
-        "intermediate": "g3g4",
-        "advanced": "g3e3"
-      }
-    },
-    {
-      "pos_id": "4TNaTWzi_20",
-      "best_frontier": "gemini",
-      "diverge_tiers": [
-        "beginner",
-        "intermediate"
-      ],
-      "ours_moat": [
-        2,
-        3
-      ],
-      "frontier_moat": [
-        2,
-        3
-      ],
-      "verdict": "tie",
-      "ours_moves": {
         "beginner": "h2e5",
-        "intermediate": "g8f6",
+        "intermediate": "d7d6",
         "advanced": "d7d6"
       }
     },
@@ -598,10 +553,8 @@
     },
     {
       "pos_id": "5TMN85VF_61",
-      "best_frontier": "gpt",
+      "best_frontier": "gemini",
       "diverge_tiers": [
-        "beginner",
-        "intermediate",
         "advanced"
       ],
       "ours_moat": [
@@ -609,7 +562,7 @@
         3
       ],
       "frontier_moat": [
-        0,
+        1,
         3
       ],
       "verdict": "win",
@@ -708,24 +661,23 @@
     },
     {
       "pos_id": "9l1xiq6Z_91",
-      "best_frontier": "gemini",
+      "best_frontier": "gpt",
       "diverge_tiers": [
-        "beginner",
         "advanced"
       ],
       "ours_moat": [
-        2,
+        3,
         3
       ],
       "frontier_moat": [
         2,
         3
       ],
-      "verdict": "tie",
+      "verdict": "win",
       "ours_moves": {
         "beginner": "h4h5",
         "intermediate": "h4h5",
-        "advanced": "b6b7"
+        "advanced": "f2f3"
       }
     },
     {
@@ -772,15 +724,35 @@
       }
     },
     {
+      "pos_id": "CN1js9Yd_32",
+      "best_frontier": "gpt",
+      "diverge_tiers": [
+        "advanced"
+      ],
+      "ours_moat": [
+        3,
+        3
+      ],
+      "frontier_moat": [
+        2,
+        3
+      ],
+      "verdict": "win",
+      "ours_moves": {
+        "beginner": "c8d7",
+        "intermediate": "c8d7",
+        "advanced": "g8g7"
+      }
+    },
+    {
       "pos_id": "CfXcDPTj_17",
       "best_frontier": "gpt",
       "diverge_tiers": [
         "beginner",
-        "intermediate",
-        "advanced"
+        "intermediate"
       ],
       "ours_moat": [
-        2,
+        3,
         3
       ],
       "frontier_moat": [
@@ -791,7 +763,28 @@
       "ours_moves": {
         "beginner": "g5e7",
         "intermediate": "g5e7",
-        "advanced": "h1g1"
+        "advanced": "e1c1"
+      }
+    },
+    {
+      "pos_id": "G15p1K8u_45",
+      "best_frontier": "gpt",
+      "diverge_tiers": [
+        "beginner"
+      ],
+      "ours_moat": [
+        3,
+        3
+      ],
+      "frontier_moat": [
+        2,
+        3
+      ],
+      "verdict": "win",
+      "ours_moves": {
+        "beginner": "b1a1",
+        "intermediate": "b1a1",
+        "advanced": "c2a2"
       }
     },
     {
@@ -840,42 +833,41 @@
       }
     },
     {
-      "pos_id": "H2FP2Kn0_82",
+      "pos_id": "HF8jqo1b_71",
       "best_frontier": "gpt",
       "diverge_tiers": [
         "advanced"
       ],
       "ours_moat": [
-        3,
+        2,
         3
       ],
       "frontier_moat": [
-        2,
+        1,
         3
       ],
       "verdict": "win",
       "ours_moves": {
-        "beginner": "h4h3",
-        "intermediate": "h4h3",
-        "advanced": "b6c5"
+        "beginner": "b7d6",
+        "intermediate": "b7d6",
+        "advanced": "b3a4"
       }
     },
     {
       "pos_id": "HJWKJMZ1_124",
-      "best_frontier": "gpt",
+      "best_frontier": "claude",
       "diverge_tiers": [
-        "beginner",
-        "intermediate"
+        "advanced"
       ],
       "ours_moat": [
         2,
         3
       ],
       "frontier_moat": [
-        0,
+        2,
         3
       ],
-      "verdict": "win",
+      "verdict": "tie",
       "ours_moves": {
         "beginner": "h5g5",
         "intermediate": "h5g5",
@@ -886,15 +878,14 @@
       "pos_id": "Hqi40pr7_83",
       "best_frontier": "gpt",
       "diverge_tiers": [
-        "beginner",
-        "intermediate"
+        "beginner"
       ],
       "ours_moat": [
         3,
         3
       ],
       "frontier_moat": [
-        1,
+        2,
         3
       ],
       "verdict": "win",
@@ -902,27 +893,6 @@
         "beginner": "a7a6",
         "intermediate": "a7a6",
         "advanced": "h4h5"
-      }
-    },
-    {
-      "pos_id": "HxV3s1Gk_68",
-      "best_frontier": "gemini",
-      "diverge_tiers": [
-        "advanced"
-      ],
-      "ours_moat": [
-        2,
-        3
-      ],
-      "frontier_moat": [
-        3,
-        1
-      ],
-      "verdict": "loss",
-      "ours_moves": {
-        "beginner": "d1g4",
-        "intermediate": "d1g4",
-        "advanced": "d1b3"
       }
     },
     {
@@ -992,6 +962,91 @@
       }
     },
     {
+      "pos_id": "IftC87Bi_26",
+      "best_frontier": "gpt",
+      "diverge_tiers": [
+        "beginner",
+        "advanced"
+      ],
+      "ours_moat": [
+        2,
+        3
+      ],
+      "frontier_moat": [
+        2,
+        3
+      ],
+      "verdict": "tie",
+      "ours_moves": {
+        "beginner": "c8b7",
+        "intermediate": "e6e5",
+        "advanced": "a7a5"
+      }
+    },
+    {
+      "pos_id": "L3FdBrfH_82",
+      "best_frontier": "claude",
+      "diverge_tiers": [
+        "advanced"
+      ],
+      "ours_moat": [
+        3,
+        3
+      ],
+      "frontier_moat": [
+        2,
+        3
+      ],
+      "verdict": "win",
+      "ours_moves": {
+        "beginner": "b2c2",
+        "intermediate": "b2c2",
+        "advanced": "e3e6"
+      }
+    },
+    {
+      "pos_id": "N25dy6eP_22",
+      "best_frontier": "gpt",
+      "diverge_tiers": [
+        "beginner"
+      ],
+      "ours_moat": [
+        3,
+        3
+      ],
+      "frontier_moat": [
+        2,
+        3
+      ],
+      "verdict": "win",
+      "ours_moves": {
+        "beginner": "c6d4",
+        "intermediate": "f6d5",
+        "advanced": "f6d5"
+      }
+    },
+    {
+      "pos_id": "NxmDDPKw_97",
+      "best_frontier": "claude",
+      "diverge_tiers": [
+        "beginner"
+      ],
+      "ours_moat": [
+        3,
+        3
+      ],
+      "frontier_moat": [
+        2,
+        3
+      ],
+      "verdict": "win",
+      "ours_moves": {
+        "beginner": "d7c7",
+        "intermediate": "d7e6",
+        "advanced": "d7e6"
+      }
+    },
+    {
       "pos_id": "O3Z4i5l3_21",
       "best_frontier": "gpt",
       "diverge_tiers": [
@@ -1014,10 +1069,8 @@
     },
     {
       "pos_id": "OQOnBClq_74",
-      "best_frontier": "gpt",
+      "best_frontier": "gemini",
       "diverge_tiers": [
-        "beginner",
-        "intermediate",
         "advanced"
       ],
       "ours_moat": [
@@ -1025,7 +1078,7 @@
         3
       ],
       "frontier_moat": [
-        0,
+        2,
         3
       ],
       "verdict": "win",
@@ -1039,7 +1092,6 @@
       "pos_id": "P8kFy28M_82",
       "best_frontier": "gemini",
       "diverge_tiers": [
-        "beginner",
         "intermediate"
       ],
       "ours_moat": [
@@ -1047,10 +1099,10 @@
         3
       ],
       "frontier_moat": [
-        2,
+        3,
         3
       ],
-      "verdict": "tie",
+      "verdict": "loss",
       "ours_moves": {
         "beginner": "h3h5",
         "intermediate": "a7a6",
@@ -1059,31 +1111,9 @@
     },
     {
       "pos_id": "RLQsvOPk_63",
-      "best_frontier": "gpt",
-      "diverge_tiers": [
-        "beginner",
-        "intermediate"
-      ],
-      "ours_moat": [
-        2,
-        3
-      ],
-      "frontier_moat": [
-        1,
-        3
-      ],
-      "verdict": "win",
-      "ours_moves": {
-        "beginner": "f2f8",
-        "intermediate": "g5d5",
-        "advanced": "f2g2"
-      }
-    },
-    {
-      "pos_id": "Vh3Bgu6J_26",
       "best_frontier": "claude",
       "diverge_tiers": [
-        "beginner"
+        "advanced"
       ],
       "ours_moat": [
         3,
@@ -1095,29 +1125,28 @@
       ],
       "verdict": "win",
       "ours_moves": {
-        "beginner": "c5c4",
-        "intermediate": "e7c6",
-        "advanced": "e7c6"
+        "beginner": "f2f8",
+        "intermediate": "f2f8",
+        "advanced": "f2g2"
       }
     },
     {
       "pos_id": "W2CgXQvS_25",
       "best_frontier": "gpt",
       "diverge_tiers": [
-        "beginner",
         "intermediate"
       ],
       "ours_moat": [
-        2,
+        3,
         3
       ],
       "frontier_moat": [
-        1,
+        2,
         3
       ],
       "verdict": "win",
       "ours_moves": {
-        "beginner": "c2c3",
+        "beginner": "f1c4",
         "intermediate": "f1c4",
         "advanced": "f3e4"
       }
@@ -1144,31 +1173,8 @@
       }
     },
     {
-      "pos_id": "X3oP16d0_23",
-      "best_frontier": "gemini",
-      "diverge_tiers": [
-        "beginner",
-        "intermediate",
-        "advanced"
-      ],
-      "ours_moat": [
-        1,
-        3
-      ],
-      "frontier_moat": [
-        1,
-        3
-      ],
-      "verdict": "tie",
-      "ours_moves": {
-        "beginner": "f1e1",
-        "intermediate": "c1e3",
-        "advanced": "b1d2"
-      }
-    },
-    {
       "pos_id": "Y2be1abe_39",
-      "best_frontier": "gemini",
+      "best_frontier": "claude",
       "diverge_tiers": [
         "advanced"
       ],
@@ -1178,7 +1184,7 @@
       ],
       "frontier_moat": [
         3,
-        2
+        3
       ],
       "verdict": "loss",
       "ours_moves": {
@@ -1188,24 +1194,26 @@
       }
     },
     {
-      "pos_id": "ZzqcH3u2_37",
-      "best_frontier": "gemini",
+      "pos_id": "ZNWZX66g_82",
+      "best_frontier": "gpt",
       "diverge_tiers": [
+        "beginner",
+        "intermediate",
         "advanced"
       ],
       "ours_moat": [
-        2,
+        3,
         3
       ],
       "frontier_moat": [
-        3,
-        2
+        0,
+        3
       ],
-      "verdict": "loss",
+      "verdict": "win",
       "ours_moves": {
-        "beginner": "e3h3",
-        "intermediate": "e3h3",
-        "advanced": "e3e8"
+        "beginner": "h4h6",
+        "intermediate": "h4h8",
+        "advanced": "h4h8"
       }
     },
     {
@@ -1296,19 +1304,20 @@
     },
     {
       "pos_id": "ecFBXWVP_30",
-      "best_frontier": "gemini",
+      "best_frontier": "gpt",
       "diverge_tiers": [
-        "beginner"
+        "intermediate",
+        "advanced"
       ],
       "ours_moat": [
         2,
         3
       ],
       "frontier_moat": [
-        1,
+        2,
         3
       ],
-      "verdict": "win",
+      "verdict": "tie",
       "ours_moves": {
         "beginner": "g8e7",
         "intermediate": "g7g5",
@@ -1317,11 +1326,9 @@
     },
     {
       "pos_id": "ei4CMzmH_18",
-      "best_frontier": "gpt",
+      "best_frontier": "claude",
       "diverge_tiers": [
-        "beginner",
-        "intermediate",
-        "advanced"
+        "beginner"
       ],
       "ours_moat": [
         2,
@@ -1361,8 +1368,30 @@
       }
     },
     {
-      "pos_id": "gY86xzy2_46",
-      "best_frontier": "claude",
+      "pos_id": "fp7ecqov_26",
+      "best_frontier": "gpt",
+      "diverge_tiers": [
+        "beginner",
+        "intermediate"
+      ],
+      "ours_moat": [
+        3,
+        3
+      ],
+      "frontier_moat": [
+        1,
+        3
+      ],
+      "verdict": "win",
+      "ours_moves": {
+        "beginner": "a8b8",
+        "intermediate": "a8b8",
+        "advanced": "e8g8"
+      }
+    },
+    {
+      "pos_id": "js1rm4cM_24",
+      "best_frontier": "gpt",
       "diverge_tiers": [
         "intermediate",
         "advanced"
@@ -1372,31 +1401,10 @@
         3
       ],
       "frontier_moat": [
-        2,
+        1,
         3
       ],
-      "verdict": "tie",
-      "ours_moves": {
-        "beginner": "h7f6",
-        "intermediate": "f8b8",
-        "advanced": "f8b8"
-      }
-    },
-    {
-      "pos_id": "js1rm4cM_24",
-      "best_frontier": "gemini",
-      "diverge_tiers": [
-        "intermediate"
-      ],
-      "ours_moat": [
-        2,
-        3
-      ],
-      "frontier_moat": [
-        2,
-        3
-      ],
-      "verdict": "tie",
+      "verdict": "win",
       "ours_moves": {
         "beginner": "d7d5",
         "intermediate": "e7e8",
@@ -1433,7 +1441,7 @@
         "advanced"
       ],
       "ours_moat": [
-        2,
+        3,
         3
       ],
       "frontier_moat": [
@@ -1443,8 +1451,30 @@
       "verdict": "win",
       "ours_moves": {
         "beginner": "b4b3",
-        "intermediate": "c4c3",
+        "intermediate": "b4b3",
         "advanced": "h7h6"
+      }
+    },
+    {
+      "pos_id": "n04zDaur_40",
+      "best_frontier": "claude",
+      "diverge_tiers": [
+        "beginner",
+        "intermediate"
+      ],
+      "ours_moat": [
+        1,
+        3
+      ],
+      "frontier_moat": [
+        1,
+        3
+      ],
+      "verdict": "tie",
+      "ours_moves": {
+        "beginner": "h8f8",
+        "intermediate": "f6e8",
+        "advanced": "d6f7"
       }
     },
     {
@@ -1466,49 +1496,6 @@
         "beginner": "e4d3",
         "intermediate": "e4f3",
         "advanced": "e4f3"
-      }
-    },
-    {
-      "pos_id": "ngs9hZ9J_72",
-      "best_frontier": "gpt",
-      "diverge_tiers": [
-        "beginner",
-        "intermediate"
-      ],
-      "ours_moat": [
-        3,
-        3
-      ],
-      "frontier_moat": [
-        1,
-        3
-      ],
-      "verdict": "win",
-      "ours_moves": {
-        "beginner": "d5g5",
-        "intermediate": "d5g5",
-        "advanced": "h6h5"
-      }
-    },
-    {
-      "pos_id": "oLdDxFMB_92",
-      "best_frontier": "claude",
-      "diverge_tiers": [
-        "advanced"
-      ],
-      "ours_moat": [
-        2,
-        3
-      ],
-      "frontier_moat": [
-        3,
-        3
-      ],
-      "verdict": "loss",
-      "ours_moves": {
-        "beginner": "e6d6",
-        "intermediate": "e6d6",
-        "advanced": "b3b2"
       }
     },
     {
@@ -1572,6 +1559,27 @@
         "beginner": "d7d5",
         "intermediate": "f8e8",
         "advanced": "f8e8"
+      }
+    },
+    {
+      "pos_id": "tI9HZsmm_21",
+      "best_frontier": "gpt",
+      "diverge_tiers": [
+        "beginner"
+      ],
+      "ours_moat": [
+        3,
+        3
+      ],
+      "frontier_moat": [
+        2,
+        3
+      ],
+      "verdict": "win",
+      "ours_moves": {
+        "beginner": "d2c4",
+        "intermediate": "f1d3",
+        "advanced": "f1d3"
       }
     },
     {
@@ -1641,9 +1649,8 @@
     },
     {
       "pos_id": "wWjmxYo3_32",
-      "best_frontier": "claude",
+      "best_frontier": "gpt",
       "diverge_tiers": [
-        "beginner",
         "intermediate"
       ],
       "ours_moat": [
@@ -1711,16 +1718,16 @@
         "beginner"
       ],
       "ours_moat": [
-        1,
+        2,
         3
       ],
       "frontier_moat": [
         1,
         3
       ],
-      "verdict": "tie",
+      "verdict": "win",
       "ours_moves": {
-        "beginner": "h4h5",
+        "beginner": "g4g5",
         "intermediate": "f1a1",
         "advanced": "f1a1"
       }

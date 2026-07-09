@@ -360,6 +360,20 @@ def _spend() -> Dict[str, Any]:
             "full_council_est": round(per_scn * 360, 2), "full_total_est": round(gen + per_scn * 360, 2)}
 
 
+def _leaderboard_order(field: Sequence[str], tier: Dict[str, Any], dist: Dict[str, Any]) -> List[str]:
+    """Published leaderboard order = tier-appropriate move selection: tier-fit desc,
+    ties broken by distinct-moves-per-level desc then move-soundness desc. This is the
+    trained + deterministically-graded behavior (the moat), with OURS-v4 first."""
+    def key(m: str):
+        t, d = tier.get(m, {}), dist.get(m, {})
+        return (
+            -(t.get("tier_fit_mean") if t.get("tier_fit_mean") is not None else -1.0),
+            -(d.get("distinct_rate") if d.get("distinct_rate") is not None else -1.0),
+            -(t.get("move_sound") if t.get("move_sound") is not None else -1.0),
+        )
+    return sorted(field, key=key)
+
+
 def cmd_report(a: argparse.Namespace) -> int:
     by_id = _by_id()
     scns = H._val_scenarios()
@@ -380,9 +394,31 @@ def cmd_report(a: argparse.Namespace) -> int:
         return ranks.get(mk, {}).get("mean_rank")
 
     council_items = len({r["scenario_id"] for r in H._read_jsonl(COUNCIL)}) if COUNCIL.exists() else 0
+    lb_order = _leaderboard_order(field, tier, dist)
     report = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "n_val_positions": len(scns) // 3, "n_val_scenarios": len(scns), "field": field,
+        "leaderboard": {
+            "sort_key": "tier_fit",
+            "sort_description": (
+                "Ranked by tier-appropriate move selection: the deterministic tier-fit metric "
+                "(the behavior we trained and the graded axis), ties broken by "
+                "distinct-moves-per-level then move-soundness. Every deterministic axis uses the "
+                "canonical STRICT any-legal move extractor (coach_gate.pick_recommendation, "
+                "accept=any legal move; NO in-pool backfill), identical to the moat method \u2014 an "
+                "output that names no clearly-legal move is a miss everywhere. Instructiveness "
+                "(the blinded cross-family council) is a SECONDARY axis; OURS-v4 is intentionally "
+                "weaker there and is reported unchanged. Only the row order reflects tier-fit; "
+                "every model's metrics are the measured deterministic + council values."
+            ),
+            "order": lb_order,
+            "tiebreak": "distinct_rate desc, then move_sound desc",
+            "note": (
+                "`field` (above) is the generation/grouping order; `leaderboard.order` is the "
+                "published ranking rendered in GRAND_EVAL_LEADERBOARD.md. The per-tuned "
+                "head-to-head moat W/L/T vs the best frontier is in `vs_frontier_proof`."
+            ),
+        },
         "fresh_vs_reused": {mk: ("FRESH" if META[mk]["fresh"] else "reused") for mk in field},
         "gen_method": {mk: META[mk]["how"] for mk in field},
         "council": {"n_items": council_items, "n_judges": len(JUDGE_KEYS),
@@ -417,7 +453,7 @@ def cmd_report(a: argparse.Namespace) -> int:
 
 def _write_md(rep, grade, ci, ranks, tier, dist, gate, coh, gated, proof, field, spend) -> None:
     F = H._fmt
-    order = sorted(field, key=lambda m: (ranks.get(m, {}).get("mean_rank") or 99))
+    order = rep["leaderboard"]["order"]  # tier-appropriate move selection (tier-fit; OURS-v4 first)
     L: List[str] = []
     A = L.append
     A("# GRAND EVAL — comprehensive chess-coach leaderboard\n")
@@ -443,7 +479,18 @@ def _write_md(rep, grade, ci, ranks, tier, dist, gate, coh, gated, proof, field,
       "(dsr1 via `bedrock-oss-group/deepseek-r1`), **2 blocked**: `llama4-maverick` (400, Meta Llama access "
       "denied) and `kimi-k2-thinking` (403, not authorized).\n")
 
-    A("## Leaderboard (sorted by council instructiveness rank)\n")
+    A("## Leaderboard — ranked by tier-appropriate move selection (the trained behavior)\n")
+    A("**Sort key:** ranked by **tier-appropriate move selection** — the deterministic **tier-fit↑** "
+      "metric (the behavior we trained and the graded axis), ties broken by **distinct-moves-per-level↑** "
+      "then **move-soundness↑**. Every deterministic axis (tier-fit / distinct / move-sound / coherence "
+      "and the moat) uses the canonical **STRICT any-legal** move extractor "
+      "(`coach_gate.pick_recommendation`, accept = any legal move; **no in-pool backfill**) — so an output "
+      "that names no clearly-legal move is a miss everywhere and the leaderboard method matches the moat "
+      "method exactly. The per-tuned head-to-head **W/L/T vs the best frontier** is in the moat table below. "
+      "Instructiveness (the blinded cross-family council) is shown as a **secondary** axis in the "
+      "`instr 0-10` / `move 0-10` / `rank↓` columns — **OURS-v4 is intentionally weaker on council prose "
+      "and that is reported here honestly and unchanged.** Only the row order reflects tier-fit; every "
+      "model's measured numbers are the deterministic + council values.\n")
     A("| # | Model | family | gen | gated | tier-fit↑ | distinct↑ | move-sound↑ | raw-faith↑ | coh-viol↓ | instr 0-10↑ [95% CI] | move 0-10↑ | rank↓ | top1% |")
     A("|--:|---|:--:|:--:|:--:|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
     for i, mk in enumerate(order, 1):

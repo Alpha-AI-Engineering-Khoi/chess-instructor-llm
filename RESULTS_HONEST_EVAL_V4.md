@@ -6,16 +6,16 @@ The definitive base-vs-tuned eval, re-centered on the **32B v4** adapter. Every 
 
 ## Headline — did the 32B (v4) REGRESS vs the 4B (iter1)?
 
-**Verdict: OURS-v4 trails OURS-4B on a core axis (see table).** 32B ≫ 4B: tier-fit Δ 0.404, distinct-moves Δ 0.490; 51W / 5L / 6T vs the best frontier on the moat.
+**Verdict: OURS-v4 trails OURS-4B on a core axis (see table).** 32B ≫ 4B: tier-fit Δ 0.369, distinct-moves Δ 0.505; 51W / 5L / 6T vs the best frontier on the moat.
 
 **Core moat + instructiveness axes:**
 
 | axis | OURS-v4 (32B) | OURS-4B | Δ (v4−4b) | better | v4 not worse |
 |---|---:|---:|---:|:--:|:--:|
-| tier_fit_mean | 0.79 | 0.386 | 0.404 | higher↑ | yes |
-| distinct_moves_per_level | 0.75 | 0.260 | 0.490 | higher↑ | yes |
+| tier_fit_mean | 0.767 | 0.397 | 0.369 | higher↑ | yes |
+| distinct_moves_per_level | 0.785 | 0.280 | 0.505 | higher↑ | yes |
 | instr_council_rank | 6.076 | 5.622 | 0.454 | lower↓ | NO |
-| coherence_violation_rate | 0.142 | 0.342 | -0.200 | lower↓ | yes |
+| coherence_violation_rate | 0.140 | 0.325 | -0.185 | lower↓ | yes |
 | instr_grade_0_10 | 4.670 | 5.320 | -0.650 | higher↑ | NO |
 
 **Shared gate floor** (BOTH models through the shipped verify-and-regenerate gate; so move-soundness/well-formedness equalize — a fairness floor, not a differentiator):
@@ -26,28 +26,28 @@ The definitive base-vs-tuned eval, re-centered on the **32B v4** adapter. Every 
 | well_formed_gated | 1.000 | 1.000 | 0.000 | shared floor ~100% |
 | no_engine_speak_gated | 0.983 | 1.000 | -0.017 | 32B slips ~2% (still > v3 95.6%); negligible |
 
-**vs untuned 32B base (`q3_32b`):** tier-fit Δ 0.448, instr-rank Δ 0.257 (neg=better), distinct Δ 0.450, instr-grade Δ -0.550.
-**vs best prompt-base on this slice (`pbase_4b`):** instr-rank Δ -0.920 (neg=better), tier-fit Δ 0.440. (The 32B prompt-base was shown to lose to the 32B tune on the prior slice — see `RESULTS_HONEST_EVAL.md` litmus [32b].)
+**vs untuned 32B base (`q3_32b`):** tier-fit Δ 0.419, instr-rank Δ 0.257 (neg=better), distinct Δ 0.495, instr-grade Δ -0.550.
+**vs best prompt-base on this slice (`pbase_4b`):** instr-rank Δ -0.920 (neg=better), tier-fit Δ 0.389. (The 32B prompt-base was shown to lose to the 32B tune on the prior slice — see `RESULTS_HONEST_EVAL.md` litmus [32b].)
 
 **Distance to frontier:** best frontier = gpt (instr rank 2.128); OURS-v4 rank 6.076; gap = 3.948 rank positions.
 
 ## vs-frontier + distinct-tier PROOF
 
-Of **120** val positions, OURS-v4 gives distinct, sound, correctly-graded per-tier moves on **68**; of those it also DIVERGES from the best frontier model's move on **62**. On that proof set: **51 wins / 5 losses / 6 ties** for OURS-v4 on the MOAT (tier-fit then soundness) vs the best-moat frontier at each position — the same win definition the platform uses (`assemble.derive_wins`). Instructiveness (where the frontier leads) is reported separately above with CIs; it is NOT folded into this moat proof.
+Of **120** val positions, OURS-v4 gives distinct, sound, correctly-graded per-tier moves on **67**; of those it also DIVERGES from the best frontier model's move on **62**. On that proof set: **51 wins / 5 losses / 6 ties** for OURS-v4 on the MOAT (tier-fit then soundness) vs the best-moat frontier at each position — the same win definition the platform uses (`assemble.derive_wins`). Instructiveness (where the frontier leads) is reported separately above with CIs; it is NOT folded into this moat proof.
 
 ## Leaderboard (v4-centered VAL field)
 
 | Model | gated | tier-fit↑ | instr rank↓ | instr 0-10↑ | move 0-10↑ | move-sound↑ | distinct↑ | coh-viol↓ |
 |---|:--:|---:|---:|---:|---:|---:|---:|---:|
-| GPT-5.5 | reuse | 0.425 | 2.128 | 8.060 | 9.500 | 1.000 | 0.220 | 0.442 |
-| Gemini 3.1 Pro | reuse | 0.503 | 3.538 | 7.160 | 9.380 | 1.000 | 0.270 | 0.367 |
-| Claude Opus 4.8 | reuse | 0.453 | 3.587 | 6.990 | 9.300 | 1.000 | 0.280 | 0.392 |
-| OURS-v3 (Qwen3-32B tuned, prior) | reuse | 0.525 | 4.100 | 6.350 | 8.630 | 1.000 | 0.310 | 0.358 |
-| OURS-4B (Qwen3-4B tuned) | yes | 0.386 | 5.622 | 5.320 | 8.970 | 1.000 | 0.260 | 0.342 |
-| BASE (Qwen3-32B untuned) | reuse | 0.342 | 5.819 | 5.220 | 9.010 | 0.992 | 0.300 | 0.492 |
-| OURS-v4 (Qwen3-32B tuned) | reuse | 0.79 | 6.076 | 4.670 | 7.900 | 0.986 | 0.75 | 0.142 |
-| PROMPT-BASE-4B (Qwen3-4B engineered) | yes | 0.350 | 6.996 | 4.220 | 8.790 | 1.000 | 0.460 | 0.392 |
-| BASE-4B (Qwen3-4B untuned) | yes | 0.347 | 7.133 | 4.110 | 8.780 | 1.000 | 0.220 | 0.392 |
+| GPT-5.5 | reuse | 0.494 | 2.128 | 8.060 | 9.500 | 1.000 | 0.280 | 0.342 |
+| Gemini 3.1 Pro | reuse | 0.553 | 3.538 | 7.160 | 9.380 | 1.000 | 0.210 | 0.292 |
+| Claude Opus 4.8 | reuse | 0.508 | 3.587 | 6.990 | 9.300 | 1.000 | 0.200 | 0.308 |
+| OURS-v3 (Qwen3-32B tuned, prior) | reuse | 0.558 | 4.100 | 6.350 | 8.630 | 0.950 | 0.585 | 0.229 |
+| OURS-4B (Qwen3-4B tuned) | yes | 0.397 | 5.622 | 5.320 | 8.970 | 1.000 | 0.280 | 0.325 |
+| BASE (Qwen3-32B untuned) | reuse | 0.347 | 5.819 | 5.220 | 9.010 | 1.000 | 0.290 | 0.500 |
+| OURS-v4 (Qwen3-32B tuned) | reuse | 0.767 | 6.076 | 4.670 | 7.900 | 0.942 | 0.785 | 0.140 |
+| PROMPT-BASE-4B (Qwen3-4B engineered) | yes | 0.378 | 6.996 | 4.220 | 8.790 | 1.000 | 0.460 | 0.333 |
+| BASE-4B (Qwen3-4B untuned) | yes | 0.353 | 7.133 | 4.110 | 8.780 | 1.000 | 0.230 | 0.375 |
 
 ## Instructiveness (blinded frontier council, 0-10) with 95% CI
 
@@ -69,12 +69,12 @@ Absolute instructiveness grade pooled over items, 95% cluster-bootstrap CI by it
 
 | Model | gated | no-engine-speak↑ | well-formed↑ | move-sound↑ | verify-pass draft1↑ | mean attempts | fallback↓ |
 |---|:--:|---:|---:|---:|---:|---:|---:|
-| GPT-5.5 | reuse | 1.000 | 0.000 | 0.981 | 0.967 | — | — |
-| Gemini 3.1 Pro | reuse | 1.000 | 0.000 | 0.981 | 0.961 | — | — |
-| Claude Opus 4.8 | reuse | 1.000 | 0.000 | 0.967 | 0.950 | — | — |
-| OURS-v3 (Qwen3-32B tuned, prior) | reuse | 0.964 | 0.000 | 0.947 | 0.942 | — | — |
+| GPT-5.5 | reuse | 1.000 | 1.000 | 1.000 | 0.986 | — | — |
+| Gemini 3.1 Pro | reuse | 0.997 | 1.000 | 1.000 | 0.958 | — | — |
+| Claude Opus 4.8 | reuse | 1.000 | 1.000 | 1.000 | 0.944 | — | — |
+| OURS-v3 (Qwen3-32B tuned, prior) | reuse | 0.964 | 0.958 | 0.950 | 0.942 | — | — |
 | OURS-4B (Qwen3-4B tuned) | yes | 1.000 | 1.000 | — | — | 1.194 | 0.008 |
-| BASE (Qwen3-32B untuned) | reuse | 0.992 | 1.000 | 0.992 | 0.950 | — | — |
+| BASE (Qwen3-32B untuned) | reuse | 0.992 | 1.000 | 1.000 | 0.950 | — | — |
 | OURS-v4 (Qwen3-32B tuned) | reuse | 0.978 | 0.956 | 0.942 | 0.589 | — | — |
 | PROMPT-BASE-4B (Qwen3-4B engineered) | yes | 1.000 | 1.000 | — | — | 1.167 | 0.003 |
 | BASE-4B (Qwen3-4B untuned) | yes | 1.000 | 1.000 | — | — | 1.156 | 0.000 |

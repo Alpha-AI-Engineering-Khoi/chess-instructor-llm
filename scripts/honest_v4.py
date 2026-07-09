@@ -456,19 +456,30 @@ def _instr_ci(field: Sequence[str], n_boot: int = 2000, seed: int = 20260708
 
 def _rec_by_model_pos_tier(field: Sequence[str], by_id: Dict[str, Dict[str, Any]]
                            ) -> Dict[str, Dict[str, Dict[str, Optional[str]]]]:
-    from scripts.divergence_analysis import extract_recommended_mode
+    """Canonical rec per (model, pos, tier): the coach's recommended move, RE-EXTRACTED
+    from ``output`` with the single STRICT any-legal extractor
+    (:func:`src.eval.evaluate.extract_recommended_move` ->
+    :func:`src.teacher.coach_gate.pick_recommendation`, ``accept`` = any legal move).
+
+    This is THE one canonical parser for every deterministic metric (tier-fit,
+    distinct-moves, coherence, and the head-to-head moat) and is byte-for-byte what
+    ``score_one`` records as ``rec_uci``. There is deliberately NO in-pool
+    "rescue"/backfill to the nearest sound move: an output that names no clearly-legal
+    move is a MISS (``None``) and is scored as a miss everywhere, so the leaderboard
+    method matches the moat method exactly. Re-extracting from ``output`` (rather than
+    trusting a possibly-stale stored ``rec_uci`` field) guarantees the report is
+    reproducible from the published generations.
+    """
+    from src.eval.evaluate import extract_recommended_move
     out: Dict[str, Dict[str, Dict[str, Optional[str]]]] = {mk: defaultdict(dict) for mk in field}
     for mk in field:
         for r in _read_jsonl(GEN_DIR / f"{mk}.jsonl"):
             scn = by_id.get(r["scenario_id"])
             if scn is None:
                 continue
-            rec = r.get("rec_uci")
-            if not rec:
-                board = chess.Board(scn["fen"])
-                _san, rec, _mode = extract_recommended_mode(
-                    r.get("output", ""), board, scn["sound_pool"], scn["student_move"].get("uci") or "")
-            out[mk][r["pos_id"]][scn["tier"]] = rec
+            _san, uci = extract_recommended_move(
+                r.get("output", ""), scn["fen"], scn["student_move"].get("uci") or "")
+            out[mk][r["pos_id"]][scn["tier"]] = uci
     return out
 
 
@@ -532,12 +543,14 @@ def _gate_metrics(field: Sequence[str], by_id: Dict[str, Dict[str, Any]]) -> Dic
         if ungated:  # measure the shipped-gate axes on the raw draft
             n = len(ungated)
             no_es = sum(1 for r in ungated if not find_engine_speak(r.get("output", "")))
-            well = sum(1 for r in ungated if r.get("rec_uci"))
-            snd = 0
-            verify_ok = 0
+            # well-formed / move-sound / verify are all read via the canonical STRICT
+            # extractor in score_one, not a possibly-stale stored rec_uci field.
+            well = snd = verify_ok = 0
             for r in ungated:
                 scn = by_id.get(r["scenario_id"])
                 s = _score(scn, r.get("output", "")) if scn else {}
+                if s.get("rec_uci"):
+                    well += 1
                 if s.get("move_sound"):
                     snd += 1
                 if scn and not s.get("fabricated"):

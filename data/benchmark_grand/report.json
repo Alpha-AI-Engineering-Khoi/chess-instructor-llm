@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-07-09T02:53:20.506315+00:00",
+  "generated_utc": "2026-07-09T07:56:23.763985+00:00",
   "n_val_positions": 120,
   "n_val_scenarios": 360,
   "field": [
@@ -26,26 +26,26 @@
   ],
   "leaderboard": {
     "sort_key": "tier_fit",
-    "sort_description": "Ranked by tier-appropriate move selection: deterministic tier-fit (the behavior we trained and graded), ties broken by distinct-moves-per-level then move-soundness. Instructiveness (the blinded cross-family council) is a SECONDARY axis; OURS-v4 is intentionally weaker there and is reported unchanged. Only the row order changed — every model's metrics are identical to the measured deterministic + council values.",
+    "sort_description": "Ranked by tier-appropriate move selection: the deterministic tier-fit metric (the behavior we trained and the graded axis), ties broken by distinct-moves-per-level then move-soundness. Every deterministic axis uses the canonical STRICT any-legal move extractor (coach_gate.pick_recommendation, accept=any legal move; NO in-pool backfill), identical to the moat method — an output that names no clearly-legal move is a miss everywhere. Instructiveness (the blinded cross-family council) is a SECONDARY axis; OURS-v4 is intentionally weaker there and is reported unchanged. Only the row order reflects tier-fit; every model's metrics are the measured deterministic + council values.",
     "order": [
       "ours_v4",
       "ours",
       "ours_v3",
-      "ours_v5",
       "gemini",
+      "ours_v5",
       "claude",
       "gpt",
       "dsr1",
-      "dsv32",
       "glm5",
+      "dsv32",
       "ours_4b",
+      "pbase_4b",
+      "base",
       "q3_32b",
       "llama33_70b",
-      "pbase_4b",
       "base_4b",
       "mistral3",
       "kimi25",
-      "base",
       "gemma3_27b",
       "q3_next80b"
     ],
@@ -137,29 +137,29 @@
   "vs_frontier_proof": {
     "ours": {
       "n_positions_total": 120,
-      "wins": 25,
+      "wins": 21,
       "losses": 17,
-      "ties": 6,
-      "n_distinct": 51,
-      "n_distinct_and_diverge": 48,
+      "ties": 5,
+      "n_distinct": 47,
+      "n_distinct_and_diverge": 43,
       "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
     },
     "ours_4b": {
       "n_positions_total": 120,
       "wins": 5,
-      "losses": 13,
+      "losses": 14,
       "ties": 4,
-      "n_distinct": 24,
-      "n_distinct_and_diverge": 22,
+      "n_distinct": 26,
+      "n_distinct_and_diverge": 23,
       "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
     },
     "ours_v3": {
       "n_positions_total": 120,
-      "wins": 23,
-      "losses": 10,
+      "wins": 22,
+      "losses": 13,
       "ties": 9,
-      "n_distinct": 46,
-      "n_distinct_and_diverge": 42,
+      "n_distinct": 47,
+      "n_distinct_and_diverge": 44,
       "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
     },
     "ours_v4": {
@@ -167,17 +167,17 @@
       "wins": 51,
       "losses": 5,
       "ties": 6,
-      "n_distinct": 68,
+      "n_distinct": 67,
       "n_distinct_and_diverge": 62,
       "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
     },
     "ours_v5": {
       "n_positions_total": 120,
-      "wins": 22,
-      "losses": 8,
-      "ties": 12,
-      "n_distinct": 45,
-      "n_distinct_and_diverge": 42,
+      "wins": 26,
+      "losses": 6,
+      "ties": 8,
+      "n_distinct": 43,
+      "n_distinct_and_diverge": 40,
       "criterion": "moat (tier-fit then soundness) vs the best-moat frontier; distinct = sound tier moves with beginner!=advanced and correct gradient"
     }
   },
@@ -196,28 +196,28 @@
         "n": 225
       },
       "move_grade": 7.25,
-      "tier_fit": 0.5444,
+      "tier_fit": 0.5361,
       "tier_fit_by_tier": {
         "beginner": 0.4583,
         "intermediate": 0.5417,
-        "advanced": 0.6333
+        "advanced": 0.6083
       },
-      "move_sound": 0.9333,
+      "move_sound": 0.8278,
       "distinct": {
-        "differentiating_n": 100,
-        "distinct_rate": 0.65,
-        "collapsed_BA": 35
+        "differentiating_n": 73,
+        "distinct_rate": 0.726,
+        "collapsed_BA": 20
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 0.9778,
-        "well_formed": 0.8972,
-        "move_sound": 0.8306,
+        "well_formed": 0.8611,
+        "move_sound": 0.8278,
         "verify_pass_draft1": 0.575
       },
-      "coherence": 0.3,
-      "flat_rate": 0.2583,
+      "coherence": 0.2597,
+      "flat_rate": 0.2078,
       "gated_soundness": {
         "n": 360,
         "gated_move_sound": 1.0,
@@ -240,17 +240,17 @@
         "n": 225
       },
       "move_grade": 7.66,
-      "tier_fit": 0.7917,
+      "tier_fit": 0.7667,
       "tier_fit_by_tier": {
-        "beginner": 0.75,
-        "intermediate": 0.7583,
-        "advanced": 0.8667
+        "beginner": 0.725,
+        "intermediate": 0.7333,
+        "advanced": 0.8417
       },
-      "move_sound": 0.9861,
+      "move_sound": 0.9417,
       "distinct": {
-        "differentiating_n": 100,
-        "distinct_rate": 0.75,
-        "collapsed_BA": 25
+        "differentiating_n": 93,
+        "distinct_rate": 0.7849,
+        "collapsed_BA": 20
       },
       "gate": {
         "gated": false,
@@ -260,8 +260,8 @@
         "move_sound": 0.9417,
         "verify_pass_draft1": 0.5889
       },
-      "coherence": 0.1417,
-      "flat_rate": 0.2917,
+      "coherence": 0.1402,
+      "flat_rate": 0.2523,
       "gated_soundness": {
         "n": 360,
         "gated_move_sound": 1.0,
@@ -284,28 +284,28 @@
         "n": 225
       },
       "move_grade": 8.54,
-      "tier_fit": 0.5667,
+      "tier_fit": 0.5583,
       "tier_fit_by_tier": {
         "beginner": 0.4583,
-        "intermediate": 0.5083,
+        "intermediate": 0.4833,
         "advanced": 0.7333
       },
-      "move_sound": 0.9778,
+      "move_sound": 0.95,
       "distinct": {
-        "differentiating_n": 100,
-        "distinct_rate": 0.57,
-        "collapsed_BA": 43
+        "differentiating_n": 94,
+        "distinct_rate": 0.5851,
+        "collapsed_BA": 39
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 0.9639,
-        "well_formed": 0.9694,
-        "move_sound": 0.9472,
+        "well_formed": 0.9583,
+        "move_sound": 0.95,
         "verify_pass_draft1": 0.9417
       },
-      "coherence": 0.275,
-      "flat_rate": 0.4083,
+      "coherence": 0.2294,
+      "flat_rate": 0.4128,
       "gated_soundness": {
         "n": 360,
         "gated_move_sound": 1.0,
@@ -328,28 +328,28 @@
         "n": 225
       },
       "move_grade": 8.05,
-      "tier_fit": 0.5694,
+      "tier_fit": 0.5778,
       "tier_fit_by_tier": {
-        "beginner": 0.7,
-        "intermediate": 0.6083,
-        "advanced": 0.4
+        "beginner": 0.725,
+        "intermediate": 0.6333,
+        "advanced": 0.375
       },
-      "move_sound": 0.9861,
+      "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.45,
-        "collapsed_BA": 55
+        "distinct_rate": 0.38,
+        "collapsed_BA": 62
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 1.0,
         "well_formed": 1.0,
-        "move_sound": 0.9861,
+        "move_sound": 1.0,
         "verify_pass_draft1": 0.6889
       },
       "coherence": 0.1667,
-      "flat_rate": 0.4417,
+      "flat_rate": 0.5167,
       "gated_soundness": {
         "n": 360,
         "gated_move_sound": 1.0,
@@ -372,17 +372,17 @@
         "n": 225
       },
       "move_grade": 8.93,
-      "tier_fit": 0.3861,
+      "tier_fit": 0.3972,
       "tier_fit_by_tier": {
-        "beginner": 0.3583,
-        "intermediate": 0.425,
+        "beginner": 0.375,
+        "intermediate": 0.4417,
         "advanced": 0.375
       },
       "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.26,
-        "collapsed_BA": 74
+        "distinct_rate": 0.28,
+        "collapsed_BA": 72
       },
       "gate": {
         "gated": true,
@@ -392,8 +392,8 @@
         "no_engine_speak": 1.0,
         "well_formed": 1.0
       },
-      "coherence": 0.3417,
-      "flat_rate": 0.675,
+      "coherence": 0.325,
+      "flat_rate": 0.6583,
       "gated_soundness": {
         "n": 360,
         "gated_move_sound": 1.0,
@@ -416,28 +416,28 @@
         "n": 225
       },
       "move_grade": 8.95,
-      "tier_fit": 0.3556,
+      "tier_fit": 0.3583,
       "tier_fit_by_tier": {
         "beginner": 0.325,
         "intermediate": 0.4,
-        "advanced": 0.3417
+        "advanced": 0.35
       },
       "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.26,
-        "collapsed_BA": 74
+        "distinct_rate": 0.25,
+        "collapsed_BA": 75
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 0.9917,
-        "well_formed": 0.9944,
-        "move_sound": 0.9944,
+        "well_formed": 1.0,
+        "move_sound": 1.0,
         "verify_pass_draft1": 0.9389
       },
-      "coherence": 0.45,
-      "flat_rate": 0.5917,
+      "coherence": 0.4417,
+      "flat_rate": 0.6,
       "gated_soundness": null
     },
     "base": {
@@ -454,28 +454,28 @@
         "n": 225
       },
       "move_grade": 6.95,
-      "tier_fit": 0.3028,
+      "tier_fit": 0.3583,
       "tier_fit_by_tier": {
-        "beginner": 0.4083,
-        "intermediate": 0.375,
-        "advanced": 0.125
+        "beginner": 0.525,
+        "intermediate": 0.4667,
+        "advanced": 0.0833
       },
-      "move_sound": 0.9278,
+      "move_sound": 0.9917,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.55,
-        "collapsed_BA": 45
+        "distinct_rate": 0.28,
+        "collapsed_BA": 72
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 0.9639,
         "well_formed": 1.0,
-        "move_sound": 0.9278,
+        "move_sound": 0.9917,
         "verify_pass_draft1": 0.8583
       },
-      "coherence": 0.3583,
-      "flat_rate": 0.3667,
+      "coherence": 0.3333,
+      "flat_rate": 0.6167,
       "gated_soundness": null
     },
     "base_4b": {
@@ -492,17 +492,17 @@
         "n": 225
       },
       "move_grade": 8.75,
-      "tier_fit": 0.3472,
+      "tier_fit": 0.3528,
       "tier_fit_by_tier": {
-        "beginner": 0.3333,
+        "beginner": 0.35,
         "intermediate": 0.3917,
         "advanced": 0.3167
       },
       "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.22,
-        "collapsed_BA": 78
+        "distinct_rate": 0.23,
+        "collapsed_BA": 77
       },
       "gate": {
         "gated": true,
@@ -512,8 +512,8 @@
         "no_engine_speak": 1.0,
         "well_formed": 1.0
       },
-      "coherence": 0.3917,
-      "flat_rate": 0.7417,
+      "coherence": 0.375,
+      "flat_rate": 0.725,
       "gated_soundness": null
     },
     "pbase_4b": {
@@ -530,10 +530,10 @@
         "n": 225
       },
       "move_grade": 8.81,
-      "tier_fit": 0.35,
+      "tier_fit": 0.3778,
       "tier_fit_by_tier": {
-        "beginner": 0.3083,
-        "intermediate": 0.4,
+        "beginner": 0.3667,
+        "intermediate": 0.425,
         "advanced": 0.3417
       },
       "move_sound": 1.0,
@@ -550,8 +550,8 @@
         "no_engine_speak": 1.0,
         "well_formed": 1.0
       },
-      "coherence": 0.3917,
-      "flat_rate": 0.5,
+      "coherence": 0.3333,
+      "flat_rate": 0.4917,
       "gated_soundness": null
     },
     "gpt": {
@@ -568,28 +568,28 @@
         "n": 225
       },
       "move_grade": 9.38,
-      "tier_fit": 0.4472,
+      "tier_fit": 0.4944,
       "tier_fit_by_tier": {
-        "beginner": 0.375,
-        "intermediate": 0.4583,
-        "advanced": 0.5083
+        "beginner": 0.4,
+        "intermediate": 0.525,
+        "advanced": 0.5583
       },
-      "move_sound": 0.9694,
+      "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.3,
-        "collapsed_BA": 70
+        "distinct_rate": 0.28,
+        "collapsed_BA": 72
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 1.0,
         "well_formed": 1.0,
-        "move_sound": 0.9694,
+        "move_sound": 1.0,
         "verify_pass_draft1": 0.9861
       },
       "coherence": 0.3417,
-      "flat_rate": 0.6,
+      "flat_rate": 0.6083,
       "gated_soundness": null
     },
     "claude": {
@@ -606,28 +606,28 @@
         "n": 225
       },
       "move_grade": 9.16,
-      "tier_fit": 0.45,
+      "tier_fit": 0.5083,
       "tier_fit_by_tier": {
         "beginner": 0.3583,
-        "intermediate": 0.4333,
-        "advanced": 0.5583
+        "intermediate": 0.5083,
+        "advanced": 0.6583
       },
-      "move_sound": 0.9667,
+      "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.25,
-        "collapsed_BA": 75
+        "distinct_rate": 0.2,
+        "collapsed_BA": 80
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 1.0,
         "well_formed": 1.0,
-        "move_sound": 0.9667,
+        "move_sound": 1.0,
         "verify_pass_draft1": 0.9444
       },
-      "coherence": 0.3333,
-      "flat_rate": 0.6833,
+      "coherence": 0.3083,
+      "flat_rate": 0.7917,
       "gated_soundness": null
     },
     "gemini": {
@@ -644,28 +644,28 @@
         "n": 225
       },
       "move_grade": 9.11,
-      "tier_fit": 0.5306,
+      "tier_fit": 0.5528,
       "tier_fit_by_tier": {
-        "beginner": 0.4,
-        "intermediate": 0.575,
-        "advanced": 0.6167
+        "beginner": 0.3917,
+        "intermediate": 0.5917,
+        "advanced": 0.675
       },
-      "move_sound": 0.9833,
+      "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.23,
-        "collapsed_BA": 77
+        "distinct_rate": 0.21,
+        "collapsed_BA": 79
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 0.9972,
-        "well_formed": 0.9944,
-        "move_sound": 0.9778,
+        "well_formed": 1.0,
+        "move_sound": 1.0,
         "verify_pass_draft1": 0.9583
       },
-      "coherence": 0.3083,
-      "flat_rate": 0.6917,
+      "coherence": 0.2917,
+      "flat_rate": 0.7583,
       "gated_soundness": null
     },
     "q3_next80b": {
@@ -682,13 +682,13 @@
         "n": 225
       },
       "move_grade": 8.95,
-      "tier_fit": 0.2778,
+      "tier_fit": 0.2806,
       "tier_fit_by_tier": {
-        "beginner": 0.25,
+        "beginner": 0.2583,
         "intermediate": 0.2917,
         "advanced": 0.2917
       },
-      "move_sound": 0.9972,
+      "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
         "distinct_rate": 0.24,
@@ -699,7 +699,7 @@
         "n": 360,
         "no_engine_speak": 1.0,
         "well_formed": 1.0,
-        "move_sound": 0.9972,
+        "move_sound": 1.0,
         "verify_pass_draft1": 0.9528
       },
       "coherence": 0.3333,
@@ -720,17 +720,17 @@
         "n": 225
       },
       "move_grade": 9.01,
-      "tier_fit": 0.2861,
+      "tier_fit": 0.2833,
       "tier_fit_by_tier": {
-        "beginner": 0.2,
-        "intermediate": 0.3333,
-        "advanced": 0.325
+        "beginner": 0.1917,
+        "intermediate": 0.325,
+        "advanced": 0.3333
       },
       "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.2,
-        "collapsed_BA": 80
+        "distinct_rate": 0.19,
+        "collapsed_BA": 81
       },
       "gate": {
         "gated": false,
@@ -741,7 +741,7 @@
         "verify_pass_draft1": 0.9694
       },
       "coherence": 0.4167,
-      "flat_rate": 0.8083,
+      "flat_rate": 0.8167,
       "gated_soundness": null
     },
     "llama33_70b": {
@@ -796,13 +796,13 @@
         "n": 225
       },
       "move_grade": 8.9,
-      "tier_fit": 0.3944,
+      "tier_fit": 0.4,
       "tier_fit_by_tier": {
         "beginner": 0.275,
         "intermediate": 0.4083,
-        "advanced": 0.5
+        "advanced": 0.5167
       },
-      "move_sound": 0.9944,
+      "move_sound": 0.9972,
       "distinct": {
         "differentiating_n": 100,
         "distinct_rate": 0.28,
@@ -812,12 +812,12 @@
         "gated": false,
         "n": 360,
         "no_engine_speak": 1.0,
-        "well_formed": 0.9917,
-        "move_sound": 0.9861,
+        "well_formed": 1.0,
+        "move_sound": 0.9972,
         "verify_pass_draft1": 0.95
       },
       "coherence": 0.3917,
-      "flat_rate": 0.6333,
+      "flat_rate": 0.6417,
       "gated_soundness": null
     },
     "glm5": {
@@ -834,28 +834,28 @@
         "n": 225
       },
       "move_grade": 9.15,
-      "tier_fit": 0.3944,
+      "tier_fit": 0.4083,
       "tier_fit_by_tier": {
         "beginner": 0.3333,
         "intermediate": 0.4333,
-        "advanced": 0.4167
+        "advanced": 0.4583
       },
-      "move_sound": 0.9917,
+      "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.28,
-        "collapsed_BA": 72
+        "distinct_rate": 0.27,
+        "collapsed_BA": 73
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 0.9972,
-        "well_formed": 0.9972,
-        "move_sound": 0.9889,
+        "well_formed": 1.0,
+        "move_sound": 1.0,
         "verify_pass_draft1": 0.9056
       },
       "coherence": 0.35,
-      "flat_rate": 0.6167,
+      "flat_rate": 0.6417,
       "gated_soundness": null
     },
     "mistral3": {
@@ -874,26 +874,26 @@
       "move_grade": 8.77,
       "tier_fit": 0.3361,
       "tier_fit_by_tier": {
-        "beginner": 0.3167,
+        "beginner": 0.3083,
         "intermediate": 0.3917,
-        "advanced": 0.3
+        "advanced": 0.3083
       },
       "move_sound": 0.9972,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.38,
-        "collapsed_BA": 62
+        "distinct_rate": 0.37,
+        "collapsed_BA": 63
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 1.0,
         "well_formed": 0.9972,
-        "move_sound": 0.9944,
+        "move_sound": 0.9972,
         "verify_pass_draft1": 0.9194
       },
-      "coherence": 0.4083,
-      "flat_rate": 0.55,
+      "coherence": 0.4034,
+      "flat_rate": 0.563,
       "gated_soundness": null
     },
     "kimi25": {
@@ -910,28 +910,28 @@
         "n": 225
       },
       "move_grade": 9.07,
-      "tier_fit": 0.3306,
+      "tier_fit": 0.3333,
       "tier_fit_by_tier": {
         "beginner": 0.2917,
         "intermediate": 0.3583,
-        "advanced": 0.3417
+        "advanced": 0.35
       },
       "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
-        "distinct_rate": 0.42,
-        "collapsed_BA": 58
+        "distinct_rate": 0.41,
+        "collapsed_BA": 59
       },
       "gate": {
         "gated": false,
         "n": 360,
         "no_engine_speak": 1.0,
-        "well_formed": 0.9972,
-        "move_sound": 0.9972,
+        "well_formed": 1.0,
+        "move_sound": 1.0,
         "verify_pass_draft1": 0.875
       },
-      "coherence": 0.5083,
-      "flat_rate": 0.45,
+      "coherence": 0.5,
+      "flat_rate": 0.4583,
       "gated_soundness": null
     },
     "dsr1": {
@@ -948,13 +948,13 @@
         "n": 225
       },
       "move_grade": 9.06,
-      "tier_fit": 0.4306,
+      "tier_fit": 0.4361,
       "tier_fit_by_tier": {
-        "beginner": 0.3667,
+        "beginner": 0.375,
         "intermediate": 0.4667,
-        "advanced": 0.4583
+        "advanced": 0.4667
       },
-      "move_sound": 0.9972,
+      "move_sound": 1.0,
       "distinct": {
         "differentiating_n": 100,
         "distinct_rate": 0.37,
@@ -965,11 +965,11 @@
         "n": 360,
         "no_engine_speak": 1.0,
         "well_formed": 1.0,
-        "move_sound": 0.9972,
+        "move_sound": 1.0,
         "verify_pass_draft1": 0.9778
       },
-      "coherence": 0.3083,
-      "flat_rate": 0.6083,
+      "coherence": 0.3,
+      "flat_rate": 0.6167,
       "gated_soundness": null
     }
   }
