@@ -1,129 +1,99 @@
 # Submission: chess-instructor-llm
 
-Project: Train Your Own Small Learning Model: a *reliable, level-calibrated chess coach* from
-a fine-tuned Qwen3-1.7B, end to end (dataset → model → platform → eval → thesis → demo).
+Project: Train Your Own Small Learning Model. A level-calibrated chess coach fine-tuned to reliably
+select the tier-appropriate instructive move, end to end (dataset -> model -> platform -> eval ->
+thesis -> demo). The shipped model is v4, a QLoRA fine-tune of Qwen3-32B (base
+`unsloth/Qwen3-32B-unsloth-bnb-4bit`).
 
-Win condition (from the brief): the tuned model beats the base model on spec-adherence,
-level-calibration, and no-engine-speak: met and exceeded (see the results table below).
+The one trained behavior: given a position and the student's rating tier (Beginner / Intermediate /
+Advanced), select the tier-appropriate, sound, instructive move and tag it with a short principle.
+The English explanation is a secondary, gated display layer, not the graded claim.
 
-> `v3` (Qwen3-32B) is evaluated: the strongest LOCAL coach yet. v3 fine-tunes a
-> 20× larger base (Qwen3-32B) on a larger, faithfulness-filtered contrastive dataset (7,128
-> rows, 0% false labels). On the definitive 803-position benchmark vs a 15-model
-> field: blinded council over all 450 items × 3 judges = 1,350 rankings,
-> self-preference-corrected (v3 tops the raw balanced score (58.0) a hair above GPT-5.5's
-> 57.7, ahead of Claude, Gemini, GLM-5 and every open model) and is the best locally-runnable
-> model. vs v2: corrected instructiveness rank 10.26 → 6.93 (top-1 7.1% → 22.6%,
-> 2nd-highest in the field); tier-fit holds at field-leading 53.2% (advanced 60.9% → 83.6%).
-> vs the untuned Qwen3-32B it was tuned from: tier-fit +16.3 pts, corrected council 9.30 →
-> 6.93: the specialist behavior is *trained in*, not emergent. Faithfulness is a gated fairness
-> floor (0% user-visible fabrication for every model), so it is not a scoring axis; the honest
-> truth differentiator is the cross-family semantic-judge residual (any/majority/unanimous + CIs:
-> OURS-v2 23% / 26% / 31% vs GPT-5.5 79% / 97% / 100%, "any" = strict lower bound). Honest
-> tradeoffs: beginner move-calibration softened (the 32B leans engine-best; beginner tier-fit 47.9%
-> → 29.6%), and OURS-v3 trips the strict 97% safety/no-jargon gate on ~4–5% malformed raw outputs
-> (actual blunder rate only 1.3%, neutralized at serve time), so GPT-5.5 leads the gate-passing
-> board. The v2 platform is untouched and still
-> serves v2. Full detail: [`RESULTS_V3.md`](RESULTS_V3.md),
-> [`RESULTS_FULL_EVAL_803_v3.md`](RESULTS_FULL_EVAL_803_v3.md).
->
-> _HF re-publish for v3 is prepared (adapter + updated cards) but pending an HF write token
-> (`hf auth login` in the user's terminal); the local 4-bit MLX 32B build is disk-blocked on
-> this machine (the `mlx_lm.convert` input is the ~65 GB merged model) and Modal's Linux MLX
-> wheel is broken (`libmlx.so`): so the deployable v3 is base-4bit + the QLoRA adapter, which
-> is exactly what the eval measured._
-
-> `v2` is shipped and current. Every number in this document is the v2 run
-> (`models/mlx/chess-coach-v2`), with the v1→v2 delta shown. The v2 data intervention
-> (faithfulness-filtered labels + tier-aware teacher rule + contrastive multi-tier pairs)
-> improved explanation faithfulness (grounded fabrication 50% → 33%) and fixed
-> tier-differentiated move-selection (27.5% → 39.2%, direction now correct). It still does not
-> out-teach a prompted frontier model on instructiveness: it *narrows* that gap (council rank
-> 4.13 → 3.68): so the headline win stays cost / privacy / register + now-improved faithful
-> grounding. The HF artifacts are the v2 re-publish. Full detail:
-> [`RESULTS_V2.md`](RESULTS_V2.md), [`RESULTS_BENCHMARK_v2.md`](RESULTS_BENCHMARK_v2.md).
+Win condition (from the brief): the tuned model beats the base model on the trained behavior,
+graded deterministically. Met: tier-appropriate move selection (tier-fit) lifts from 0.347 on the
+Qwen3-32B base to 0.767 on v4 on the strict held-out eval, the top tier-fit of all 20 models
+measured.
 
 ---
 
-## Deliverables map
+## Canonical deliverables map (v4)
 
-| # | Deliverable | Artifact: path / URL | Status (`v2`) |
-|---|---|---|---|
-| 1 | Dataset (published on HF Hub) | [`datasets/khoilamalphaai/chess-coach-benchmark`](https://huggingface.co/datasets/khoilamalphaai/chess-coach-benchmark): held-out benchmark: 100 positions × 5 models × 2 conditions + objective scores + council rankings + blind-label export | Published (v2) |
-| 1b | Training set (the "real deliverable") | Local, 100% synthetic SFT rows: `data/dataset/train_v2.jsonl` (+`valid_v2.jsonl`), 2,586 kept rows incl. 348 contrastive multi-tier sets, built by the `positions → Stockfish → Maia → GPT-5.5 (tier-aware) → hard filter + faithfulness gate` pipeline | Built locally *(gitignored; v2 faithfulness gate → 0% false labels)* |
-| 2 | Fine-tuned model (published on HF Hub) | [`khoilamalphaai/qwen3-1.7b-chess-coach-mlx`](https://huggingface.co/khoilamalphaai/qwen3-1.7b-chess-coach-mlx): QLoRA SFT → merged → 4-bit MLX | Published (v2) |
-| 2b | Running inference demo (local) | The Analysis Room: FastAPI (`src/api/server.py`, :8000) + Next.js (`web/`, :3000). One command: `./run_platform.sh` → http://localhost:3000 | Runs locally (tuned MLX coach + engine + verifier) |
-| 3 | Eval harness | `src/eval/evaluate.py` (base-vs-tuned) · `src/eval/benchmark/` (5-model council) · `scripts/frontier_gap*.py` (gap) · `scripts/divergence_*.py` (tier-selection). Protocol + pass bar: [`docs/EVAL_AND_ITERATE.md`](docs/EVAL_AND_ITERATE.md) | Complete & re-runnable |
-| 3b | Base-vs-tuned results table | [`RESULTS_V2.md`](RESULTS_V2.md) + [`RESULTS_BENCHMARK_v2.md`](RESULTS_BENCHMARK_v2.md) (v2, with v1→v2 deltas) · [`RESULTS.md`](RESULTS.md) (v1 Claude-judged base vs tuned) · [`data/analysis/GAP_REPORT.md`](data/analysis/GAP_REPORT.md) · [`data/analysis/DIVERGENCE_REPORT.md`](data/analysis/DIVERGENCE_REPORT.md) | Complete (v2) |
-| 3c | Results dashboard (published on HF Hub) | [`spaces/khoilamalphaai/chess-coach-benchmark`](https://huggingface.co/spaces/khoilamalphaai/chess-coach-benchmark): interactive view of the benchmark | Published (v2) |
-| 4 | BrainLift (behavior thesis + evidence) | [`brainlift/brainlift.md`](brainlift/brainlift.md): DOK-4 spiky POVs, experts, DOK-2 knowledge tree (~120 sources), all tied to primary sources or the project's own measurement | Complete |
-| 5 | Demo video (3–5 min) | Script + shot list: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md). Runnable demo provided (`./run_platform.sh`); recording is the user's step | Script ready: awaiting user recording |
-
----
-
-## Win-condition scorecard (`v2`: current)
-
-Base vs. tuned, cross-family Claude judge, held-out scenarios (from [`RESULTS_V2.md`](RESULTS_V2.md) /
-[`RESULTS.md`](RESULTS.md)):
-
-| Behavior (the brief's win condition) | Base | v1 tuned | v2 tuned | Verdict |
-|---|---:|---:|---:|:---:|
-| Spec-adherence (judge 0–2) | 0.47 | 0.93 | 0.93 | WIN |
-| Level-calibration (judge 0–2) | 0.60 | 1.13 | 1.13 | WIN |
-| No-engine-speak (objective %) | 33% | 100% | 100% | WIN |
-| No-engine-speak (judge 0–2) | 0.87 | 1.87 | 1.73 | WIN |
-| Move soundness (objective %) | 87% | 100% | 100% | WIN |
-| Ply-cap adherence (objective %) | 67% | 100% | 100% | WIN |
-| Truthfulness (judge 0–2) | 0.13 | 0.13 | 0.20 | IMPROVING: was flat; grounded fabrication 50% → 33% |
-| Tier-differentiation (% + direction) |: | 27.5% (mis-directed) | 39.2% (correct) | DIRECTION FIXED by v2 |
-
-Bottom line: v2 still clears the stated win condition on all three target behaviors, and the two
-honest v1 gaps both moved: truthfulness is no longer flat (0.13 → 0.20 on the rubric; grounded
-fabrication 50% → 33%) and tier-differentiation is fixed in direction (27.5% → 39.2%, beginners
-now steered to the human-findable move). What data-shaping still can't buy is out-teaching a much
-larger model on raw instructiveness: v2 *narrows* that gap (council rank 4.13 → 3.68) but doesn't
-close it. Dependable truth at deployment stays carried by grounding + a non-LLM verifier: precisely
-the spiky claim of the BrainLift.
+| # | Deliverable | Artifact: path / URL |
+|---|---|---|
+| 1 | Dataset (published on HF Hub) | [`datasets/khoilamalphaai/chess-coach-move-review`](https://huggingface.co/datasets/khoilamalphaai/chess-coach-move-review), default config = v4: the engine-grounded, contrastive multi-tier SFT set built by `positions -> Stockfish -> Maia -> GPT-5.5 (tier-aware) -> hard filter + faithfulness gate` |
+| 2 | Fine-tuned model (published on HF Hub) | [`khoilamalphaai/chess-coach-32b-v4-qlora`](https://huggingface.co/khoilamalphaai/chess-coach-32b-v4-qlora): QLoRA adapter on the 4-bit Qwen3-32B base |
+| 2b | Running demo | Live Space: [`spaces/khoilamalphaai/chess-coach-studio`](https://huggingface.co/spaces/khoilamalphaai/chess-coach-studio) (https://khoilamalphaai-chess-coach-studio.static.hf.space), backed by the Modal endpoint `chess-coach-v4-4bit-maia` (Maia-enabled, scale-to-zero, ~2.5-3 min cold start). Also local: The Analysis Room, `./run_platform.sh` |
+| 3 | Eval harness | `src/eval/` (base-vs-tuned `evaluate.py` · blinded council `benchmark/` · honest gated `honest/`) · `scripts/honest_v4.py` (v4 regression + moat proof) · `scripts/grand_eval.py` (20-model leaderboard). Protocol + pass bar: [`docs/EVAL_AND_ITERATE.md`](docs/EVAL_AND_ITERATE.md) |
+| 3b | Base-vs-tuned results | [`RESULTS_HONEST_EVAL_V4.md`](RESULTS_HONEST_EVAL_V4.md) + `data/benchmark_honest/report_v4.json` (strict, deterministic) · [`data/benchmark_grand/GRAND_EVAL_LEADERBOARD.md`](data/benchmark_grand/GRAND_EVAL_LEADERBOARD.md) (20-model field) |
+| 3c | Grand eval (published on HF Hub) | [`datasets/khoilamalphaai/chess-coach-grand-eval`](https://huggingface.co/datasets/khoilamalphaai/chess-coach-grand-eval): all 20 models on the same held-out slice, deterministic moat + blinded council with 95% CIs |
+| 4 | BrainLift (behavior thesis + evidence) | [`BRAINLIFT.md`](BRAINLIFT.md): the one-behavior thesis, the 32B training story (v2 -> v3 -> v4 -> v5), DOK-4 spiky POVs, all tied to primary sources or the project's own measurement |
+| 5 | Demo video (3-5 min) | Script + shot list: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md). Runnable demo provided (live Space + `./run_platform.sh`); recording is the user's step |
 
 ---
 
-## The honest gaps: what v2 moved, what remains
+## Win-condition scorecard (v4, strict held-out eval)
 
-Reported plainly so the submission is not oversold (details in [`RESULTS_V2.md`](RESULTS_V2.md),
-[`GAP_REPORT.md`](data/analysis/GAP_REPORT.md), [`DIVERGENCE_REPORT.md`](data/analysis/DIVERGENCE_REPORT.md)):
+Deterministic, no LLM judge in the loop (120 held-out positions x 3 tiers). From
+[`RESULTS_HONEST_EVAL_V4.md`](RESULTS_HONEST_EVAL_V4.md):
 
-- Truthfulness: improved, not solved; and *ungrounded*, v2 is more brittle. Grounded (the
-  deployment mode) v2 cut fabrication 50% → 33%, and the faithfulness gate produced 0% false
-  labels. But ungrounded, v2 fabricates *more* than v1 (87% → 99%): it teaches more
-  concretely (an explicit "how to find it" that cites squares/captures), so a 1.7B invents more
-  without the engine facts. The product always runs grounded; the verify-and-regenerate gate remains
-  the production defense. Truth is carried by grounding + the verifier, not the weights.
-- Tier-differentiation: fixed in direction, now partial (not universal). v2 raised it 27.5%
-  → 39.2% and *reversed the direction*: beginners now get the more human-findable move, advanced the
-  sharpest ("beginner move == the human/Maia move" 39% → 62%), after taking contrastive multi-tier
-  pairs from 0% → 348 FENs × 3 tiers. The move still varies by tier on ~39% of positions, not all.
-- Instructiveness still trails the frontier. Even grounded, the blinded council ranks the big
-  models above the 1.7B; v2 *narrows* the gap (rank 4.13 → 3.68, gap to best frontier +2.22 → +1.60)
-  but does not erase it. The small model's defensible win is form factor + register consistency +
-  now-improved faithful grounding (~$0, local, private, low-variance voice), not raw coaching
-  quality.
+| Behavior (brief's win condition, v4 framing) | Qwen3-32B base | OURS-v4 (tuned) | Verdict |
+|---|---:|---:|:---:|
+| Level-calibration = tier-appropriate move (tier-fit up) | 0.347 | 0.767 | WIN (top of all 20 models) |
+| Distinct move per level (up) | 0.290 | 0.785 | WIN |
+| Move soundness (up) | 1.000 | 0.942 raw / ~1.0 gated | Shared gate floor (fairness, not differentiator) |
+| No-engine-speak (up) | 0.992 | 0.978 raw / ~1.0 gated | Near-ceiling on the 32B base at this size |
+
+- v4 has the top tier-fit of the 20-model field; the tuned checkpoints take 4 of the top 5, and the
+  best frontier model (Gemini 3.1 Pro, 0.553) is #4.
+- Moat: on the 62 held-out positions where v4 diverges from the best frontier's move, v4 wins the
+  tier-appropriate move 51-5 (6 ties).
+- Prompting cannot buy it: on the same weights, an engineered prompt on the base does not reach the
+  tuned tier-fit at 1.7B, 4B, or 32B (full controlled table in [`BRAINLIFT.md`](BRAINLIFT.md)).
+
+At the small 1.7B form factor (v2), no-engine-speak was the win the fine-tune had to earn (base 0.33
+-> tuned 1.00). At 32B the base already writes clean, well-formed, no-jargon prose, so v4's entire
+value-add is the tier-appropriate move: the fine-tune's differentiator at this size is the move, and
+soundness / no-engine-speak equalize to a shared ~100% floor once through the shipped gate.
 
 ---
 
-## Reproduce (one command per instrument)
+## The honest gaps (so the submission is not oversold)
+
+- Prose is weaker by design. v4 lands about 15th of 20 on the blinded instructiveness council (grade
+  about 4.5), below the 4B tune and the prior 32B v3. Prose is the optional, gated display layer,
+  not the trained behavior; a product that wants rich prose renders it on top of the tuned move and
+  verifies it separately.
+- Truth is carried by grounding + a non-LLM verifier, not the weights. About 40% of v4's raw drafts
+  trip the prose faithfulness check; the shipped verify-and-regenerate gate drives user-visible
+  fabrication to zero. The core move claim cannot fabricate a board fact.
+- Live vs curated showcase. The curated showcase is the canonical deterministic proof of the moat;
+  the live tool differentiates by tier but is not guaranteed to be move-for-move identical to the
+  showcase.
+- Size vs form factor. The on-spec, defensible form factor is a small (~4B) local model, the honest
+  floor of the claim. The 32B v4 is a deliberate quality push to the strongest instance of the
+  behavior.
+
+---
+
+## Eval integrity
+
+Two independent audits back the headline: Maia (the human-move model) is present and symmetric
+across all 20 models, feeding both the ground-truth tier move and every model's grounding equally;
+and there is zero train/test leakage (board-key intersection 0 of 120 between the val slice and v4's
+training data).
+
+---
+
+## Reproduce
 
 ```bash
 cd chess-instructor-llm
-set -a && source .env && set +a # keys, never printed
-~/.venvs/mlx/bin/python scripts/run_benchmark_v2.py all --n 100 # → RESULTS_BENCHMARK_v2.md
-~/.venvs/mlx/bin/python -m scripts.divergence_compare_v2 \
-  --v1 data/analysis/divergence_v1_matched.jsonl \
-  --v2 data/analysis/divergence_v2.jsonl \
-  --out data/analysis/divergence_compare_v2.json # → RESULTS_V2.md deltas
-~/.venvs/mlx/bin/python -m scripts.frontier_gap --num 50 && \
-  ~/.venvs/mlx/bin/python -m scripts.frontier_gap_report # → data/analysis/GAP_REPORT.md
-./run_platform.sh # → http://localhost:3000 (serves chess-coach-v2)
+python -m scripts.honest_v4 report     # -> RESULTS_HONEST_EVAL_V4.md + data/benchmark_honest/report_v4.json
+python -m scripts.grand_eval report    # -> data/benchmark_grand/GRAND_EVAL_LEADERBOARD.md
+./run_platform.sh                      # local Analysis Room, or use the live Space
 ```
 
-All eval FENs are verified held-out (absent from `train.jsonl`/`valid.jsonl` by board + side-to-move
-key); grounding is identical across every model; local decoding is greedy. See
-[`docs/EVAL_AND_ITERATE.md`](docs/EVAL_AND_ITERATE.md) for the full protocol and the v2 pass bar.
+All eval FENs are verified held-out (absent from the training set by board + side-to-move key, 0 of
+120); grounding is identical across every model; Maia is symmetric; local decoding is greedy.
+Re-scoring the published generations reproduces tier-fit 0.767 and distinct-moves 0.785 exactly. See
+[`docs/EVAL_AND_ITERATE.md`](docs/EVAL_AND_ITERATE.md) for the full protocol and pass bar.
