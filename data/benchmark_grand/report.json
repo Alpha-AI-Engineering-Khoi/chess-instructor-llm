@@ -24,6 +24,34 @@
     "kimi25",
     "dsr1"
   ],
+  "leaderboard": {
+    "sort_key": "tier_fit",
+    "sort_description": "Ranked by tier-appropriate move selection: deterministic tier-fit (the behavior we trained and graded), ties broken by distinct-moves-per-level then move-soundness. Instructiveness (the blinded cross-family council) is a SECONDARY axis; OURS-v4 is intentionally weaker there and is reported unchanged. Only the row order changed — every model's metrics are identical to the measured deterministic + council values.",
+    "order": [
+      "ours_v4",
+      "ours",
+      "ours_v3",
+      "ours_v5",
+      "gemini",
+      "claude",
+      "gpt",
+      "dsr1",
+      "dsv32",
+      "glm5",
+      "ours_4b",
+      "q3_32b",
+      "llama33_70b",
+      "pbase_4b",
+      "base_4b",
+      "mistral3",
+      "kimi25",
+      "base",
+      "gemma3_27b",
+      "q3_next80b"
+    ],
+    "tiebreak": "distinct_rate desc, then move_sound desc",
+    "note": "`field` (above) is the generation/grouping order; `leaderboard.order` is the published ranking rendered in GRAND_EVAL_LEADERBOARD.md. The per-tuned head-to-head moat W/L/T vs the best frontier is in `vs_frontier_proof`."
+  },
   "fresh_vs_reused": {
     "ours_v5": "FRESH",
     "ours_v4": "reused",
