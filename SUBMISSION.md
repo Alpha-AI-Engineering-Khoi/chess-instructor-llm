@@ -53,6 +53,9 @@ pedagogy.
 | 3c | Grand eval (published on HF Hub) | [`datasets/khoilamalphaai/chess-coach-grand-eval`](https://huggingface.co/datasets/khoilamalphaai/chess-coach-grand-eval): all 20 models on the same held-out slice, deterministic tier-policy match + selection-conditioned head-to-head + blinded council with 95% CIs |
 | 4 | BrainLift (behavior thesis + evidence) | [`BRAINLIFT.md`](BRAINLIFT.md): the one-behavior thesis, the 32B training story (v2 -> v3 -> v4 -> v5), DOK-4 spiky POVs, all tied to primary sources or the project's own measurement |
 | 5 | Demo video (3-5 min) | Script + shot list: [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md). Runnable demo provided (live Space + `./run_platform.sh`); recording is the user's step |
+| 6 | Stretch: preference-tuned adapter | [`khoilamalphaai/chess-coach-32b-v6-dpo`](https://huggingface.co/khoilamalphaai/chess-coach-32b-v6-dpo): v4 + DPO on tier-move pairs (sharpens the moat, no regression) |
+| 7 | Stretch: engine-distilled adapter | [`khoilamalphaai/chess-coach-32b-v6-distill`](https://huggingface.co/khoilamalphaai/chess-coach-32b-v6-distill): the tier rule distilled into the weights, scored no-grounding |
+| 7b | Stretch results (corrected benchmark) | [`RESULTS_STAGE4_CORRECTED.md`](RESULTS_STAGE4_CORRECTED.md): v4 / base / v6-dpo / v6-distill on the deep-verified v6 labels, 120 held-out TEST |
 
 ---
 
@@ -94,6 +97,30 @@ extractor). Metric = tier-policy exact match (agreement with `select_tier_move`)
 Soundness and no-engine-speak equalize to a shared ~100% floor once every model passes the shipped
 gate, so they are a fairness floor, not a differentiator. Move soundness itself is fidelity to a
 shallow sound pool, not certified best-move truth (see honest gaps).
+
+### Stretch results on the corrected benchmark (Stage-4)
+
+The benchmark labels were rebuilt under deeper Stockfish-17 search plus Syzygy (the 120 held-out TEST
+FENs are unchanged, only the canonical and engine-best targets moved). Re-scored in one controlled run
+with the same strict extractor, GROUNDED for base/v4/v6-dpo and NO-GROUNDING for base/v6-distill
+([`RESULTS_STAGE4_CORRECTED.md`](RESULTS_STAGE4_CORRECTED.md)):
+
+| Model | condition | tier-policy match | move-sound | distinct | names-a-move |
+|---|---|---:|---:|---:|---:|
+| BASE (Qwen3-32B untuned) | grounded | 0.428 | 0.969 | 0.303 | 0.975 |
+| OURS-v4 (shipped) | grounded | 0.861 | 0.983 | 0.987 | 0.983 |
+| OURS-v6-dpo | grounded | 0.881 | 0.983 | 0.987 | 0.983 |
+| BASE (Qwen3-32B untuned) | no-grounding | 0.022 | 0.081 | 0.040 | 0.250 |
+| OURS-v6-distill | no-grounding | 0.325 | 0.653 | 0.461 | 0.983 |
+
+- Preference tuning (v6-dpo) sharpens the moat with no regression: +0.0195 tier-policy over v4, all
+  from the intermediate tier (0.808 vs 0.750, out of distribution); soundness, distinct-moves,
+  beginner and advanced are identical to v4. v4 remains the shipped model; v6-dpo is a drop-in successor.
+- Distillation puts the tier rule in the weights: stripped of grounding, the base collapses (0.022,
+  names-a-move 0.250); the distilled adapter recovers it to 0.325 (names-a-move 0.983), with an honest
+  advanced-tier limit (0.217, the sharpest move genuinely needs grounding).
+- Base-vs-tuned is preserved under the correction: grounded tuned-minus-base is +0.433 (v4) and +0.453
+  (v6-dpo) tier-policy, matching the pre-correction gap.
 
 ---
 

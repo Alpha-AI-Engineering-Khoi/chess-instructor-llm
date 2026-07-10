@@ -100,5 +100,13 @@ _v4dl
 data/benchmark_v5/
 data/benchmark_honest_1p7_bak/
 
+# Stage-4 re-eval: bulky, re-derivable inputs (built by scripts/stage4_*.py from
+# the committed model outputs + scenarios_v6 + gitignored v6 labels). The committed
+# evidence (stage4/*.jsonl model outputs, scores/verdict/rescore json, and the
+# council raw rankings + aggregate) is enough to re-derive the verdict.
+data/benchmark_gap803/stage4_eval_inputs.jsonl
+data/benchmark_gap803/stage4_council/generations.jsonl
+data/benchmark_gap803/stage4_council/scenarios.jsonl
+
 # Always keep folder-structure placeholders
 !**/.gitkeep

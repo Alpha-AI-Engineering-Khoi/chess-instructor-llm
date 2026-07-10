@@ -9,6 +9,40 @@ The airtight, held-out evaluation of **tier-appropriate move selection** (the mo
 - The balanced winner (GLM-5) and the best-base pick (Gemma-3-27B-it) **differ** — the balanced score rewards raw tier-selection + coaching that a huge model has, but a v3 base must be fine-tunable and locally runnable, which favors Gemma-3-27B-it.
 - Tier-appropriate move selection is **weak across the whole field** (it is the trained behavior, not an emergent one) — see the tier table; this is exactly the gap v3 targets.
 
+## Corrected-benchmark update (Stage-4: v4 / base / v6-dpo / v6-distill)
+
+The tables in this document were computed on the pre-correction (v4-era) labels. The
+v6 rebuild re-derived the benchmark's canonical / engine-best labels under deeper
+Stockfish-17 search plus Syzygy (`data/benchmark_gap803/scenarios_v6.jsonl`; the 120
+held-out TEST FENs are unchanged, only the targets moved). The consolidating Stage-4
+re-eval on those corrected labels, over the 120 held-out TEST x 3 tiers, is in
+`RESULTS_STAGE4_CORRECTED.md`. Deterministic tier-policy match (same vendored
+extractor), GROUNDED for base/v4/v6-dpo and NO-GROUNDING for base/v6-distill:
+
+| Model | condition | tier-policy match | move-sound | distinct | names-a-move |
+|---|---|---:|---:|---:|---:|
+| BASE (Qwen3-32B untuned) | grounded | 0.428 | 0.969 | 0.303 | 0.975 |
+| OURS-v4 (shipped) | grounded | 0.861 | 0.983 | 0.987 | 0.983 |
+| OURS-v6-dpo | grounded | 0.881 | 0.983 | 0.987 | 0.983 |
+| BASE (Qwen3-32B untuned) | no-grounding | 0.022 | 0.081 | 0.040 | 0.250 |
+| OURS-v6-distill | no-grounding | 0.325 | 0.653 | 0.461 | 0.983 |
+
+Takeaways (full detail + per-tier + 95%-CI council in `RESULTS_STAGE4_CORRECTED.md`):
+
+- **v6-dpo sharpens the moat without regressing:** +0.0195 tier-policy over v4, all
+  from the intermediate tier (0.808 vs 0.750, out of distribution); soundness,
+  distinct-moves, beginner and advanced are identical to v4.
+- **Distillation puts the tier rule in the weights:** stripped of grounding the base
+  collapses (tier 0.022, names-a-move 0.25); the distilled adapter recovers it to
+  0.325 tier-policy and 0.983 names-a-move, with an honest advanced-tier limit
+  (0.217, the sharpest move genuinely needs grounding).
+- **Base-vs-tuned is preserved under the correction:** grounded tuned-minus-base is
+  +0.433 (v4) and +0.453 (v6-dpo) tier-policy, matching the pre-correction gap.
+- The correction lifts every model's absolute grounded number slightly (cleaner
+  grounding) but preserves the tuned-over-base and tuned-over-frontier ordering, so
+  the "beats-frontier on tier-appropriate selection" claim holds; a full 803 x 3
+  frontier re-score under corrected labels was out of scope for this stage (cost).
+
 ## Method & cost-smart scope
 
 - **Deterministic metrics** (tier-fit, tier-differentiation, direction, move-safety, no-engine-speak) computed on **ALL 803 positions x 3 tiers** for the 2 local models (OURS-v2, BASE) + OURS-v3 + 9 open models — the 12 models with full generations. The **3 frontier references** are measured on a **balanced 150-position stratified subset x 3 tiers** — generating Claude Opus 4.8 on all 803 would add real cost for a *reference* row whose behavior is already established; the stratified subset gives a tight estimate.

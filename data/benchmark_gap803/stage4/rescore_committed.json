@@ -1,0 +1,67 @@
+{
+  "benchmark": "scenarios_v6 (corrected) re-score of committed gens",
+  "scores": {
+    "v4_grounded_committed": {
+      "tier_policy_match": 0.4806,
+      "per_tier": {
+        "beginner": 0.4583,
+        "intermediate": 0.5167,
+        "advanced": 0.4667
+      },
+      "per_tier_counts": {
+        "beginner": [
+          55,
+          120
+        ],
+        "intermediate": [
+          62,
+          120
+        ],
+        "advanced": [
+          56,
+          120
+        ]
+      },
+      "move_sound": 0.8528,
+      "named_rate": 0.9556,
+      "format_rate": 0.3889,
+      "distinct_rate": 0.6316,
+      "distinct_counts": [
+        48,
+        76
+      ],
+      "n": 360
+    },
+    "base_grounded_committed": {
+      "tier_policy_match": 0.2972,
+      "per_tier": {
+        "beginner": 0.2583,
+        "intermediate": 0.2833,
+        "advanced": 0.35
+      },
+      "per_tier_counts": {
+        "beginner": [
+          31,
+          120
+        ],
+        "intermediate": [
+          34,
+          120
+        ],
+        "advanced": [
+          42,
+          120
+        ]
+      },
+      "move_sound": 0.8583,
+      "named_rate": 1.0,
+      "format_rate": 1.0,
+      "distinct_rate": 0.2368,
+      "distinct_counts": [
+        18,
+        76
+      ],
+      "n": 360
+    }
+  }
+}

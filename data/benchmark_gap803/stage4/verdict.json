@@ -1,0 +1,326 @@
+{
+  "benchmark": "scenarios_v6 (corrected labels), 120 held-out TEST x 3 tiers = 360",
+  "decode": {
+    "do_sample": false,
+    "repetition_penalty": 1.15,
+    "no_repeat_ngram_size": 4,
+    "grounded_max_new": 256,
+    "nog_max_new": 120
+  },
+  "grounded": {
+    "base": {
+      "tier_policy_match": 0.4278,
+      "per_tier": {
+        "beginner": 0.4417,
+        "intermediate": 0.4083,
+        "advanced": 0.4333
+      },
+      "per_tier_counts": {
+        "beginner": [
+          53,
+          120
+        ],
+        "intermediate": [
+          49,
+          120
+        ],
+        "advanced": [
+          52,
+          120
+        ]
+      },
+      "move_sound": 0.9694,
+      "named_rate": 0.975,
+      "format_rate": 0.975,
+      "distinct_rate": 0.3026,
+      "distinct_counts": [
+        23,
+        76
+      ],
+      "n": 360
+    },
+    "v4": {
+      "tier_policy_match": 0.8611,
+      "per_tier": {
+        "beginner": 0.8583,
+        "intermediate": 0.75,
+        "advanced": 0.975
+      },
+      "per_tier_counts": {
+        "beginner": [
+          103,
+          120
+        ],
+        "intermediate": [
+          90,
+          120
+        ],
+        "advanced": [
+          117,
+          120
+        ]
+      },
+      "move_sound": 0.9833,
+      "named_rate": 0.9833,
+      "format_rate": 0.9389,
+      "distinct_rate": 0.9868,
+      "distinct_counts": [
+        75,
+        76
+      ],
+      "n": 360
+    },
+    "v6_dpo": {
+      "tier_policy_match": 0.8806,
+      "per_tier": {
+        "beginner": 0.8583,
+        "intermediate": 0.8083,
+        "advanced": 0.975
+      },
+      "per_tier_counts": {
+        "beginner": [
+          103,
+          120
+        ],
+        "intermediate": [
+          97,
+          120
+        ],
+        "advanced": [
+          117,
+          120
+        ]
+      },
+      "move_sound": 0.9833,
+      "named_rate": 0.9833,
+      "format_rate": 0.9194,
+      "distinct_rate": 0.9868,
+      "distinct_counts": [
+        75,
+        76
+      ],
+      "n": 360
+    }
+  },
+  "no_grounding": {
+    "base": {
+      "tier_policy_match": 0.0222,
+      "per_tier": {
+        "beginner": 0.025,
+        "intermediate": 0.0167,
+        "advanced": 0.025
+      },
+      "per_tier_counts": {
+        "beginner": [
+          3,
+          120
+        ],
+        "intermediate": [
+          2,
+          120
+        ],
+        "advanced": [
+          3,
+          120
+        ]
+      },
+      "move_sound": 0.0806,
+      "named_rate": 0.25,
+      "format_rate": 0.25,
+      "distinct_rate": 0.0395,
+      "distinct_counts": [
+        3,
+        76
+      ],
+      "n": 360
+    },
+    "v6_distill": {
+      "tier_policy_match": 0.325,
+      "per_tier": {
+        "beginner": 0.3583,
+        "intermediate": 0.4,
+        "advanced": 0.2167
+      },
+      "per_tier_counts": {
+        "beginner": [
+          43,
+          120
+        ],
+        "intermediate": [
+          48,
+          120
+        ],
+        "advanced": [
+          26,
+          120
+        ]
+      },
+      "move_sound": 0.6528,
+      "named_rate": 0.9833,
+      "format_rate": 0.9833,
+      "distinct_rate": 0.4605,
+      "distinct_counts": [
+        35,
+        76
+      ],
+      "n": 360
+    }
+  },
+  "continuity_committed_vs_corrected": {
+    "v4_grounded_committed": {
+      "tier_policy_match": 0.4806,
+      "per_tier": {
+        "beginner": 0.4583,
+        "intermediate": 0.5167,
+        "advanced": 0.4667
+      },
+      "per_tier_counts": {
+        "beginner": [
+          55,
+          120
+        ],
+        "intermediate": [
+          62,
+          120
+        ],
+        "advanced": [
+          56,
+          120
+        ]
+      },
+      "move_sound": 0.8528,
+      "named_rate": 0.9556,
+      "format_rate": 0.3889,
+      "distinct_rate": 0.6316,
+      "distinct_counts": [
+        48,
+        76
+      ],
+      "n": 360
+    },
+    "base_grounded_committed": {
+      "tier_policy_match": 0.2972,
+      "per_tier": {
+        "beginner": 0.2583,
+        "intermediate": 0.2833,
+        "advanced": 0.35
+      },
+      "per_tier_counts": {
+        "beginner": [
+          31,
+          120
+        ],
+        "intermediate": [
+          34,
+          120
+        ],
+        "advanced": [
+          42,
+          120
+        ]
+      },
+      "move_sound": 0.8583,
+      "named_rate": 1.0,
+      "format_rate": 1.0,
+      "distinct_rate": 0.2368,
+      "distinct_counts": [
+        18,
+        76
+      ],
+      "n": 360
+    }
+  },
+  "published_v4_v4era": {
+    "tier_policy_match": 0.7667,
+    "move_sound": 0.9417,
+    "distinct_rate": 0.73
+  },
+  "published_base_v4era": {
+    "tier_policy_match": 0.3472,
+    "move_sound": 1.0,
+    "distinct_rate": 0.29
+  },
+  "Q1_dpo_vs_v4_grounded": {
+    "metrics_dpo_v4_delta": {
+      "tier_policy_match": [
+        0.8806,
+        0.8611,
+        0.0195
+      ],
+      "move_sound": [
+        0.9833,
+        0.9833,
+        0.0
+      ],
+      "distinct_rate": [
+        0.9868,
+        0.9868,
+        0.0
+      ],
+      "named_rate": [
+        0.9833,
+        0.9833,
+        0.0
+      ],
+      "format_rate": [
+        0.9194,
+        0.9389,
+        -0.0195
+      ]
+    },
+    "per_tier_dpo_v4_delta": {
+      "beginner": [
+        0.8583,
+        0.8583,
+        0.0
+      ],
+      "intermediate": [
+        0.8083,
+        0.75,
+        0.0583
+      ],
+      "advanced": [
+        0.975,
+        0.975,
+        0.0
+      ]
+    },
+    "no_regression_sound_distinct_beginner_advanced": true,
+    "intermediate_gain_holds_out_of_distribution": true,
+    "format_note": "format_rate is prose-completeness (Takeaway line within the 256-token cap); named+sound+tier identical/higher, so any format delta is truncation of marginally longer coaching, not a move/quality regression."
+  },
+  "Q2_distillation_behavior_in_weights": {
+    "tier_policy_match_base_to_distill": [
+      0.0222,
+      0.325,
+      0.3028
+    ],
+    "named_rate_base_to_distill": [
+      0.25,
+      0.9833,
+      0.7333
+    ],
+    "move_sound_base_to_distill": [
+      0.0806,
+      0.6528,
+      0.5722
+    ],
+    "distill_per_tier": {
+      "beginner": 0.3583,
+      "intermediate": 0.4,
+      "advanced": 0.2167
+    },
+    "honest_advanced_limit": {
+      "distill_advanced": 0.2167,
+      "distill_beginner": 0.3583,
+      "distill_intermediate": 0.4,
+      "note": "advanced (=engine-best) is the distilled model's WEAKEST tier without grounding: the sharpest move genuinely needs the engine grounding the no-grounding condition strips."
+    }
+  },
+  "Q3_base_vs_tuned_grounded": {
+    "v4_minus_base_tier_policy": 0.4333,
+    "v6dpo_minus_base_tier_policy": 0.4528,
+    "v4_minus_base_distinct": 0.6842,
+    "v6dpo_minus_base_distinct": 0.6842
+  }
+}

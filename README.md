@@ -40,6 +40,12 @@ shortened to "tier-policy match." The canonical move is a project rule, not vali
 - BrainLift (behavior thesis + evidence): [`BRAINLIFT.md`](BRAINLIFT.md)
 - Local platform: The Analysis Room (FastAPI + Next.js), one command: `./run_platform.sh`
 
+Stretch adapters (research, not shipped; see the corrected-benchmark results below):
+
+- Preference-tuned: [`khoilamalphaai/chess-coach-32b-v6-dpo`](https://huggingface.co/khoilamalphaai/chess-coach-32b-v6-dpo) (v4 + DPO on tier-move pairs)
+- Engine-distilled (no-grounding): [`khoilamalphaai/chess-coach-32b-v6-distill`](https://huggingface.co/khoilamalphaai/chess-coach-32b-v6-distill) (tier rule distilled into the weights)
+- Stage-4 corrected-benchmark results: [`RESULTS_STAGE4_CORRECTED.md`](RESULTS_STAGE4_CORRECTED.md)
+
 ## Headline result (strict held-out eval)
 
 The trained behavior is graded deterministically against the engine and a human-move model, with no
@@ -81,6 +87,17 @@ Honest by design: v4 is deliberately weaker on prose. On the blinded, cross-fami
 council it lands around 15th of 20 (grade about 4.5), below the smaller 4B tune and the prior 32B v3.
 Prose is secondary to the evaluation claim and is not separately optimized (but it is in the SFT
 loss). See [`RESULTS_HONEST_EVAL_V4.md`](RESULTS_HONEST_EVAL_V4.md).
+
+Corrected-benchmark stretch results (Stage-4): the benchmark labels were rebuilt under deeper
+Stockfish-17 search plus Syzygy (the 120 held-out test FENs are unchanged, only the canonical and
+engine-best targets moved), and every tuned model was re-scored in one controlled run. On the corrected
+grounded held-out benchmark, tier-policy match is base 0.428, v4 0.861, and the preference-tuned v6-dpo
+0.881, with soundness and distinct-moves identical for v4 and v6-dpo, so v6-dpo sharpens the moat
+(entirely at the intermediate tier, 0.808 vs 0.750, out of distribution) without regressing. Stripped of
+grounding, the untuned base collapses to tier-policy 0.022 (names-a-move 0.250) while the engine-distilled
+adapter recovers it to 0.325 (names-a-move 0.983), a behavior-in-weights result with an honest advanced-tier
+limit (0.217). v4 remains the shipped model; v6-dpo and v6-distill are stretch-ladder results. Full detail:
+[`RESULTS_STAGE4_CORRECTED.md`](RESULTS_STAGE4_CORRECTED.md).
 
 Eval audited honest. Two independent audits back the base-vs-tuned comparison: the human-move model
 (Maia) is present and symmetric across all 20 models (it feeds both the ground-truth tier move and
