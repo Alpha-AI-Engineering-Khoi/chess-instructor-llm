@@ -69,12 +69,12 @@ raw move soundness 0.942.)
   frontier 0.553 (Gemini, #4). The tuned checkpoints take 4 of the top 5. This is the primary unbiased
   comparison.
 - Unbiased head-to-head: over ALL positions where v4 diverges from the best frontier (not conditioned
-  on v4 succeeding), v4 goes 56-28-12 over the 96 diverging positions (56-28-36 over all 120) on the
+  on v4 succeeding), v4 goes 56-24-12 over the 92 diverging positions (56-24-40 over all 120) on the
   moat (tier-policy match then soundness).
 - Selection-conditioned subset (NOT a general win rate): within the v4-success/divergence subset (the
   62 of 120 positions where v4 already gives a distinct, sound, correctly-graded move AND diverges from
   the frontier), v4 wins 51-5 (6 ties). Conditioned on v4 succeeding, so it overstates a win rate; use
-  the unbiased 56-28-12 above.
+  the unbiased 56-24-12 above.
 - The demo serves the evaluated move: the prose gate changes only the explanation, never the move (it
   keeps v4's own greedy sound move on a prose failure and rewrites only the prose), so the served-move
   tier-policy match (0.789 replayed over the val drafts) matches the evaluated greedy 0.767.
@@ -175,7 +175,7 @@ wrong turns.
   5th of 20 on the blinded prose council (instructiveness grade about 6.35) at tier-policy match 0.558.
 - v4 (Qwen3-32B QLoRA): the shipped model. Trained to maximize the policy match, it leads the field
   (tier-policy match 0.767, distinct-moves 0.730, raw move-soundness 0.942); the unbiased head-to-head
-  over the 96 diverging positions is 56-28-12 (the 51-5-6 over 62 is the v4-success-conditioned subset,
+  over the 92 diverging positions is 56-24-12 (the 51-5-6 over 62 is the v4-success-conditioned subset,
   not a win rate), while it trades prose down to about 15th of 20 (grade about 4.5). 32B is a mid-size
   extension, not a small model.
 - v5 (Qwen3-32B QLoRA): an attempt to fix v4's prose and raw faithfulness with a cleaner, filtered

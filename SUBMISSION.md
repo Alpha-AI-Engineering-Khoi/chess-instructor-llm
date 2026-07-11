@@ -83,12 +83,12 @@ extractor). Metric = tier-policy exact match (agreement with `select_tier_move`)
   0.767 vs the best frontier 0.553 (Gemini, #4). The tuned checkpoints take 4 of the top 5. (v4
   distinct-moves-per-level 0.730 = 73/100 canonical beginner!=advanced opportunities.)
 - Unbiased head-to-head: over ALL positions where v4 diverges from the best frontier (not conditioned
-  on v4 succeeding), v4 goes 56-28-12 over the 96 diverging positions (56-28-36 over all 120) on the
+  on v4 succeeding), v4 goes 56-24-12 over the 92 diverging positions (56-24-40 over all 120) on the
   moat (tier-policy match then soundness).
 - v4-success-conditioned subset (NOT a general win rate): within the subset of 62 of 120 positions
   where v4 already gives a distinct, sound, correctly-graded move AND diverges from the frontier, v4
   wins 51-5 (6 ties). Conditioned on v4 succeeding, so it overstates a win rate; use the unbiased
-  56-28-12 above.
+  56-24-12 above.
 - The demo serves the evaluated move: the prose gate changes only the explanation, never the move, so
   the served-move tier-policy match (0.789 replayed over the val drafts) equals the evaluated greedy
   0.767 (pre-fix it could collapse to 0.589; fixed in `d4afd73`).
