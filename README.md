@@ -1,8 +1,10 @@
 # chess-instructor-llm
 
-A level-calibrated, engine-grounded chess coach. The shipped model is `chess-coach-32b-v4`, a
-QLoRA fine-tune of Qwen3-32B (base `unsloth/Qwen3-32B-unsloth-bnb-4bit`); the genuinely small,
-on-spec model is the 1.7B tune. It is trained to do one thing: given a position and the student's
+A level-calibrated, engine-grounded chess coach. The SFT base is `chess-coach-32b-v4`, a
+QLoRA fine-tune of Qwen3-32B (base `unsloth/Qwen3-32B-unsloth-bnb-4bit`) and the model behind the
+full reproducible evaluation below; the live demo now serves `chess-coach-32b-v6-dpo2` (0.892 on the
+corrected 120 TEST, a strict no-regression improvement over v4's 0.861), the best-DPO refinement of
+v4. The genuinely small, on-spec model is the 1.7B tune. It is trained to do one thing: given a position and the student's
 rating tier (Beginner / Intermediate / Advanced), emit the move that a fixed rule, `select_tier_move`,
 designates as the canonical tier move, tagged with a short principle (for example, "Nf3, develop
 toward the center").
@@ -36,13 +38,13 @@ shortened to "tier-policy match." The canonical move is a project rule, not vali
 - Model: [`khoilamalphaai/chess-coach-32b-v4-qlora`](https://huggingface.co/khoilamalphaai/chess-coach-32b-v4-qlora) (Qwen3-32B QLoRA adapter)
 - Dataset: [`khoilamalphaai/chess-coach-move-review`](https://huggingface.co/datasets/khoilamalphaai/chess-coach-move-review) (default config = v4)
 - Grand eval: [`khoilamalphaai/chess-coach-grand-eval`](https://huggingface.co/datasets/khoilamalphaai/chess-coach-grand-eval) (in-repo: [`RESULTS_HONEST_EVAL_V4.md`](RESULTS_HONEST_EVAL_V4.md), `data/benchmark_honest/report_v4.json`, `src/eval/`, `scripts/grand_eval.py`)
-- Live demo (Space): [`khoilamalphaai/chess-coach-studio`](https://huggingface.co/spaces/khoilamalphaai/chess-coach-studio) (live: https://khoilamalphaai-chess-coach-studio.static.hf.space), backed by the Modal endpoint `chess-coach-v4-4bit-maia` (Maia-enabled, scale-to-zero, ~2.5-3 min cold start)
+- Live demo (Space): [`khoilamalphaai/chess-coach-studio`](https://huggingface.co/spaces/khoilamalphaai/chess-coach-studio) (live: https://khoilamalphaai-chess-coach-studio.static.hf.space), now backed by the Modal endpoint `chess-coach-v6dpo2-4bit-maia` serving v6-dpo2 (a verbatim clone of the v4 serving app with only the LoRA adapter swapped; Maia-enabled, scale-to-zero, ~2.5-3 min cold start); the v4 endpoint `chess-coach-v4-4bit-maia` stays deployed as the fallback
 - BrainLift (behavior thesis + evidence): [`BRAINLIFT.md`](BRAINLIFT.md)
 - Local platform: The Analysis Room (FastAPI + Next.js), one command: `./run_platform.sh`
 
-Stretch adapters (research, not shipped; see the corrected-benchmark results below):
+Stretch and refinement adapters (see the corrected-benchmark results below; v6-dpo2 is now the live-served model):
 
-- Preference-tuned, best DPO: [`khoilamalphaai/chess-coach-32b-v6-dpo2`](https://huggingface.co/khoilamalphaai/chess-coach-32b-v6-dpo2) (v4 + stronger tier-targeted DPO, checkpoint step 200; overall tier-policy 0.892 on the corrected 120 TEST, supersedes v6-dpo as the queued successor)
+- Preference-tuned, best DPO (now live-served): [`khoilamalphaai/chess-coach-32b-v6-dpo2`](https://huggingface.co/khoilamalphaai/chess-coach-32b-v6-dpo2) (v4 + stronger tier-targeted DPO, checkpoint step 200; overall tier-policy 0.892 on the corrected 120 TEST, supersedes v6-dpo and is now the live-served model on the demo, the best-DPO refinement of v4)
 - Preference-tuned, earlier DPO: [`khoilamalphaai/chess-coach-32b-v6-dpo`](https://huggingface.co/khoilamalphaai/chess-coach-32b-v6-dpo) (v4 + DPO on tier-move pairs)
 - Engine-distilled (no-grounding): [`khoilamalphaai/chess-coach-32b-v6-distill`](https://huggingface.co/khoilamalphaai/chess-coach-32b-v6-distill) (tier rule distilled into the weights)
 - Deep-verified v6 labels (dataset): [`khoilamalphaai/chess-coach-v6`](https://huggingface.co/datasets/khoilamalphaai/chess-coach-v6) (corrected canonical/sound labels, deeper Stockfish-17 + Syzygy, behind the v6 stretch results)
@@ -76,9 +78,9 @@ raw move soundness 0.942.)
   62 of 120 positions where v4 already gives a distinct, sound, correctly-graded move AND diverges from
   the frontier), v4 wins 51-5 (6 ties). Conditioned on v4 succeeding, so it overstates a win rate; use
   the unbiased 56-24-12 above.
-- The demo serves the evaluated move: the prose gate changes only the explanation, never the move (it
-  keeps v4's own greedy sound move on a prose failure and rewrites only the prose), so the served-move
-  tier-policy match (0.789 replayed over the val drafts) matches the evaluated greedy 0.767.
+- The served move is the evaluated move: the prose gate changes only the explanation, never the move (it
+  keeps the model's own greedy sound move on a prose failure and rewrites only the prose), so v4's served-move
+  tier-policy match (0.789 replayed over the val drafts) matches its evaluated greedy 0.767.
 - Deployment-necessity is false as built: the deterministic rule already computes the canonical move
   at ~1.0 from the same grounding, so the model approximates a policy the product produces without it.
 - Move soundness equalizes to a shared ~100% floor once every model passes the shipped gate; it is a
@@ -94,15 +96,16 @@ Corrected-benchmark stretch results (Stage-4): the benchmark labels were rebuilt
 Stockfish-17 search plus Syzygy (the 120 held-out test FENs are unchanged, only the canonical and
 engine-best targets moved), and every tuned model was re-scored in one controlled run. On the corrected
 grounded held-out benchmark, tier-policy match is base 0.428, v4 0.861, the preference-tuned v6-dpo 0.881,
-and the stronger tier-targeted v6-dpo2 0.892 (checkpoint step 200), the best DPO result. v6-dpo2 supersedes
-v6-dpo as the queued successor, but it is honestly a stronger v6-dpo, not a beginner or advanced breakthrough:
+and the stronger tier-targeted v6-dpo2 0.892 (checkpoint step 200), the best DPO result. v6-dpo2 is now the
+live-served model on the demo (the best-DPO refinement of v4), but it is honestly a stronger v6-dpo, not a beginner or advanced breakthrough:
 the whole gain is the intermediate tier (0.842 vs v4 0.750, vs v6-dpo 0.808), while beginner (0.858) and
 advanced (0.975) are byte-identical to v4 and v6-dpo because both already sit at their ceiling under
 grounding; soundness (0.983) and distinct-moves (0.987) are unchanged, and format (0.925) is marginally
 under v4 (0.939), a token-cap prose-length artifact. Stripped of grounding, the untuned base collapses to
 tier-policy 0.022 (names-a-move 0.250) while the engine-distilled adapter recovers it to 0.325 (names-a-move
-0.983), a behavior-in-weights result with an honest advanced-tier limit (0.217). v4 remains the shipped
-model; v6-dpo2, v6-dpo, and v6-distill are stretch-ladder results. A free cached re-score of the full field
+0.983), a behavior-in-weights result with an honest advanced-tier limit (0.217). v4 is the SFT base and
+the model behind the full reproducible evaluation; v6-dpo2 (the best-DPO refinement of v4) is now the
+live-served model on the demo, and v6-dpo and v6-distill remain stretch-ladder results. A free cached re-score of the full field
 against the corrected labels ([`RESULTS_FULL_EVAL_803.md`](RESULTS_FULL_EVAL_803.md)) keeps OURS on top of
 the moat (OURS-v2 #1, +0.042 over the best frontier; tuned-over-base +0.151 / +0.162) and preserves the
 cross-family order (OURS then frontier then open), while the frontier reshuffles internally so Claude Opus
@@ -227,9 +230,12 @@ Locked design decisions:
 ### Serving the coach
 
 The shipped live demo is the Hugging Face Space `chess-coach-studio` (a static Next.js export)
-talking to a Modal endpoint, `chess-coach-v4-4bit-maia`, that serves the v4 adapter on the 4-bit
-base with Maia enabled and greedy-first decoding. The endpoint is scale-to-zero, so the first
-request after idle has a ~2.5-3 min cold start.
+talking to a Modal endpoint, `chess-coach-v6dpo2-4bit-maia`, that serves the v6-dpo2 adapter (the
+best-DPO refinement of v4) on the same 4-bit base with Maia enabled and greedy-first decoding. It is
+a verbatim clone of the v4 serving app with only the LoRA adapter swapped; the v4 endpoint
+`chess-coach-v4-4bit-maia` stays deployed as the fallback. The full reproducible evaluation below was
+run on v4 (the SFT base). The endpoint is scale-to-zero, so the first request after idle has a
+~2.5-3 min cold start.
 
 The same behavior runs locally as "The Analysis Room": a thin FastAPI backend wires the repo's
 existing pieces to a calm, board-centric Next.js front end. It re-implements no chess logic:
@@ -270,8 +276,8 @@ cd chess-instructor-llm
 ```
 
 This starts the FastAPI backend and the Next.js front end, then waits (Ctrl-C stops both). Open
-http://localhost:3000. For the hosted v4 coach with no local setup, use the live Space instead:
-https://khoilamalphaai-chess-coach-studio.static.hf.space.
+http://localhost:3000. For the hosted coach with no local setup (the live Space now serves v6-dpo2),
+use it instead: https://khoilamalphaai-chess-coach-studio.static.hf.space.
 
 Prerequisites:
 
@@ -403,8 +409,8 @@ Reported as plainly as the wins:
 
 Data-gen and eval run locally (Mac, `~/.venvs/mlx`) plus the TrueFoundry gateway for the frontier
 council. Fine-tuning runs on a CUDA GPU (Modal) via QLoRA on the 4-bit Qwen3-32B base. Live
-inference is served on Modal in 4-bit (`chess-coach-v4-4bit-maia`, scale-to-zero); the same coach
-runs locally in MLX.
+inference is served on Modal in 4-bit (`chess-coach-v6dpo2-4bit-maia`, scale-to-zero, with the v4
+endpoint `chess-coach-v4-4bit-maia` kept as the fallback); the same coach runs locally in MLX.
 
 ## Data sourcing & licensing
 
