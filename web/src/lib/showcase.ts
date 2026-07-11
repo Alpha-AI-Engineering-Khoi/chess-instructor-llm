@@ -336,7 +336,10 @@ function shortName(name: string): string {
  */
 export function deriveOursLabel(name: string | null | undefined): OursLabel {
   const raw = (name ?? "").trim();
-  const version = raw.match(/v(\d+(?:\.\d+)?)/i)?.[0]?.toLowerCase() ?? null;
+  // Capture the WHOLE version token, including any suffix like "-dpo2" ("v6-dpo2")
+  // so a DPO successor badges as "OURS · v6-dpo2", not a bare "OURS · v6". A plain
+  // "v4" (no suffix) still matches exactly "v4", so v4 data is unaffected.
+  const version = raw.match(/v\d+(?:\.\d+)?(?:-[a-z0-9]+)*/i)?.[0]?.toLowerCase() ?? null;
   const size = raw.match(/(\d+(?:\.\d+)?\s?B)\b/i)?.[1]?.replace(/\s+/g, "") ?? null;
   // Never assert a version we couldn't parse. When the model name carries a
   // "vN" we badge "OURS · vN"; otherwise we show the raw model name (or a bare

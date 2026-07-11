@@ -155,8 +155,10 @@ export default function Showdown() {
         </div>
 
         {/* Provenance: this list is the PRIOR-generation (1.7B / v2) held-out benchmark.
-            The shipped model is v4 (Qwen3-32B); its curated per-level comparison lives on
-            the Showcase. Kept honest so the v2 rows here aren't mistaken for the shipped model. */}
+            The LIVE coach now serves v6-dpo2 (Qwen3-32B); the curated per-level comparison
+            (cached OURS column = v4) lives on the Showcase, where OURS can also be re-run
+            live (now v6-dpo2). Kept honest so the v2 rows here aren't mistaken for the
+            live-served model. */}
         <div className="flex flex-col gap-1 rounded-[10px] border border-[color:var(--caution)]/40 bg-[color:var(--caution)]/10 px-4 py-3 text-xs leading-relaxed">
           <span className="flex items-center gap-2 text-sm font-medium text-ink">
             <span aria-hidden className="text-[color:var(--caution)]">◐</span>
@@ -164,9 +166,10 @@ export default function Showdown() {
           </span>
           <span className="text-muted">
             This 200-position held-out study was run on the earlier{" "}
-            <span className="text-ink">1.7B (v2)</span> coach. The shipped model is{" "}
-            <span className="text-ink">v4 (Qwen3-32B)</span>; for its curated, per-level comparison —
-            OURS-v4 vs the frontier on genuine tier forks, with the live re-run — see the{" "}
+            <span className="text-ink">1.7B (v2)</span> coach. The live coach now serves{" "}
+            <span className="text-ink">v6-dpo2 (Qwen3-32B)</span>; for the curated, per-level
+            comparison — OURS (v4) vs the frontier on genuine tier forks, with the live re-run
+            (now v6-dpo2) — see the{" "}
             <Link
               href="/showcase"
               className="text-signal underline decoration-dotted underline-offset-2 transition-colors hover:text-ink"

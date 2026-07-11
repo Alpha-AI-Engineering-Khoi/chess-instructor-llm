@@ -1,30 +1,29 @@
 import type { NextConfig } from "next";
 
 // The live coach backend the static site calls at runtime (client-side fetch to
-// ${NEXT_PUBLIC_API_BASE}/api/coach). This is the shipped v4 product endpoint:
-// Qwen3-32B + the chess-coach-v4 QLoRA adapter, served scale-to-zero via vLLM on
-// Modal (workspace chess-instructor-3), through the SAME gated pipeline as the
-// local API (Stockfish grounding + verify-and-regenerate faithfulness gate).
+// ${NEXT_PUBLIC_API_BASE}/api/coach). This is now the v6-dpo2 product endpoint:
+// Qwen3-32B + the chess-coach-v6-dpo2 QLoRA adapter (DPO successor to v4), served
+// scale-to-zero via vLLM on Modal (workspace chess-instructor-2), through the SAME
+// gated pipeline as the local API (Stockfish grounding + verify-and-regenerate
+// faithfulness gate).
 //
-// Now points at the MAIA-ENABLED 4-bit build on a cheaper A100-80GB
-// (`chess-coach-v4-4bit-maia`). This is the same NF4 base + v4 LoRA as the plain
-// 4-bit app, but the image also ships lc0 (CPU-only) + the tier Maia nets, so the
-// live `coach_all` computes the SAME per-tier Maia human-likelihood facts the local
-// pipeline does — and the coach decodes the first gate attempt greedily so those
-// facts actually steer a tier-appropriate move (sampling at temp 0.7 washed the
-// signal out and collapsed every tier onto one move). Result: the live coach now
-// DIFFERENTIATES tiers (was 0-1/7 without Maia; 4/7 genuine-fork positions with it).
+// This is a VERBATIM clone of the v4 MAIA-ENABLED 4-bit serving app
+// (`chess-coach-v6dpo2-4bit-maia`): same NF4 base + Maia (lc0 CPU-only + tier nets)
+// + Stockfish grounding + greedy-first tier-conditioned decode, with ONLY the LoRA
+// adapter swapped v4 -> v6-dpo2. The v6-dpo2 improvement over v4 is small and
+// concentrated in the intermediate tier (see the docs); the CORS allowlist (which
+// includes this Space origin) is inherited unchanged from src/api/server.py.
 //
-// FALLBACK (one-line revert): switch this constant back to the Maia-less 4-bit app
-//   https://chess-instructor-3--chess-coach-v4-4bit-coachv44bit-fastapi-app.modal.run
-// (or the BF16 app  https://chess-instructor-3--chess-coach-v4-vllm-coachv4vllm-fastapi-app.modal.run)
+// FALLBACK (one-line revert): the v4 endpoint is STILL DEPLOYED and alive on
+// chess-instructor-3 — switch this constant back to it and rebuild:
+//   https://chess-instructor-3--chess-coach-v4-4bit-maia-coachv44bit-b1deed.modal.run
 // then rebuild (`npm run build`) and re-upload web/out to the chess-coach-studio Space.
 //
 // Baked in here (not just .env.local, which is gitignored) so the static export and
 // any rebuild ship the correct endpoint. Override locally by exporting
 // NEXT_PUBLIC_API_BASE before `next dev` / `next build`.
-const V4_COACH_ENDPOINT =
-  "https://chess-instructor-3--chess-coach-v4-4bit-maia-coachv44bit-b1deed.modal.run";
+const V6DPO2_COACH_ENDPOINT =
+  "https://chess-instructor-2--chess-coach-v6dpo2-4bit-maia-coachv4-513645.modal.run";
 
 const nextConfig: NextConfig = {
   // Static HTML export: the platform ships as a static site (Hugging Face Static
@@ -41,7 +40,7 @@ const nextConfig: NextConfig = {
   images: { unoptimized: true },
   env: {
     NEXT_PUBLIC_API_BASE:
-      process.env.NEXT_PUBLIC_API_BASE ?? V4_COACH_ENDPOINT,
+      process.env.NEXT_PUBLIC_API_BASE ?? V6DPO2_COACH_ENDPOINT,
   },
 };
 

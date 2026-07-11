@@ -29,9 +29,9 @@ type EvidenceLink = {
 // what it was measured on, try it, read the code, read the reasoning.
 const LINKS: EvidenceLink[] = [
   {
-    href: "https://huggingface.co/khoilamalphaai/chess-coach-32b-v4-qlora",
+    href: "https://huggingface.co/khoilamalphaai/chess-coach-32b-v6-dpo2",
     label: "Model",
-    hint: "Qwen3-32B chess-coach v4 · QLoRA adapter · Hugging Face",
+    hint: "Qwen3-32B chess-coach v6-dpo2 · QLoRA adapter · Hugging Face",
     Icon: LayersIcon,
   },
   {
@@ -43,7 +43,7 @@ const LINKS: EvidenceLink[] = [
   {
     href: "https://huggingface.co/spaces/khoilamalphaai/chess-coach-studio",
     label: "Space",
-    hint: "Live v4 coach demo · Hugging Face",
+    hint: "Live v6-dpo2 coach demo · Hugging Face",
     Icon: RocketIcon,
   },
   {

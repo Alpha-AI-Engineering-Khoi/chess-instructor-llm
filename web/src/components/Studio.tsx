@@ -34,15 +34,16 @@ import { FlipVerticalIcon, ResetIcon, UndoIcon } from "./icons";
 
 type Status = "idle" | "loading" | "done" | "error";
 
-// DEFAULT is a GENUINE, THREE-way per-tier fork, verified on the held-out v4
-// generations (the same tuned model the demo serves) with the avoid-framing-aware
-// extractor. On this king-and-pawn endgame the student's Ne2 was fine but passive,
-// and the coach hands back a DIFFERENT, engine-sound, tier-canonical move for each
-// level: Ne6+ (beginner — a forcing check) · h6 (intermediate — a passed-pawn
-// push) · Kd2 (advanced — the quiet king improvement). Every tier switch changes
-// the move, so it is the one-screen proof that the fine-tune adapts the move to
-// the player's level. (The previous default's "h5" advanced move was an
-// extraction artifact — the coach actually converged there — so it was replaced.)
+// DEFAULT is a GENUINE per-tier fork, regenerated live through the v6-dpo2 endpoint
+// (the same tuned model the demo serves) — the precomputed answers live in
+// web/src/lib/studioDefault.ts. On this king-and-pawn endgame the student's Ne2 was
+// fine but passive, and the coach hands back an engine-sound, tier-appropriate move
+// per level: Ne6+ (beginner — a forcing check) vs h6 (intermediate / advanced — the
+// passed-pawn push). Beginner forks away from the stronger tiers, so switching to
+// Beginner changes the move — the one-screen proof that the fine-tune adapts to the
+// player's level. (v6-dpo2's gain over v4 is small and concentrated in the
+// intermediate tier, so this position reads as a 2-move fork rather than v4's
+// 3-move split — kept honest rather than cherry-picked.)
 const DEFAULT = {
   fen: "8/7b/5p2/P1kp3P/2pN1P2/4K3/8/8 w - - 1 39",
   tier: "beginner" as Tier,
