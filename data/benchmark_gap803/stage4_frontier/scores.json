@@ -1,0 +1,242 @@
+{
+  "benchmark": "scenarios_v6 (corrected labels), 120 held-out TEST x 3 tiers",
+  "scope": "MATCHED FRESH GROUNDING \u2014 every model (ours + frontier) scored on the SAME stage4_eval_inputs.jsonl grounded prompt (Stockfish sound-pool + Maia + verify-gate facts) that produced v6-dpo2's 0.892.",
+  "n_scenarios": 360,
+  "extractor": "src.eval.evaluate.extract_recommended_move (== reproduce_v4.py)",
+  "frontier_gen": "TrueFoundry gateway (src.eval.benchmark.backends.TFYChat), GEN_MAX_TOKENS_TFY, per-model reasoning_effort; NOT Modal.",
+  "field_order": [
+    "v6_dpo2",
+    "v6_dpo",
+    "v4",
+    "base",
+    "gpt",
+    "claude",
+    "gemini"
+  ],
+  "scores": {
+    "v6_dpo2": {
+      "tier_policy_match": 0.8917,
+      "per_tier": {
+        "beginner": 0.8583,
+        "intermediate": 0.8417,
+        "advanced": 0.975
+      },
+      "per_tier_counts": {
+        "beginner": [
+          103,
+          120
+        ],
+        "intermediate": [
+          101,
+          120
+        ],
+        "advanced": [
+          117,
+          120
+        ]
+      },
+      "move_sound": 0.9833,
+      "named_rate": 0.9861,
+      "format_rate": 0.925,
+      "distinct_rate": 0.9868,
+      "distinct_counts": [
+        75,
+        76
+      ],
+      "n": 360,
+      "display": "OURS-v6-dpo2"
+    },
+    "v6_dpo": {
+      "tier_policy_match": 0.8806,
+      "per_tier": {
+        "beginner": 0.8583,
+        "intermediate": 0.8083,
+        "advanced": 0.975
+      },
+      "per_tier_counts": {
+        "beginner": [
+          103,
+          120
+        ],
+        "intermediate": [
+          97,
+          120
+        ],
+        "advanced": [
+          117,
+          120
+        ]
+      },
+      "move_sound": 0.9833,
+      "named_rate": 0.9833,
+      "format_rate": 0.9194,
+      "distinct_rate": 0.9868,
+      "distinct_counts": [
+        75,
+        76
+      ],
+      "n": 360,
+      "display": "OURS-v6-dpo"
+    },
+    "v4": {
+      "tier_policy_match": 0.8611,
+      "per_tier": {
+        "beginner": 0.8583,
+        "intermediate": 0.75,
+        "advanced": 0.975
+      },
+      "per_tier_counts": {
+        "beginner": [
+          103,
+          120
+        ],
+        "intermediate": [
+          90,
+          120
+        ],
+        "advanced": [
+          117,
+          120
+        ]
+      },
+      "move_sound": 0.9833,
+      "named_rate": 0.9833,
+      "format_rate": 0.9389,
+      "distinct_rate": 0.9868,
+      "distinct_counts": [
+        75,
+        76
+      ],
+      "n": 360,
+      "display": "OURS-v4 (shipped)"
+    },
+    "base": {
+      "tier_policy_match": 0.4278,
+      "per_tier": {
+        "beginner": 0.4417,
+        "intermediate": 0.4083,
+        "advanced": 0.4333
+      },
+      "per_tier_counts": {
+        "beginner": [
+          53,
+          120
+        ],
+        "intermediate": [
+          49,
+          120
+        ],
+        "advanced": [
+          52,
+          120
+        ]
+      },
+      "move_sound": 0.9694,
+      "named_rate": 0.975,
+      "format_rate": 0.975,
+      "distinct_rate": 0.3026,
+      "distinct_counts": [
+        23,
+        76
+      ],
+      "n": 360,
+      "display": "BASE (Qwen3-32B untuned)"
+    },
+    "gpt": {
+      "tier_policy_match": 0.5778,
+      "per_tier": {
+        "beginner": 0.5833,
+        "intermediate": 0.5333,
+        "advanced": 0.6167
+      },
+      "per_tier_counts": {
+        "beginner": [
+          70,
+          120
+        ],
+        "intermediate": [
+          64,
+          120
+        ],
+        "advanced": [
+          74,
+          120
+        ]
+      },
+      "move_sound": 1.0,
+      "named_rate": 1.0,
+      "format_rate": 1.0,
+      "distinct_rate": 0.2237,
+      "distinct_counts": [
+        17,
+        76
+      ],
+      "n": 360,
+      "display": "GPT-5.5"
+    },
+    "claude": {
+      "tier_policy_match": 0.6139,
+      "per_tier": {
+        "beginner": 0.5583,
+        "intermediate": 0.575,
+        "advanced": 0.7083
+      },
+      "per_tier_counts": {
+        "beginner": [
+          67,
+          120
+        ],
+        "intermediate": [
+          69,
+          120
+        ],
+        "advanced": [
+          85,
+          120
+        ]
+      },
+      "move_sound": 1.0,
+      "named_rate": 1.0,
+      "format_rate": 1.0,
+      "distinct_rate": 0.3026,
+      "distinct_counts": [
+        23,
+        76
+      ],
+      "n": 360,
+      "display": "Claude Opus 4.8"
+    },
+    "gemini": {
+      "tier_policy_match": 0.6139,
+      "per_tier": {
+        "beginner": 0.5583,
+        "intermediate": 0.575,
+        "advanced": 0.7083
+      },
+      "per_tier_counts": {
+        "beginner": [
+          67,
+          120
+        ],
+        "intermediate": [
+          69,
+          120
+        ],
+        "advanced": [
+          85,
+          120
+        ]
+      },
+      "move_sound": 1.0,
+      "named_rate": 1.0,
+      "format_rate": 1.0,
+      "distinct_rate": 0.1711,
+      "distinct_counts": [
+        13,
+        76
+      ],
+      "n": 360,
+      "display": "Gemini 3.1 Pro"
+    }
+  }
+}

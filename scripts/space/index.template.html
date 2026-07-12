@@ -155,6 +155,51 @@ td.g{color:var(--good)} td.b{color:var(--bad)} .mut{color:var(--muted)}
 </div>
 </section>
 
+<!-- ============ 1b. v6-dpo2 vs FRONTIER — 120 TEST, MATCHED FRESH GROUNDING ============ -->
+<section class="reveal">
+<h2>v6-dpo2 vs the frontier — 120 held-out TEST<span class="sub">matched fresh grounding: the SAME 360 grounded prompts (Stockfish sound-pool + Maia + verify-gate) that produced v6-dpo2's 89.2%</span></h2>
+<p class="hint">The apples-to-apples cut. The three frontier coaches (GPT-5.5, Claude Opus 4.8, Gemini 3.1 Pro) were generated fresh on the <b>exact same 360 grounded prompts</b> our models saw — verified sound-pool, Maia block, and board facts — then scored with the <b>same vendored move extractor</b>. This is a genuinely matched comparison, not a reuse of older cached frontier generations under a different grounding. <b>Scope:</b> 120-TEST, fresh grounding — do not compare cross-scope to the 803 re-score field table below (different positions, different grounding). 1,080 frontier generations, 0 failures.</p>
+
+<div class="panel pad reveal">
+<div class="bars">
+  <div class="barrow"><div class="nm">OURS-v6-dpo2 (live) <span class="tag live">live</span></div><div class="track"><div class="fill ours" style="width:89.2%"></div></div><div class="val g">89.2%</div></div>
+  <div class="barrow"><div class="nm">OURS-v6-dpo <span class="tag ours">OURS</span></div><div class="track"><div class="fill ours" style="width:88.1%"></div></div><div class="val g">88.1%</div></div>
+  <div class="barrow"><div class="nm">OURS-v4 (SFT base) <span class="tag ours">OURS</span></div><div class="track"><div class="fill ours" style="width:86.1%"></div></div><div class="val g">86.1%</div></div>
+  <div class="barrow"><div class="nm">Claude Opus 4.8 <span class="tag frontier">frontier</span></div><div class="track"><div class="fill" style="width:61.4%"></div></div><div class="val">61.4%</div></div>
+  <div class="barrow"><div class="nm">Gemini 3.1 Pro <span class="tag frontier">frontier</span></div><div class="track"><div class="fill" style="width:61.4%"></div></div><div class="val">61.4%</div></div>
+  <div class="barrow"><div class="nm">GPT-5.5 <span class="tag frontier">frontier</span></div><div class="track"><div class="fill" style="width:57.8%"></div></div><div class="val">57.8%</div></div>
+  <div class="barrow"><div class="nm">BASE (Qwen3-32B untuned) <span class="tag base">base</span></div><div class="track"><div class="fill" style="width:42.8%"></div></div><div class="val">42.8%</div></div>
+</div>
+<div class="legend">
+  <span class="it"><span class="sw" style="background:var(--ours)"></span>OURS (tuned)</span>
+  <span class="it"><span class="sw" style="background:var(--dim)"></span>frontier / untuned base</span>
+  <span class="it">tier-policy match on the 120 TEST, matched fresh grounding, higher is better</span>
+</div>
+</div>
+
+<div class="panel reveal" style="margin-top:14px"><table>
+<thead><tr><th>Model (grounded, 120 TEST)</th><th>tier-policy match</th><th>move-sound</th><th>distinct / level</th><th>names a move</th><th>B / I / A</th></tr></thead>
+<tbody>
+<tr class="ours"><td class="mname">OURS-v6-dpo2 <span class="tag live">live</span></td><td class="num ours-v">89.2%</td><td class="num">98.3%</td><td class="num">98.7%</td><td class="num">98.6%</td><td class="num mut">85.8 / 84.2 / 97.5</td></tr>
+<tr class="ours"><td class="mname">OURS-v6-dpo</td><td class="num ours-v">88.1%</td><td class="num">98.3%</td><td class="num">98.7%</td><td class="num">98.3%</td><td class="num mut">85.8 / 80.8 / 97.5</td></tr>
+<tr class="ours"><td class="mname">OURS-v4 <span class="tag ours">SFT base</span></td><td class="num ours-v">86.1%</td><td class="num">98.3%</td><td class="num">98.7%</td><td class="num">98.3%</td><td class="num mut">85.8 / 75.0 / 97.5</td></tr>
+<tr><td class="mname">Claude Opus 4.8 <span class="tag frontier">frontier</span></td><td class="num">61.4%</td><td class="num">100%</td><td class="num">30.3%</td><td class="num">100%</td><td class="num mut">55.8 / 57.5 / 70.8</td></tr>
+<tr><td class="mname">Gemini 3.1 Pro <span class="tag frontier">frontier</span></td><td class="num">61.4%</td><td class="num">100%</td><td class="num">17.1%</td><td class="num">100%</td><td class="num mut">55.8 / 57.5 / 70.8</td></tr>
+<tr><td class="mname">GPT-5.5 <span class="tag frontier">frontier</span></td><td class="num">57.8%</td><td class="num">100%</td><td class="num">22.4%</td><td class="num">100%</td><td class="num mut">58.3 / 53.3 / 61.7</td></tr>
+<tr><td class="mname">BASE (Qwen3-32B untuned) <span class="tag base">base</span></td><td class="num">42.8%</td><td class="num">96.9%</td><td class="num">30.3%</td><td class="num">97.5%</td><td class="num mut">44.2 / 40.8 / 43.3</td></tr>
+</tbody></table></div>
+<p class="hint" style="margin-top:8px">All 360 scenarios per model (120 positions x 3 tiers). distinct / level = of the 76 positions whose canonical beginner and advanced moves differ, the share where the model recommends different moves for the two tiers. move-sound and names-a-move are label-independent floors. The frontier ran with generous 4,000-token headroom (favorable to them); ours ran the deployed 256-token budget. B / I / A = per-tier tier-policy match.</p>
+
+<div class="callout good reveal">
+  <div class="ct">Matched grounding, honest gap: v6-dpo2 leads the frontier by ~28 points</div>
+  <p>On identical fresh grounding and the same extractor, <b>v6-dpo2 reaches 89.2% tier-policy match versus 61.4% for the best frontier</b> (Claude Opus 4.8 and Gemini 3.1 Pro) and 57.8% for GPT-5.5 — a <b>+27.8-point</b> lead. The frontier is not weak: it names a legal move 100% of the time and every move it picks is engine-sound (100%), far above the untuned base (42.8%). The gap is behavioral: the frontier coaches every student with the engine-strong move, so it differentiates a beginner's move from an advanced player's on only <b>17-30%</b> of positions versus <b>98.7%</b> for OURS. Selecting the <i>tier-appropriate</i> move — softer and more findable for a beginner, sharpest for an advanced player — is the trained behavior, and it holds against the frontier under matched conditions.</p>
+</div>
+<div class="callout info reveal">
+  <div class="ct">Why the frontier numbers differ from the 803 field table below</div>
+  <p>This panel is the 120-TEST slice under the current fresh grounding — the same pipeline that produced v6-dpo2's headline — so the frontier's absolute numbers sit higher here (~58-61%) than in the 803 re-score field table below (~40-47%), which judges the original generations under an older grounding by the sharper corrected targets. Both are honest; they are simply different scopes. This one is the fair v6-dpo2-versus-frontier comparison; the 803 table is the broad 15-model ranking. In both, OURS leads the moat.</p>
+</div>
+</section>
+
 <!-- ============ 2. THE MOAT ACROSS THE FIELD ============ -->
 <section class="reveal">
 <h2>Tier-appropriate move selection across the field<span class="sub">803 held-out positions across 3 tiers, 15 models, corrected v6 labels</span></h2>

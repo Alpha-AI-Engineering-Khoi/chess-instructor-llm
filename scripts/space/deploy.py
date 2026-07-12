@@ -51,6 +51,13 @@ advanced), grounded by Stockfish, Maia, and a truthfulness verifier.
   the model behind the full reproducible evaluation; **v6-dpo2** is the live-served
   best-DPO refinement of v4. Grounded tier-policy match runs 42.8% (base) to 89.2%
   (v6-dpo2), a +0.433 tuned-over-base gap.
+- **v6-dpo2 vs the frontier, matched fresh grounding** (120 held-out TEST): the three
+  frontier coaches (GPT-5.5, Claude Opus 4.8, Gemini 3.1 Pro) were generated on the SAME
+  grounding pipeline that produced v6-dpo2's 89.2% and scored with the same extractor —
+  the fair apples-to-apples cut, not a reuse of older cached gens. v6-dpo2 leads
+  tier-policy match **89.2% vs 57.8-61.4%** for the frontier (+27.8 over the best);
+  the frontier stays 100% sound and 100% names-a-move but differentiates tiers on only
+  17-30% of positions (vs 98.7% for OURS).
 - **The moat across the field:** tier-appropriate move selection over 803 held-out,
   zero-leakage positions for all 15 models under corrected v6 labels. OURS leads the
   field (family average 0.486, ahead of frontier 0.437 and open 0.310); best open coach
@@ -162,7 +169,7 @@ def main() -> int:
             repo_id=SPACE_REPO,
             repo_type="space",
             operations=ops,
-            commit_message="Revamp: honest v4/v6-dpo2 framing, corrected v6 numbers, tier-policy match, Tournament Hall design",
+            commit_message="Add v6-dpo2-vs-frontier matched-grounding panel (120 held-out TEST; frontier regenerated on the same grounding pipeline, honestly scoped)",
         ),
         "create_commit",
     )
