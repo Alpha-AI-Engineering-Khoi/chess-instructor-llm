@@ -131,7 +131,7 @@ export default function Showdown() {
               </span>
             )}
             <Link
-              href="/showcase"
+              href="/showcase.html"
               className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-signal/12 px-3.5 text-sm font-medium text-signal ring-1 ring-signal/40 transition-colors hover:bg-signal/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
             >
               Showcase
@@ -171,7 +171,7 @@ export default function Showdown() {
             comparison — OURS (v4) vs the frontier on genuine tier forks, with the live re-run
             (now v6-dpo2) — see the{" "}
             <Link
-              href="/showcase"
+              href="/showcase.html"
               className="text-signal underline decoration-dotted underline-offset-2 transition-colors hover:text-ink"
             >
               Multi-Model Showcase

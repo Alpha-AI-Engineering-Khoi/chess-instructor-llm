@@ -510,14 +510,14 @@ export default function Studio() {
       <header className="flex flex-col gap-5">
         <div className="flex items-center justify-end gap-2">
           <Link
-            href="/showdown"
+            href="/showdown.html"
             className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium text-muted ring-1 ring-[color:var(--border)] transition-colors hover:text-ink hover:ring-[color:var(--field-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
           >
             Showdown list
             <span aria-hidden className="text-faint">›</span>
           </Link>
           <Link
-            href="/showcase"
+            href="/showcase.html"
             className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-signal/12 px-3.5 text-sm font-medium text-signal ring-1 ring-signal/40 transition-colors hover:bg-signal/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
           >
             Multi-Model Showcase
@@ -547,12 +547,14 @@ export default function Studio() {
             move chosen for your level</span> and a short <span className="text-ink">principle
             tag</span> for why. Its one job is selecting the tier-appropriate move; the full
             explanation is an <span className="text-ink">optional layer</span> underneath, not the
-            headline. On the held-out benchmark it is substantially more reliable at this{" "}
-            <span className="text-ink tnum">(76.7% tuned vs 34.7% base / 55.3% best frontier)</span>.{" "}
+            headline. On the original v4-era 120-position held-out eval it is substantially more
+            reliable at this{" "}
+            <span className="text-ink tnum">(76.7% tuned vs 34.7% base / 55.3% best frontier)</span>;{" "}
+            the corrected v6 numbers are on the Benchmark Space.{" "}
             <span className="text-faint">
               See the{" "}
               <Link
-                href="/showcase"
+                href="/showcase.html"
                 className="text-muted underline decoration-dotted underline-offset-2 transition-colors hover:text-ink"
               >
                 multi-model comparison

@@ -1174,7 +1174,7 @@ const NOTES: Record<string, string> = {
   test: "Test sample: held-out positions the model never trained on. This is the honest measure of the coach.",
   // Item 7: make explicit that tier-fit is a TARGET-MATCH, not an emergent judgment.
   tier_fit: "tier-fit = the move matches the canonical tier-appropriate target OURS is trained to produce for that rating band: a trained target match, not an emergent capability.",
-  fabricated: "Every model ships 0% user-visible fabrication after the verify-and-regenerate gate: a fairness floor applied equally to all, not a per-model differentiator. Where models actually differ is the semantic-judge truthfulness residual below.",
+  fabricated: "Every model ships zero verifier-detectable mechanical violations after the verify-and-regenerate gate: a fairness floor applied equally to all, not a per-model differentiator. Where models actually differ is the semantic-judge truthfulness residual below.",
   council: "Blinded council of judges grades each answer for move correctness and instructiveness, models anonymized.",
 };
 
@@ -1430,10 +1430,11 @@ export function gateBadge(cell: ViewCell): GateBadgeInfo | null {
 /* v4 (Qwen3-32B) submission. Its static dataset was a prior-generation  */
 /* (1.7B / v2) judge study; no v4 semantic-truth study exists, so rather  */
 /* than mislabel v2 numbers as v4 we removed it. The faithfulness         */
-/* fairness-floor message (0% user-visible board-fact fabrication after   */
-/* the gate) still lives in the control bar + leaderboard, and where OURS */
-/* genuinely trails (coaching prose) is shown live in the leaderboard's   */
-/* council instructiveness column, straight from showcase.json.           */
+/* fairness-floor message (zero verifier-detectable mechanical violations */
+/* after the gate) still lives in the control bar + leaderboard, and      */
+/* where OURS genuinely trails (coaching prose) is shown live in the      */
+/* leaderboard's council instructiveness column, straight from            */
+/* showcase.json.                                                         */
 /* ------------------------------------------------------------------ */
 
 /* ------------------------------------------------------------------ */

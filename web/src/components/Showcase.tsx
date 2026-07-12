@@ -494,7 +494,7 @@ function ShowcaseHeader({
         </Link>
         <div className="flex items-center gap-3">
           <Link
-            href="/showdown"
+            href="/showdown.html"
             className="inline-flex min-h-9 items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
           >
             Showdown list
@@ -547,9 +547,10 @@ function ShowcaseHeader({
               level-appropriate move is the behavior a prompt on the same weights can’t reproduce
               (computed in your browser from {headline.ours.cells.toLocaleString()} benchmark cells
               in this curated slice).
-              On the full held-out eval, OURS’s tier-fit is{" "}
+              On the original v4-era 120-position held-out eval, OURS’s tier-fit is{" "}
               <span className="text-ink tnum">76.7%</span> vs the base’s{" "}
-              <span className="text-ink tnum">34.7%</span> — the top of every model measured.
+              <span className="text-ink tnum">34.7%</span> (the top of every model measured; corrected
+              v6 numbers are on the Benchmark Space).
             </>
           ) : (
             <>
@@ -765,8 +766,8 @@ function ControlBar({
         three <span className="text-muted">frontier</span> models only (GPT-5.5 / Claude / Gemini)
         on the sound tier move: OURS’s own <span className="text-muted">BASE</span> baseline and the
         open field are excluded from win credit, so the banner and these counts use one rule. Every
-        shipped cell is gated, so deterministic board-fact fabrication is{" "}
-        <span className="text-muted">0% for all models</span> (a fairness floor, not a ranking axis);
+        shipped cell is gated, so every model ships{" "}
+        <span className="text-muted">zero verifier-detectable mechanical violations</span> (a fairness floor, not a ranking axis);
         the measured per-model metrics — including the council grades where OURS trails on the
         coaching prose — are in the leaderboard below.
       </p>
@@ -846,8 +847,8 @@ function LensLegend() {
           </p>
           <p className="text-muted">
             Faithfulness is a fairness floor, not a ranking axis: after the verify-and-regenerate
-            gate, user-visible board-fact fabrication is{" "}
-            <span className="font-medium">0% for all models</span>. Where OURS genuinely trails is the
+            gate, every model ships{" "}
+            <span className="font-medium">zero verifier-detectable mechanical violations</span>. Where OURS genuinely trails is the
             coaching prose — see the council instructiveness grades in the leaderboard below.
           </p>
         </div>
@@ -1518,8 +1519,8 @@ function VerdictRow({ model, cell, tier }: { model: ViewModel; cell: ViewCell; t
           </p>
           <p>
             <span className="font-medium">faithful</span>: the explanation passed the deterministic
-            board-fact gate. That gate is a fairness floor (0% fabrication for every shipped cell),
-            not a guarantee of full semantic truth.
+            board-fact gate. That gate is a fairness floor (zero verifier-detectable mechanical
+            violations for every shipped cell), not a guarantee of full semantic truth.
           </p>
         </InfoTip>
       </div>
@@ -2389,10 +2390,11 @@ function LeaderboardPanel({
       <p className="max-w-4xl text-xs leading-relaxed text-muted">
         Every number here is computed in your browser from the loaded benchmark cells: nothing is
         hardcoded, so it always matches the OURS version on screen. These rates are over the{" "}
-        <span className="text-ink">curated fork positions</span> shown here — a hand-picked subset where
-        OURS forks by level — so OURS’s tier-fit reads higher than on the full held-out eval (where it
-        is <span className="text-ink tnum">76.7%</span> vs the base’s{" "}
-        <span className="text-ink tnum">34.7%</span>, still #1). The axis this product competes on is
+        <span className="text-ink">curated fork positions</span> shown here (a hand-picked subset where
+        OURS forks by level), so OURS’s tier-fit reads higher than on the original v4-era 120-position
+        held-out eval (where it is <span className="text-ink tnum">76.7%</span> vs the base’s{" "}
+        <span className="text-ink tnum">34.7%</span>, still #1; corrected v6 numbers are on the
+        Benchmark Space). The axis this product competes on is
         the leftmost: <span className="text-ink">tier-appropriate move selection</span> (tier-fit),
         where <span className="text-signal">OURS</span> leads its own untuned{" "}
         <span className="text-ink">BASE</span> and the frontier. The{" "}
@@ -2431,7 +2433,7 @@ function LeaderboardPanel({
         </table>
       </div>
       <p className="text-[10px] leading-relaxed text-faint">
-        Deterministic board-fact fabrication is <span className="text-muted">0% for every model</span>{" "}
+        Every model ships <span className="text-muted">zero verifier-detectable mechanical violations</span>{" "}
         after the verify-and-regenerate gate (the fairness floor), so it isn’t a ranking column here.{" "}
         <span className="text-[color:var(--caution)]">⚠</span> marks a partial model (fewer cells,
         provider throttling); its rates are over the cells it does have.

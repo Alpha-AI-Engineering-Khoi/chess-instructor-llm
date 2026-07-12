@@ -81,9 +81,10 @@ export default function EvidenceBar() {
             <span className="font-mono text-muted tnum">34.7%</span>{" "}
             <span className="text-muted">base</span> →{" "}
             <span className="font-mono font-semibold text-signal tnum">76.7%</span>{" "}
-            <span className="text-ink">tuned</span> on the strict held-out eval &mdash; the top
-            tier-fit of every model measured, past the best frontier at{" "}
-            <span className="font-mono text-ink tnum">55.3%</span>. On the{" "}
+            <span className="text-ink">tuned</span> on the original v4-era 120-position held-out eval,
+            the top tier-fit of every model measured, past the best frontier at{" "}
+            <span className="font-mono text-ink tnum">55.3%</span> (corrected v6 numbers are on the
+            Benchmark Space). On the{" "}
             <span className="font-mono text-ink tnum">62</span> held-out positions where OURS diverges
             from the best frontier, it wins the tier-appropriate move{" "}
             <span className="font-mono font-semibold text-signal tnum">51&ndash;5</span> (6 ties).

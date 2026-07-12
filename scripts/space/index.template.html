@@ -106,7 +106,7 @@ td.g{color:var(--good)} td.b{color:var(--bad)} .mut{color:var(--muted)}
 <div class="label">Evaluation dashboard</div>
 <h1>Chess-Coach Benchmark</h1>
 <p class="framing">We optimize for one thing: <b>tier-appropriate move selection</b> (the moat). Safety, no-jargon, and faithfulness are <b class="ts">table-stakes</b> floors every competent coach clears. Faithfulness is guaranteed at inference by a deterministic verify-and-regenerate gate, so verifier-detectable fabrication is <b class="ts">0 for every model</b>.</p>
-<p class="lede">OURS is a <b>Qwen3-32B QLoRA</b> chess coach grounded by Stockfish, Maia, and a truthfulness verifier. <b>v4</b> is our SFT base: the model behind the full reproducible evaluation and the starting point for the DPO refinements. <b>v6-dpo2</b> is the live-served best-DPO refinement of v4. All figures are the corrected v6 benchmark, verbatim from <code>RESULTS_STAGE4_CORRECTED.md</code> and <code>RESULTS_FULL_EVAL_803.md</code>.</p>
+<p class="lede">OURS is a <b>Qwen3-32B QLoRA</b> chess coach grounded by Stockfish, Maia, and a truthfulness verifier. <b>v4</b> is our SFT base: the model behind the full reproducible evaluation and the starting point for the DPO refinements. <b>v6-dpo2</b> is the live-served best-DPO refinement of v4. All figures are the corrected v6 benchmark; the provenance note at the foot of the page lists the exact source for each panel.</p>
 <div class="pills">
   <span class="pill ours"><b>OURS</b> leads the moat</span>
   <span class="pill">Frontier leads prose</span>
@@ -320,7 +320,7 @@ td.g{color:var(--good)} td.b{color:var(--bad)} .mut{color:var(--muted)}
     <a href="https://huggingface.co/khoilamalphaai/chess-coach-32b-v6-distill">chess-coach-32b-v6-distill</a></p>
   <p class="fl"><b>Data and artifacts:</b> companion dataset <a href="https://huggingface.co/datasets/khoilamalphaai/chess-coach-benchmark">chess-coach-benchmark</a> (per-model generations, objective flags, council sheet, corrected v6 labels).</p>
   <p class="fl"><b>Reproduce:</b> the 803-field re-score is free and label-only (<code>python scripts/rescore_field_v6.py</code>, about 7 seconds, no GPU); the 120-TEST lineup is one controlled session (<code>scripts/stage4_eval.py</code>).</p>
-  <p class="mut">Provenance: numbers are verbatim from <code>RESULTS_STAGE4_CORRECTED.md</code> (120 TEST) and <code>RESULTS_FULL_EVAL_803.md</code> (803 field). Deterministic metrics use the vendored move extractor; instructiveness is a blinded, cross-family LLM-judge proxy with self-preference measured. This Space displays numbers only, with no runtime or GPU.</p>
+  <p class="mut">Provenance: the v6-dpo2-vs-frontier matched-grounding panel and the 120-TEST lineup (the +27.8 gap) are from <code>data/benchmark_gap803/stage4_frontier/scores.json</code> and <code>docs/VERSION_COMPARISON.md</code> section 3; the 803-field table is from <code>RESULTS_FULL_EVAL_803.md</code>; the corrected v6 labels are documented in <code>RESULTS_STAGE4_CORRECTED.md</code>. Deterministic metrics use the vendored move extractor; instructiveness is a blinded, cross-family LLM-judge proxy with self-preference measured. This Space displays numbers only, with no runtime or GPU.</p>
 </div>
 
 </div></body></html>
