@@ -107,6 +107,10 @@ data/benchmark_honest_1p7_bak/
 data/benchmark_gap803/stage4_eval_inputs.jsonl
 data/benchmark_gap803/stage4_council/generations.jsonl
 data/benchmark_gap803/stage4_council/scenarios.jsonl
+# Full-803 grounded eval prompts for the Colab v6-dpo2 run: re-derivable via
+# scripts/precompute_grounded_prompts_803.py and mirrored on HF dataset
+# khoilamalphaai/chess-coach-803-eval-prompts (the notebook downloads it from there).
+data/benchmark_gap803/eval803_grounded_prompts.jsonl
 
 # Always keep folder-structure placeholders
 !**/.gitkeep
