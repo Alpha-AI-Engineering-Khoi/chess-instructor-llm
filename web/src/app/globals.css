@@ -482,7 +482,8 @@ body .cg-wrap svg g:has(> line[stroke="#eaa93a" i]) {
   container-type: inline-size !important;
 }
 body .cg-wrap coords {
-  font-size: min(9px, 2cqw) !important;
+  font-size: min(11px, 2.6cqw) !important;
+  font-weight: 700 !important;
 }
 body .cg-wrap coords.ranks {
   top: -2.2222em !important;
@@ -494,23 +495,20 @@ body .cg-wrap coords.files {
   left: 2.6667em !important;
   height: 1.7778em !important;
 }
-/* Coordinate contrast, contextual per square + board orientation: reuse
-   chessground's own orientation-aware parity selectors (the same scheme Lichess
-   ships) so each rank/file label is colored to contrast with the square it sits
-   on. The labels that land on light (chalk) squares get a dark ink; those on
-   dark (walnut) squares get cream. Replaces the earlier forced-dark + text-shadow
-   hack, which flattened every label to one color plus a halo. */
-body .cg-wrap.orientation-white .ranks :nth-child(odd),
-body .cg-wrap.orientation-white .files :nth-child(even),
-body .cg-wrap.orientation-black .ranks :nth-child(even),
-body .cg-wrap.orientation-black .files :nth-child(odd) {
-  color: oklch(0.3 0.03 60) !important;
-  text-shadow: none !important;
-}
-body .cg-wrap.orientation-white .ranks :nth-child(even),
-body .cg-wrap.orientation-white .files :nth-child(odd),
-body .cg-wrap.orientation-black .ranks :nth-child(odd),
-body .cg-wrap.orientation-black .files :nth-child(even) {
-  color: oklch(0.93 0.02 90) !important;
-  text-shadow: none !important;
+/* Coordinate legibility: a single decisive high-contrast scheme that reads on
+   BOTH the cream (light) and walnut (dark) squares of the Tournament Hall board.
+   A warm near-white label is carried by a full dark OUTLINE (multi-directional
+   text-shadow + soft glow) so the digits/letters pop regardless of the square
+   underneath — no reliance on per-square parity. Replaces the earlier
+   "contextual contrast", whose mid-tone inks with text-shadow:none were too
+   faint to see on the felt board (user could not read them). */
+body .cg-wrap coords coord {
+  color: #fcf7ea !important;
+  font-weight: 700 !important;
+  text-shadow:
+    -1px -1px 0 rgba(23, 16, 9, 0.95),
+    1px -1px 0 rgba(23, 16, 9, 0.95),
+    -1px 1px 0 rgba(23, 16, 9, 0.95),
+    1px 1px 0 rgba(23, 16, 9, 0.95),
+    0 0 3px rgba(23, 16, 9, 0.9) !important;
 }
