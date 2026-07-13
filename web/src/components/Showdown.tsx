@@ -145,11 +145,9 @@ export default function Showdown() {
           </h1>
           <p className="max-w-3xl text-sm leading-relaxed text-muted sm:text-base">
             Every held-out position, with each model&rsquo;s recommended move on the same grounded
-            input. A move is <span className="text-ink">tier-fit</span> when it is the human-findable
-            sound move for that tier; <span className="text-ink">fabricated</span> when the
-            faithfulness verifier caught a false board fact. Rows where{" "}
-            <span className="text-signal">OURS wins</span> (sound + tier-fit where a frontier model
-            isn&rsquo;t, or faithful where a frontier model invents a fact) are surfaced first.
+            input. Rows where <span className="text-signal">OURS wins</span> — sound and tier-fit
+            where a frontier model isn&rsquo;t, or faithful where one invents a fact — are surfaced
+            first.
           </p>
         </div>
 

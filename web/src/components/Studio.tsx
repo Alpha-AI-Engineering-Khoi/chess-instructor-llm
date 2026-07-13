@@ -18,7 +18,6 @@ import {
   moveToUci,
   sideToMove,
   stepSanLine,
-  uciToSan,
   uciToSquares,
   validateFen,
   type Orientation,
@@ -300,16 +299,11 @@ export default function Studio() {
   // library, and tier switching all stay live while a call runs.
   const activeLoading = activeStatus === "loading";
 
-  const toMove = useMemo(() => sideToMove(fen), [fen]);
   // OURS identity parsed from the live coach response (never hardcoded), so the
-  // "· vN" chip tracks whatever model the backend is actually serving.
+  // version chip tracks whatever model the backend is actually serving.
   const oursLabel = useMemo(
     () => (activeResult ? deriveOursLabel(activeResult.meta.model) : null),
     [activeResult],
-  );
-  const studentSan = useMemo(
-    () => (studentUci ? uciToSan(coachedFen, studentUci) : null),
-    [coachedFen, studentUci],
   );
   const draftUci = useMemo(
     () => (moveDraft.trim() ? moveToUci(fen, moveDraft) : null),
@@ -565,31 +559,34 @@ export default function Studio() {
           </Link>
         </div>
 
-        <div className="flex max-w-3xl flex-col gap-2.5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex w-fit items-center rounded-full bg-signal/12 px-2.5 py-1 text-[11px] font-medium text-signal ring-1 ring-signal/30">
-              One behavior: move selection
-            </span>
-            {oursLabel?.version && (
-              <span className="rounded-full px-2.5 py-1 font-mono text-[11px] text-signal ring-1 ring-signal/40 tnum">
-                {oursLabel.badge}
-              </span>
-            )}
-          </div>
+        <div className="flex max-w-3xl flex-wrap items-center gap-x-3 gap-y-2">
           <h1 className="text-2xl font-semibold leading-tight tracking-tight text-balance text-ink sm:text-[2rem]">
-            The fine-tune picks the level-appropriate move far more reliably than its base or the
-            frontier.
+            The right move for your level
           </h1>
+          {oursLabel?.version && (
+            <span
+              className="rounded-full px-2.5 py-1 font-mono text-[11px] text-signal ring-1 ring-signal/40 tnum"
+              title="The live 'Run live' coach and this chip are v6-dpo2; the multi-model comparison + council numbers are the evaluated OURS-v4."
+            >
+              live · {oursLabel.version}
+            </span>
+          )}
         </div>
 
-        {/* GRADER 30-SECOND ORIENTATION: the one behavior + the three-step loop,
-            so a first-time viewer knows exactly what to do and what to read. */}
-        <div className="flex flex-col gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] p-4 sm:flex-row sm:items-center sm:gap-5">
-          <p className="text-sm leading-relaxed text-muted sm:max-w-[15rem]">
-            <span className="font-medium text-ink">How it works.</span> The model&apos;s one job is to
-            pick the move that fits your rating, not to lecture.
-          </p>
-          <ol className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-3">
+        {/* GRADER 30-SECOND ORIENTATION: the one behavior + three-step loop, in a
+            collapsed-by-default toggle so the hero stays clean. */}
+        <details className="group rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)]">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
+            <span aria-hidden className="text-faint transition-transform group-open:rotate-90">
+              ›
+            </span>
+            How it works
+          </summary>
+          <div className="flex flex-col gap-3 px-4 pb-4 sm:flex-row sm:items-center sm:gap-5">
+            <p className="text-sm leading-relaxed text-muted sm:max-w-[15rem]">
+              The model&apos;s one job is to pick the move that fits your rating, not to lecture.
+            </p>
+            <ol className="grid flex-1 grid-cols-1 gap-2 sm:grid-cols-3">
             {[
               ["Set a position", "Pick a preset or study, or paste a FEN."],
               ["Pick your level", "Beginner, Intermediate, or Advanced."],
@@ -608,8 +605,9 @@ export default function Studio() {
                 </span>
               </li>
             ))}
-          </ol>
-        </div>
+            </ol>
+          </div>
+        </details>
       </header>
 
       {/* Board-centric console. Desktop: board + controls in the left column, the
@@ -635,19 +633,8 @@ export default function Studio() {
             onMove={onBoardMove}
           />
 
-          {/* Board toolbar */}
-          <div className="flex min-h-11 flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted">
-                {toMove === "white" ? "White" : "Black"} to move
-              </span>
-              {studentSan && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--surface-tertiary)] px-2.5 py-1 text-xs text-muted">
-                  your move
-                  <span className="font-mono text-[color:var(--your-move)] tnum">{studentSan}</span>
-                </span>
-              )}
-            </div>
+          {/* Board toolbar: board utilities only (side-to-move status removed). */}
+          <div className="flex min-h-11 flex-wrap items-center justify-end gap-3">
             <div className="flex items-center gap-2">
               {/* Copy the FEN of the position currently displayed (current ply). */}
               <CopyFenButton fen={displayFen} className="min-h-11" />
@@ -721,11 +708,7 @@ export default function Studio() {
               ) : activeStatus === "error" ? (
                 <ErrorPanel error={activeError} onRetry={() => runLiveTier(tier)} />
               ) : (
-                <IdlePanel
-                  toMove={toMove}
-                  studentSan={studentSan}
-                  onRunLive={runLiveActive}
-                />
+                <IdlePanel />
               )}
             </div>
           </div>
@@ -784,15 +767,15 @@ export default function Studio() {
                     </Tooltip.Content>
                   </Tooltip>
                 )}
-                <p className="text-[11px] leading-relaxed text-faint" aria-live="polite">
-                  {activeLoading
-                    ? wakingCoach
+                {activeLoading && (
+                  <p className="text-[11px] leading-relaxed text-faint" aria-live="polite">
+                    {wakingCoach
                       ? `Waking the hosted coach — first call after idle takes ~2–3 min${
                           wakingCoach.elapsedSec > 0 ? ` · ${wakingCoach.elapsedSec}s elapsed` : ""
                         }.`
-                      : "Running the shown level through the live coach…"
-                    : "Optional live pass on the hosted coach (Modal, scale-to-zero). The move shown is precomputed; a live run replaces just this level."}
-                </p>
+                      : "Running the shown level through the live coach…"}
+                  </p>
+                )}
               </div>
 
               <Separator />
@@ -837,9 +820,14 @@ export default function Studio() {
 
               <Separator />
 
-              {/* Advanced: paste any FEN or set a move (always available) */}
-              <div>
-                <span className="text-sm font-medium text-muted">Paste a FEN or set a move</span>
+              {/* Advanced: paste any FEN or set a move (collapsed by default) */}
+              <details className="group">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-sm font-medium text-muted transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
+                  <span aria-hidden className="text-faint transition-transform group-open:rotate-90">
+                    ›
+                  </span>
+                  Paste a FEN or set a move
+                </summary>
                 <div className="mt-3 flex flex-col gap-3">
                   <TextField
                     className="flex flex-col gap-1.5"
@@ -939,7 +927,7 @@ export default function Studio() {
                     )}
                   </div>
                 </div>
-              </div>
+              </details>
             </div>
           </div>
         </section>
@@ -1031,15 +1019,7 @@ function ErrorPanel({ error, onRetry }: { error: string | null; onRetry: () => v
   );
 }
 
-function IdlePanel({
-  toMove,
-  studentSan,
-  onRunLive,
-}: {
-  toMove: Orientation;
-  studentSan: string | null;
-  onRunLive?: () => void;
-}) {
+function IdlePanel() {
   const steps = [
     "Set a position, or pick one from the study library.",
     "Drag your move onto the board to mark what you’d play.",
@@ -1066,24 +1046,6 @@ function IdlePanel({
           </li>
         ))}
       </ol>
-      {onRunLive && (
-        <div>
-          <Button variant="primary" size="lg" className="min-h-12" onPress={onRunLive}>
-            Run live
-          </Button>
-        </div>
-      )}
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-[color:var(--separator)] pt-5 text-sm text-muted">
-        {toMove === "white" ? "White" : "Black"} to move
-        {studentSan && (
-          <>
-            <span className="text-faint">·</span>
-            <span>
-              your move <span className="font-mono text-ink tnum">{studentSan}</span>
-            </span>
-          </>
-        )}
-      </div>
     </div>
   );
 }

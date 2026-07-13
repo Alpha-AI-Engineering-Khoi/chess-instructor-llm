@@ -521,56 +521,36 @@ function ShowcaseHeader({
           or the frontier.
         </h1>
         <p className="max-w-3xl text-sm leading-relaxed text-muted sm:text-base">
-          <span className="text-signal">OURS</span> is a {sizeLabel}model served on a hosted
-          endpoint with one job: <span className="text-ink">select the tier-appropriate move</span>{" "}
-          for the player’s rating.{" "}
-          {headline ? (
+          <span className="text-signal">OURS</span> is a {sizeLabel}model with one job:{" "}
+          <span className="text-ink">pick the tier-appropriate move</span> for the player’s rating and
+          adapt it by level — a behavior a prompt on the same weights can’t reproduce.{" "}
+          {headline && (
             <>
-              Across these <span className="text-ink">curated fork positions</span>, on the same
-              grounded input its untuned <span className="text-ink">base</span> saw (same weights,
-              byte-identical), fine-tuning lifts tier-appropriate move selection{" "}
+              Fine-tuning lifts tier-fit{" "}
               <span className="text-ink tnum">
                 {pct(headline.base.tierFitRate)} → {pct(headline.ours.tierFitRate)}
-              </span>
-              {headline.bestFrontier && (
-                <>
-                  , past even the best frontier model here{" "}
-                  <span className="text-ink tnum">({pct(headline.bestFrontier.tierFitRate)})</span>
-                </>
-              )}
-              . And it <span className="text-ink">adapts the move to the level</span>: on those same
-              positions OURS gives{" "}
-              <span className="text-ink tnum">{headline.oursDistinct.toFixed(1)}</span> distinct,
-              level-appropriate moves across the three tiers, where the frontier repeats essentially
-              one{" "}
-              <span className="tnum">({headline.frontierDistinct.toFixed(1)})</span>. That
-              level-appropriate move is the behavior a prompt on the same weights can’t reproduce
-              (computed in your browser from {headline.ours.cells.toLocaleString()} benchmark cells
-              in this curated slice).
-              On the original v4-era 120-position held-out eval, OURS’s tier-fit is{" "}
-              <span className="text-ink tnum">76.7%</span> vs the base’s{" "}
-              <span className="text-ink tnum">34.7%</span> (the top of every model measured; corrected
-              v6 numbers are on the Benchmark Space).
-            </>
-          ) : (
-            <>
-              Fine-tuning teaches it to pick a different, level-appropriate move per rating where the
-              frontier repeats one: a behavior a prompt on the same weights can’t reproduce.
+              </span>{" "}
+              on this slice; on the v4-era 120-position held-out eval it is{" "}
+              <span className="text-ink tnum">76.7%</span> vs base{" "}
+              <span className="text-ink tnum">34.7%</span>.
             </>
           )}
         </p>
         <p className="max-w-3xl text-sm leading-relaxed text-muted">
-          <span className="text-ink">The comparison, below,</span> is centered on that axis:
-          tier-appropriate move selection and per-level move adaptation, both deterministic. The
-          coaching prose is a <span className="text-ink">secondary, optional layer</span>: the
-          frontier writes livelier explanations (see the council instructiveness grades in the
-          leaderboard below), and we don’t claim the prose as the win. Pick a position, switch
-          the model and the rating tier, and read each model’s move at every level side by side; only{" "}
-          <span className="text-signal">OURS</span> can be re-run live against the hosted coach.
+          Pick a position, switch the model and rating tier, and read each model’s move at every
+          level side by side; only <span className="text-signal">OURS</span> can be re-run live
+          against the hosted coach.
         </p>
       </div>
 
-      {meta && status === "ready" && <ProvenanceNote meta={meta} />}
+      {meta && status === "ready" && (
+        <p className="max-w-3xl text-xs leading-relaxed text-faint">
+          Labels: the comparison and council numbers below are the{" "}
+          <span className="text-muted">evaluated OURS-v4</span> model; the live “Re-run OURS live”
+          coach and the Studio version chip are the later <span className="text-muted">v6-dpo2</span>{" "}
+          (DPO) evolution. v4 figures are shown as-is.
+        </p>
+      )}
     </header>
   );
 }
@@ -578,57 +558,6 @@ function ShowcaseHeader({
 /** X.X% with a single decimal, tabular-friendly. */
 function pct(rate: number): string {
   return `${(rate * 100).toFixed(1)}%`;
-}
-
-function ProvenanceNote({ meta }: { meta: ShowcaseView["meta"] }) {
-  const { source } = meta;
-  const tone =
-    source === "showdown"
-      ? "border-[color:var(--caution)]/40 bg-[color:var(--caution)]/10"
-      : "border-signal/40 bg-signal/10";
-  const dotCls = source === "showdown" ? "text-[color:var(--caution)]" : "text-signal";
-  const title =
-    source === "showcase"
-      ? "Precomputed benchmark: showcase.json"
-      : source === "interim"
-        ? "Interim data: OURS re-scored at all three tiers"
-        : "Preview data: showdown.json (held-out only)";
-  return (
-    <div className={`flex flex-col gap-1 rounded-[10px] border px-4 py-3 text-xs leading-relaxed ${tone}`}>
-      <div className="flex items-center gap-2 text-sm font-medium text-ink">
-        <span aria-hidden className={dotCls}>
-          {source === "showcase" ? "●" : "◐"}
-        </span>
-        {title}
-      </div>
-      <p className="text-muted">
-        {source === "showcase" && (
-          <>
-            Reading the curated showcase slice: training + test splits, all three tiers per position,
-            and blinded council grades where the council scored them.
-          </>
-        )}
-        {source === "interim" && (
-          <>
-            showcase.json isn’t here yet. OURS ({meta.ours.badge}) was re-run offline at{" "}
-            <span className="text-ink">all three tiers</span>, so the tier-differentiation moat and
-            the per-tier OURS-vs-best duel are live on the held-out set. Rivals stay at their single
-            benchmarked tier, and the <span className="text-ink">training sample</span> +{" "}
-            <span className="text-ink">blinded council grades</span> arrive with the full
-            showcase.json.
-          </>
-        )}
-        {source === "showdown" && (
-          <>
-            showcase.json isn’t here yet, so this reads the shipped held-out benchmark. The{" "}
-            <span className="text-ink">Training sample</span>, the per-tier comparison across all
-            three levels, and the <span className="text-ink">blinded council grades</span> light up
-            automatically once showcase.json lands.
-          </>
-        )}
-      </p>
-    </div>
-  );
 }
 
 /* ================================================================== */
@@ -757,20 +686,6 @@ function ControlBar({
         </span>
       </div>
 
-      <p className="max-w-4xl text-xs leading-relaxed text-faint">
-        <span className="font-medium text-muted">Proof</span> is the headline: where OURS both
-        adapts by level (a different, level-appropriate move across the three tiers) AND diverges
-        from the best frontier model’s move. <span className="font-medium text-muted">Distinct-tier</span>{" "}
-        is the broader adaptation set it’s drawn from.{" "}
-        <span className="font-medium text-muted">OURS wins / OURS loses</span> compare OURS to the
-        three <span className="text-muted">frontier</span> models only (GPT-5.5 / Claude / Gemini)
-        on the sound tier move: OURS’s own <span className="text-muted">BASE</span> baseline and the
-        open field are excluded from win credit, so the banner and these counts use one rule. Every
-        shipped cell is gated, so every model ships{" "}
-        <span className="text-muted">zero verifier-detectable mechanical violations</span> (a fairness floor, not a ranking axis);
-        the measured per-model metrics — including the council grades where OURS trails on the
-        coaching prose — are in the leaderboard below.
-      </p>
     </section>
   );
 }
@@ -1872,15 +1787,7 @@ function RerunPanel({
   const loading = live.status === "loading";
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold text-ink">
-            Re-run through the workflow
-          </span>
-          <span className="text-[11px] text-muted">
-            OURS live on the backend: engines → grounding → model → verifier, at {cap(tier)}.
-          </span>
-        </div>
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <div className="flex items-center gap-2">
           {liveActive && (
             <Button variant="tertiary" size="sm" className="min-h-9" onPress={onClear}>
