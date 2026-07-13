@@ -156,6 +156,50 @@ export function uciToSquares(uci: string): Squares | null {
   return { from: uci.slice(0, 2), to: uci.slice(2, 4) };
 }
 
+/** One position in a navigable mainline. Ply 0 is the start position (no move). */
+export interface MainlinePly {
+  /** FEN of the position AT this ply. */
+  fen: string;
+  /** SAN of the move that led to this ply (null at ply 0). */
+  san: string | null;
+  /** Origin/target squares of the move that led here (null at ply 0). */
+  from: string | null;
+  to: string | null;
+  /** Full-move number of the move that led here (0 at ply 0). */
+  moveNumber: number;
+  /** Whether the move that led here was White's (for move-list numbering). */
+  whiteMoved: boolean;
+}
+
+/**
+ * Build a navigable mainline from `startFen` by applying SAN moves one at a time.
+ * Ply 0 is the start position; each subsequent ply records the resulting FEN, the
+ * move's SAN + squares, and numbering info. Stops CLEANLY at the first move that
+ * doesn't apply (illegal/malformed PV entry), returning the plies gathered so far.
+ */
+export function buildMainline(startFen: string, sanMoves: string[]): MainlinePly[] {
+  const plies: MainlinePly[] = [];
+  try {
+    const game = new Chess(startFen);
+    plies.push({ fen: game.fen(), san: null, from: null, to: null, moveNumber: 0, whiteMoved: false });
+    for (const san of sanMoves) {
+      const whiteMoved = game.turn() === "w";
+      const moveNumber = Number(game.fen().split(" ")[5]) || 0;
+      let move: { san: string; from: string; to: string } | null = null;
+      try {
+        move = game.move(san); // chess.js throws on an illegal move in v1.x
+      } catch {
+        break; // malformed/illegal PV entry: stop the line here
+      }
+      if (!move) break;
+      plies.push({ fen: game.fen(), san: move.san, from: move.from, to: move.to, moveNumber, whiteMoved });
+    }
+  } catch {
+    /* invalid start FEN: return whatever we have (possibly empty) */
+  }
+  return plies;
+}
+
 /** Center of a square in a normalized 0..8 board space, honoring orientation. */
 export function squareCenter(square: string, orientation: Orientation): { x: number; y: number } {
   const file = square.charCodeAt(0) - 97; // a=0 .. h=7

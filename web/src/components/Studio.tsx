@@ -13,6 +13,7 @@ import {
   type Tier,
 } from "@/lib/api";
 import {
+  buildMainline,
   legalDragUci,
   moveToUci,
   sideToMove,
@@ -30,7 +31,8 @@ import TierControl from "./TierControl";
 import CoachingReveal from "./CoachingReveal";
 import PositionLibrary, { type LibStatus } from "./PositionLibrary";
 import CopyFenButton from "./CopyFenButton";
-import { FlipVerticalIcon, ResetIcon, UndoIcon } from "./icons";
+import MoveNav from "./MoveNav";
+import { FlipVerticalIcon, ResetIcon } from "./icons";
 
 type Status = "idle" | "loading" | "done" | "error";
 
@@ -116,7 +118,7 @@ export default function Studio() {
 
   const [fen, setFen] = useState(DEFAULT.fen); // what the board shows
   const [coachedFen, setCoachedFen] = useState(DEFAULT.fen); // position the result is about
-  const [history, setHistory] = useState<string[]>([]); // prior board positions (for take-back)
+  const [navPly, setNavPly] = useState(0); // current ply in the coach mainline (0 = loaded position)
   const [lastMove, setLastMove] = useState<string[] | null>(
     DEFAULT_STUDENT_UCI ? [DEFAULT_STUDENT_UCI.slice(0, 2), DEFAULT_STUDENT_UCI.slice(2, 4)] : null,
   );
@@ -161,6 +163,9 @@ export default function Studio() {
 
   const abortRef = useRef<AbortController | null>(null);
   const didInit = useRef(false);
+  // The board zone (board + toolbar + move list): keyboard move-nav (←/→/Home/End)
+  // only fires while this area is hovered or focused, so arrows never fight typing.
+  const boardZoneRef = useRef<HTMLElement>(null);
 
   // Start a fresh coaching SESSION for a position + student move. Any tier we
   // already have a PRECOMPUTED answer for (the default's three tiers on mount, or
@@ -342,6 +347,45 @@ export default function Studio() {
     [fen, coachedFen, activeResult],
   );
 
+  // Navigable MAINLINE for the coached position: ply 0 = the loaded FEN, then the
+  // coach's recommended move and its engine principal variation. The recommended
+  // move's own sound_pool PV already begins with that move, so there's no
+  // duplication; buildMainline stops cleanly on any illegal/malformed PV entry.
+  // Only built while the board is on the coached position with a ready result.
+  const mainlineSan = useMemo<string[]>(() => {
+    if (fen !== coachedFen || activeStatus !== "done" || !activeResult) return [];
+    const entry = activeResult.engine.sound_pool.find(
+      (m) => m.uci === activeResult.recommended_move_uci,
+    );
+    if (entry?.pv?.length) return entry.pv;
+    return activeResult.recommended_move_san ? [activeResult.recommended_move_san] : [];
+  }, [fen, coachedFen, activeStatus, activeResult]);
+  const mainline = useMemo(() => buildMainline(coachedFen, mainlineSan), [coachedFen, mainlineSan]);
+  const navActive = mainline.length > 1;
+  const maxPly = mainline.length - 1;
+  const curPly = navActive ? Math.min(Math.max(navPly, 0), maxPly) : 0;
+  const goToPly = useCallback(
+    (p: number) => setNavPly(Math.min(Math.max(p, 0), Math.max(0, mainline.length - 1))),
+    [mainline.length],
+  );
+
+  // Reset navigation to the loaded position whenever a new position or tier loads.
+  useEffect(() => {
+    setNavPly(0);
+  }, [coachedFen, tier]);
+
+  // What the board shows: at ply 0, the coached position with its pinned coach +
+  // your-move arrows and eval bar; once stepped into the line, the ply's FEN with
+  // a single last-move highlight, no pinned arrows, and a neutralized eval bar (we
+  // have no per-ply cp). Copy FEN copies whatever ply is on screen.
+  const displayFen = curPly > 0 ? mainline[curPly].fen : fen;
+  const displayArrows = curPly === 0 ? arrows : [];
+  const displayEvalCp = curPly === 0 ? evalCp : null;
+  const displayLastMove: string[] | null =
+    curPly === 0
+      ? lastMove
+      : [mainline[curPly].from as string, mainline[curPly].to as string];
+
   // Dragging a legal move REVIEWS it in place: the board does NOT advance
   // (ChessgroundBoard snaps the piece back to the reviewed position). We record it
   // as "your move" on the CURRENT position and start a fresh session; the coach
@@ -362,23 +406,9 @@ export default function Studio() {
     [fen, resetSession],
   );
 
-  // Take back the last stepped engine-line move: return to the previous position.
-  const undo = useCallback(() => {
-    if (history.length === 0) return;
-    const prev = history[history.length - 1];
-    setHistory((h) => h.slice(0, -1));
-    setFen(prev);
-    setLastMove(null);
-    setStudentUci(null);
-    setMoveDraft("");
-    setActiveLibId(null);
-    resetSession(prev, null);
-  }, [history, resetSession]);
-
-  // Click a move in "Top engine lines" to play that variation onto the board:
+  // Click a move in "How it could continue" to play that variation onto the board:
   // apply the PV up to the clicked move from the analyzed position (coachedFen),
-  // animate with the move sound, push history so take-back walks it back, then
-  // coach the resulting position. Reuses the fen/lastMove/history board model.
+  // animate with the move sound, then coach the resulting position.
   const playEngineLine = useCallback(
     (pv: string[], count: number) => {
       const stepped = stepSanLine(coachedFen, pv, count);
@@ -386,7 +416,6 @@ export default function Studio() {
       if (stepped.captured) playCapture();
       else playMove();
       setActiveLibId(null);
-      setHistory(stepped.history);
       setFen(stepped.boardFen);
       setLastMove(stepped.lastMove);
       setStudentUci(null);
@@ -431,7 +460,6 @@ export default function Studio() {
   const selectLibraryItem = (e: LibraryEntry) => {
     const su = e.student_move ? moveToUci(e.fen, e.student_move) : null;
     setFen(e.fen);
-    setHistory([]);
     setFenDraft(e.fen);
     setTier(e.tier);
     setStudentUci(su);
@@ -451,7 +479,6 @@ export default function Studio() {
     if (!v.ok) return;
     const f = fenDraft.trim();
     setFen(f);
-    setHistory([]);
     setStudentUci(null);
     setMoveDraft("");
     setLastMove(null);
@@ -466,7 +493,6 @@ export default function Studio() {
   const selectPreset = (p: Preset) => {
     const su = p.move ? moveToUci(p.fen, p.move) : null;
     setFen(p.fen);
-    setHistory([]);
     setFenDraft(p.fen);
     setMoveDraft(p.move ?? "");
     setStudentUci(su);
@@ -494,14 +520,25 @@ export default function Studio() {
       if (e.key === "f" || e.key === "F") {
         e.preventDefault();
         flip();
-      } else if ((e.key === "z" || e.key === "Z") && history.length > 0) {
+        return;
+      }
+      // Move navigation (←/→/Home/End), only while the board area is hovered or
+      // focused so it never hijacks arrow keys elsewhere on the page.
+      if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) {
+        const zone = boardZoneRef.current;
+        const active =
+          !!zone && (zone.matches(":hover") || zone.contains(document.activeElement));
+        if (!active || !navActive) return;
         e.preventDefault();
-        undo();
+        if (e.key === "ArrowLeft") setNavPly((p) => Math.max(0, p - 1));
+        else if (e.key === "ArrowRight") setNavPly((p) => Math.min(maxPly, p + 1));
+        else if (e.key === "Home") setNavPly(0);
+        else setNavPly(maxPly);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [flip, undo, history.length]);
+  }, [flip, navActive, maxPly]);
 
   return (
     <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-[1240px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -579,17 +616,22 @@ export default function Studio() {
           coaching console tall on the right. Mobile: board → console → controls. */}
       <main className="grid flex-1 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.02fr)]">
         {/* Board + toolbar */}
-        <section className="order-1 flex flex-col gap-4 lg:col-start-1 lg:row-start-1">
+        <section
+          ref={boardZoneRef}
+          className="order-1 flex flex-col gap-4 lg:col-start-1 lg:row-start-1"
+        >
           {/* The board is NEVER gated by a coaching call — it stays interactive
-              through cold starts and live runs so the position is always usable. */}
+              through cold starts and live runs so the position is always usable.
+              While stepping the coach mainline (ply > 0) it shows that ply's
+              position and is view-only; ply 0 restores the interactive board. */}
           <BoardStage
-            fen={fen}
+            fen={displayFen}
             orientation={orientation}
-            arrows={arrows}
-            evalCp={evalCp}
-            lastMove={lastMove}
+            arrows={displayArrows}
+            evalCp={displayEvalCp}
+            lastMove={displayLastMove}
             loading={false}
-            interactive
+            interactive={curPly === 0}
             onMove={onBoardMove}
           />
 
@@ -607,22 +649,8 @@ export default function Studio() {
               )}
             </div>
             <div className="flex items-center gap-2">
-              {/* Copy the FEN of the position currently on the board. */}
-              <CopyFenButton fen={fen} className="min-h-11" />
-              <Tooltip delay={300}>
-                <Button
-                  isIconOnly
-                  variant="tertiary"
-                  size="md"
-                  className="min-h-11 min-w-11"
-                  aria-label="Take back move (Z)"
-                  isDisabled={history.length === 0}
-                  onPress={undo}
-                >
-                  <UndoIcon />
-                </Button>
-                <Tooltip.Content>Take back (Z)</Tooltip.Content>
-              </Tooltip>
+              {/* Copy the FEN of the position currently displayed (current ply). */}
+              <CopyFenButton fen={displayFen} className="min-h-11" />
               <Tooltip delay={300}>
                 <Button
                   isIconOnly
@@ -650,6 +678,13 @@ export default function Studio() {
               </Tooltip>
             </div>
           </div>
+
+          {/* Lichess-style move navigation for the coach's mainline (recommended
+              move + engine PV): first/prev/next/last + a clickable SAN list.
+              ←/→/Home/End also step it while the board area is hovered/focused. */}
+          {navActive && (
+            <MoveNav plies={mainline} currentPly={curPly} onJump={goToPly} />
+          )}
         </section>
 
         {/* Coaching console: unboxed onto the felt. On desktop a 1px divider (not
