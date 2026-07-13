@@ -131,27 +131,19 @@ export default function CoachingReveal({
         )}
       </Block>
 
-      {/* Full coaching prose: a SECONDARY, OPTIONAL layer, collapsed by default so
-          the move + principle tag stays the hero. It reads as a supplementary,
-          engine-assisted explanation, not the trained output. */}
+      {/* Full coaching prose for the currently selected tier: a supplementary,
+          engine-assisted explanation, always shown in a plain card (no toggle). */}
       {hasProse && (
         <Block delay={0.04}>
-          <details className="group rounded-[10px] border border-[color:var(--border)] bg-[color:var(--surface)]">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm font-medium text-muted transition-colors hover:text-ink [&::-webkit-details-marker]:hidden">
-              <span aria-hidden className="text-faint transition-transform group-open:rotate-90">
-                ›
-              </span>
-              Show full explanation
-              <span className="text-faint">(optional, engine-assisted)</span>
-            </summary>
-            <div className="flex max-w-[66ch] flex-col gap-3.5 px-4 pb-4">
+          <div className="rounded-[10px] border border-[color:var(--border)] bg-[color:var(--surface)]">
+            <div className="flex max-w-[66ch] flex-col gap-3.5 px-4 py-4">
               {paragraphs.map((p, i) => (
                 <p key={i} className="text-base leading-relaxed text-muted text-pretty">
                   {p}
                 </p>
               ))}
             </div>
-          </details>
+          </div>
         </Block>
       )}
 
