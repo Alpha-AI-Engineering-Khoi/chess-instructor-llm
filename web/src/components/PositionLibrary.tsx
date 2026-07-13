@@ -24,20 +24,18 @@ const FILTERS: { id: Filter; label: string }[] = [
   { id: "advanced", label: "Advanced" },
 ];
 
-// Severity → a legible dot color + label. The label always renders in ink/muted
-// (high contrast); color is a secondary cue via the dot, never the sole signal.
-// A red → orange → amber → cool severity ramp (each hue distinct). The text label
-// always carries the meaning; the dot is a scannable secondary cue.
-function sevStyle(sev: string | null): { label: string; dot: string } {
+// Severity → a legible text label. The label (rendered in ink/muted) always
+// carries the meaning; there is no color-coded dot, so status reads purely as text.
+function sevLabel(sev: string | null): string {
   switch (sev) {
     case "blunder":
-      return { label: "Blunder", dot: "var(--danger)" };
+      return "Blunder";
     case "mistake":
-      return { label: "Mistake", dot: "oklch(0.7 0.16 47)" };
+      return "Mistake";
     case "inaccuracy":
-      return { label: "Inaccuracy", dot: "var(--caution)" };
+      return "Inaccuracy";
     default:
-      return { label: sev ? cap(sev) : "To plan", dot: "var(--engine)" };
+      return sev ? cap(sev) : "To plan";
   }
 }
 
@@ -133,7 +131,7 @@ export default function PositionLibrary({
         <div className="relative">
             <ul className="flex max-h-[340px] flex-col divide-y divide-[color:var(--separator)] overflow-y-auto rounded-[10px] border border-[color:var(--border)]">
               {shown.map((e) => {
-                const sev = sevStyle(e.severity);
+                const sevText = sevLabel(e.severity);
                 const active = e.id === activeId;
                 return (
                   <li key={e.id}>
@@ -148,11 +146,6 @@ export default function PositionLibrary({
                           : "hover:bg-[color:var(--surface-tertiary)]"
                       }`}
                     >
-                      <span
-                        aria-hidden
-                        className={`size-2 shrink-0 rounded-full ${active ? "ring-2 ring-signal/40" : ""}`}
-                        style={{ backgroundColor: sev.dot }}
-                      />
                       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
                         <span className="text-sm text-muted">
                           {e.student_move ? (
@@ -167,7 +160,7 @@ export default function PositionLibrary({
                           )}
                         </span>
                         <span className="text-xs text-muted">
-                          {sev.label} · {cap(e.phase)}
+                          {sevText} · {cap(e.phase)}
                         </span>
                       </div>
                       <div className="flex shrink-0 items-baseline gap-1.5">
