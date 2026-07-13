@@ -114,30 +114,12 @@ export default function Showdown() {
     <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-[1240px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       {/* Header */}
       <header className="flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-3">
-          <Link
-            href="/"
-            className="inline-flex min-h-9 items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
-          >
-            <span aria-hidden className="text-faint">
-              ‹
+        <div className="flex items-center justify-end gap-3">
+          {doc && (
+            <span className="hidden font-mono text-xs text-faint tnum sm:inline">
+              grounded · {doc.meta.condition === "grounded" ? "same input for every model" : doc.meta.condition}
             </span>
-            Coach studio
-          </Link>
-          <div className="flex items-center gap-3">
-            {doc && (
-              <span className="hidden font-mono text-xs text-faint tnum sm:inline">
-                grounded · {doc.meta.condition === "grounded" ? "same input for every model" : doc.meta.condition}
-              </span>
-            )}
-            <Link
-              href="/showcase.html"
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-signal/12 px-3.5 text-sm font-medium text-signal ring-1 ring-signal/40 transition-colors hover:bg-signal/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
-            >
-              Showcase
-              <span aria-hidden className="text-signal/70">›</span>
-            </Link>
-          </div>
+          )}
         </div>
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">

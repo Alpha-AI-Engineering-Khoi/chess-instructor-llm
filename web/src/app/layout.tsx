@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Archivo, Spline_Sans_Mono, Merriweather } from "next/font/google";
 import "./globals.css";
+import NavBar from "@/components/NavBar";
 import EvidenceBar from "@/components/EvidenceBar";
 // Chessground (Lichess board) styles loaded GLOBALLY in the root layout so the
 // board is always styled on first paint: not dependent on the client-component
@@ -53,6 +54,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-dvh flex-col bg-background font-sans text-foreground">
+        {/* One uniform top nav across every page. */}
+        <NavBar />
         {/* Page content grows to fill; the global Evidence + Trust bar sits below it
             (and pins to the bottom of short pages via the flex column). */}
         <div className="flex flex-1 flex-col">{children}</div>

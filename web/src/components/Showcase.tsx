@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import Link from "next/link";
 import {
   Button,
   Card,
@@ -484,27 +483,14 @@ function ShowcaseHeader({
   const modelCount = meta?.modelCount ?? 0;
   return (
     <header className="flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <Link
-          href="/"
-          className="inline-flex min-h-9 items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
+      <div className="flex items-center justify-end gap-3">
+        <span
+          className="rounded-full px-2.5 py-1 font-mono text-xs text-signal ring-1 ring-signal/40 tnum"
+          title="Evaluated model for the comparison + council numbers below."
         >
-          <span aria-hidden className="text-faint">‹</span>
-          Coach studio
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/showdown.html"
-            className="inline-flex min-h-9 items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
-          >
-            Showdown list
-            <span aria-hidden className="text-faint">›</span>
-          </Link>
-          <span className="rounded-full px-2.5 py-1 font-mono text-xs text-signal ring-1 ring-signal/40 tnum">
-            {ours?.badge ?? "OURS"}
-            {ours?.size ? ` · ${ours.size}` : ""}
-          </span>
-        </div>
+          {ours?.version ? `OURS-${ours.version}` : "OURS"}
+          {ours?.size ? ` · ${ours.size}` : ""}
+        </span>
       </div>
 
       <div className="flex flex-col gap-3">
@@ -629,11 +615,22 @@ function ControlBar({
                 </span>
                 <Tabs.Indicator />
               </Tabs.Tab>
-              <Tabs.Tab id="train" isDisabled={trainDisabled}>
-                <span className="flex flex-col items-start whitespace-nowrap leading-tight">
+              <Tabs.Tab
+                id="train"
+                isDisabled={trainDisabled}
+                className={trainDisabled ? "cursor-not-allowed" : undefined}
+              >
+                <span
+                  className="flex flex-col items-start whitespace-nowrap leading-tight"
+                  title={
+                    trainDisabled
+                      ? "Training-split view isn’t seeded — the honest measure is the held-out test sample."
+                      : undefined
+                  }
+                >
                   <span>Training sample</span>
                   <span className="text-[11px] text-faint">
-                    {trainDisabled ? "with showcase.json" : "in-distribution"}
+                    {trainDisabled ? "not seeded · test is the honest measure" : "in-distribution"}
                   </span>
                 </span>
                 <Tabs.Indicator />
@@ -652,7 +649,8 @@ function ControlBar({
             <p className="leading-relaxed">
               Training positions are in-distribution for the tuned model: expected to be strong, and{" "}
               <span className="font-medium">not</span> a generalization test. Test positions are
-              held-out; that split is the honest measure of the coach.
+              held-out; that split is the honest measure of the coach. This seed carries only
+              held-out test positions, so the Training-sample tab is disabled here.
             </p>
           </Tooltip.Content>
         </Tooltip>

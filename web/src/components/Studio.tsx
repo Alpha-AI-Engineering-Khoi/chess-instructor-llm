@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { Button, FieldError, Input, Label, Separator, TextArea, TextField, Tooltip } from "@heroui/react";
 import {
   getLibrary,
@@ -542,23 +541,6 @@ export default function Studio() {
           secondary, optional layer, and the cross-model views are the bonus
           comparison. */}
       <header className="flex flex-col gap-5">
-        <div className="flex items-center justify-end gap-2">
-          <Link
-            href="/showdown.html"
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-3.5 text-sm font-medium text-muted ring-1 ring-[color:var(--border)] transition-colors hover:text-ink hover:ring-[color:var(--field-border)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
-          >
-            Showdown list
-            <span aria-hidden className="text-faint">›</span>
-          </Link>
-          <Link
-            href="/showcase.html"
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-signal/12 px-3.5 text-sm font-medium text-signal ring-1 ring-signal/40 transition-colors hover:bg-signal/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
-          >
-            Multi-Model Showcase
-            <span aria-hidden className="text-signal/70">›</span>
-          </Link>
-        </div>
-
         <div className="flex max-w-3xl flex-wrap items-center gap-x-3 gap-y-2">
           <h1 className="text-2xl font-semibold leading-tight tracking-tight text-balance text-ink sm:text-[2rem]">
             The right move for your level
