@@ -50,11 +50,6 @@ const DEFAULT = {
   move: "Ne2",
 };
 const DEFAULT_STUDENT_UCI = moveToUci(DEFAULT.fen, DEFAULT.move);
-const TIER_LABEL: Record<Tier, string> = {
-  beginner: "Beginner",
-  intermediate: "Intermediate",
-  advanced: "Advanced",
-};
 
 interface Preset {
   label: string;
@@ -499,9 +494,6 @@ export default function Studio() {
     return () => window.removeEventListener("keydown", onKey);
   }, [flip, undo, history.length]);
 
-  // Label for the user-initiated live button: run the shown level on the position.
-  const runLiveLabel = `Run live · ${TIER_LABEL[tier]}`;
-
   return (
     <div className="relative z-[1] mx-auto flex min-h-dvh w-full max-w-[1240px] flex-col gap-8 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       {/* Top-of-page intro. The hero is the ONE behavior: the tuned model selects
@@ -710,7 +702,6 @@ export default function Studio() {
                 <IdlePanel
                   toMove={toMove}
                   studentSan={studentSan}
-                  tierLabel={TIER_LABEL[tier]}
                   onRunLive={runLiveActive}
                 />
               )}
@@ -759,11 +750,10 @@ export default function Studio() {
                     <Button
                       variant="primary"
                       size="lg"
-                      className="min-h-12 w-full gap-2 font-medium"
+                      className="min-h-12 w-full font-medium"
                       onPress={runLiveActive}
                     >
-                      <ResetIcon width={16} height={16} />
-                      {runLiveLabel}
+                      Run live
                     </Button>
                     <Tooltip.Content className="max-w-[16rem]">
                       Optional. Runs the shown level live on the hosted coach-gate pipeline
@@ -1026,12 +1016,10 @@ function ErrorPanel({ error, onRetry }: { error: string | null; onRetry: () => v
 function IdlePanel({
   toMove,
   studentSan,
-  tierLabel,
   onRunLive,
 }: {
   toMove: Orientation;
   studentSan: string | null;
-  tierLabel: string;
   onRunLive?: () => void;
 }) {
   const steps = [
@@ -1063,7 +1051,7 @@ function IdlePanel({
       {onRunLive && (
         <div>
           <Button variant="primary" size="lg" className="min-h-12" onPress={onRunLive}>
-            Run live · {tierLabel}
+            Run live
           </Button>
         </div>
       )}
