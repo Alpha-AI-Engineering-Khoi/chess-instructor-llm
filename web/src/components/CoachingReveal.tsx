@@ -165,12 +165,9 @@ export default function CoachingReveal({
         />
       </Block>
 
-      {/* Provenance */}
-      <Block delay={0.16} className="flex flex-col gap-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <Chip variant="soft" color="default" size="sm">
-            {result.meta.tuned ? "Tuned coach" : "Base model"}
-          </Chip>
+      {/* Faithfulness signal + any engine/coach notes (model provenance line removed). */}
+      {(fallback || notes.length > 0) && (
+        <Block delay={0.16} className="flex flex-col gap-2">
           {fallback && (
             <Tooltip delay={200}>
               <Tooltip.Trigger aria-label="What “Verified explanation” means">
@@ -188,14 +185,13 @@ export default function CoachingReveal({
               </Tooltip.Content>
             </Tooltip>
           )}
-          <span className="font-mono text-xs text-muted">{result.meta.model}</span>
-        </div>
-        {notes.map((n) => (
-          <p key={n} className="text-xs leading-relaxed text-muted">
-            {n}
-          </p>
-        ))}
-      </Block>
+          {notes.map((n) => (
+            <p key={n} className="text-xs leading-relaxed text-muted">
+              {n}
+            </p>
+          ))}
+        </Block>
+      )}
     </div>
   );
 }
