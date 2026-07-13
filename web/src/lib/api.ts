@@ -83,7 +83,14 @@ export interface CoachAllResponse {
 }
 
 /** A pre-computed library entry: a real dataset position + the tuned model's
- *  cached coaching, so the gallery renders instantly without a model call. */
+ *  cached coaching, so the gallery renders instantly without a model call.
+ *
+ *  `coach`/`tier` are the ORIGINAL single-tier fields (kept for back-compat and
+ *  as a fallback). `coachByTier`, when present, carries the tuned model's cached
+ *  answer at EVERY rating tier for this position, so selecting the entry seeds
+ *  all three bands and switching Beginner/Intermediate/Advanced is instant with
+ *  no live call. Entries that only have `coach` still work (the Studio falls back
+ *  to seeding just `{ [tier]: coach }`). */
 export interface LibraryEntry {
   id: string;
   label: string;
@@ -93,6 +100,7 @@ export interface LibraryEntry {
   severity: string | null;
   student_move: string | null;
   coach: CoachResponse;
+  coachByTier?: Record<Tier, CoachResponse>;
 }
 
 async function readError(res: Response): Promise<string> {

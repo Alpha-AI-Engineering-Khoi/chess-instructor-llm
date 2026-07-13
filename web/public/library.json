@@ -10,8 +10,8 @@
     "coach": {
       "recommended_move_san": "b3",
       "recommended_move_uci": "b4b3",
-      "coaching": "Move: b3. Your move was perfectly reasonable here: there is no hanging piece to win right away, so improving your pawn setup is a calm choice. The point is simple — push the b-pawn forward while keeping your rook active on c4. How to find it: In an endgame like this, run this quick checklist before moving: first ask, 'Is any piece hanging?' Here, no. Then ask, 'Can I make my pawns safer or more advanced without moving my rook away?' Since nothing urgent needs saving, the straightforward move is b3.",
-      "takeaway": "When nothing is hanging, do not force a tactic — improve your pawns and keep your active rook where it belongs.",
+      "coaching": "Move: b3. Your move was perfectly reasonable here: there is no hanging piece you must save right away, so pushing the b-pawn makes simple progress without bringing the queen out or making an unnecessary trade. The main point is easy to remember: when nothing is under attack, improve your position by moving a pawn forward safely and keeping your pieces active. How to find it: Use this checklist before choosing a quiet endgame move: first ask, 'Is any piece hanging?' Here, no. Then ask, 'Can I make steady progress with a pawn while my rook stays useful?' Since yes, choose b3: push the advanced b-pawn and keep playing calmly instead of forcing action.",
+      "takeaway": "In simple positions, if nothing is hanging, look for safe pawn progress rather than automatic checks or trades.",
       "concepts_used": [],
       "side_to_move": "black",
       "engine": {
@@ -45,24 +45,38 @@
             ]
           },
           {
+            "san": "h5",
+            "uci": "h7h5",
+            "cp": 6,
+            "pv": [
+              "h5",
+              "f4",
+              "Rc3+",
+              "Kd4",
+              "Rh3",
+              "Kxd5"
+            ]
+          },
+          {
             "san": "b3",
             "uci": "b4b3",
-            "cp": 9,
+            "cp": 2,
             "pv": [
-              "b3"
+              "b3",
+              "Rb7",
+              "Rc3+",
+              "Kd4",
+              "Rxf3",
+              "h4"
             ]
           },
           {
             "san": "Rc6",
             "uci": "c4c6",
-            "cp": 11,
+            "cp": -5,
             "pv": [
               "Rc6",
-              "Rb7",
-              "Rc4",
-              "Rb5",
-              "Kg7",
-              "Rxd5"
+              "Rb7"
             ]
           },
           {
@@ -75,19 +89,6 @@
               "Kg8",
               "Rxd5",
               "Rh4",
-              "Rb5"
-            ]
-          },
-          {
-            "san": "h5",
-            "uci": "h7h5",
-            "cp": 1,
-            "pv": [
-              "h5",
-              "Rb7",
-              "Kg8",
-              "f4",
-              "h4",
               "Rb5"
             ]
           },
@@ -121,7 +122,7 @@
         "student_move": {
           "san": "b3",
           "uci": "b4b3",
-          "cp_loss": 9,
+          "cp_loss": 6,
           "severity": "none"
         }
       },
@@ -163,6 +164,487 @@
         "notes": [],
         "attempts": 1,
         "verified_fallback": false
+      }
+    },
+    "coachByTier": {
+      "beginner": {
+        "recommended_move_san": "b3",
+        "recommended_move_uci": "b4b3",
+        "coaching": "Move: b3. Your move was perfectly reasonable here: there is no hanging piece you must save right away, so pushing the b-pawn makes simple progress without bringing the queen out or making an unnecessary trade. The main point is easy to remember: when nothing is under attack, improve your position by moving a pawn forward safely and keeping your pieces active. How to find it: Use this checklist before choosing a quiet endgame move: first ask, 'Is any piece hanging?' Here, no. Then ask, 'Can I make steady progress with a pawn while my rook stays useful?' Since yes, choose b3: push the advanced b-pawn and keep playing calmly instead of forcing action.",
+        "takeaway": "In simple positions, if nothing is hanging, look for safe pawn progress rather than automatic checks or trades.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "Rh4",
+          "best_cp": 21,
+          "sound_pool": [
+            {
+              "san": "Rh4",
+              "uci": "c4h4",
+              "cp": 21,
+              "pv": [
+                "Rh4",
+                "Rb7",
+                "Kg8",
+                "Rb5",
+                "d4+",
+                "Kd3"
+              ]
+            },
+            {
+              "san": "Kg8",
+              "uci": "h8g8",
+              "cp": 16,
+              "pv": [
+                "Kg8",
+                "Rb7",
+                "Rh4",
+                "h3",
+                "Rxh3",
+                "Kd4"
+              ]
+            },
+            {
+              "san": "h5",
+              "uci": "h7h5",
+              "cp": 6,
+              "pv": [
+                "h5",
+                "f4",
+                "Rc3+",
+                "Kd4",
+                "Rh3",
+                "Kxd5"
+              ]
+            },
+            {
+              "san": "b3",
+              "uci": "b4b3",
+              "cp": 2,
+              "pv": [
+                "b3",
+                "Rb7",
+                "Rc3+",
+                "Kd4",
+                "Rxf3",
+                "h4"
+              ]
+            },
+            {
+              "san": "Rc6",
+              "uci": "c4c6",
+              "cp": -5,
+              "pv": [
+                "Rc6",
+                "Rb7"
+              ]
+            },
+            {
+              "san": "h6",
+              "uci": "h7h6",
+              "cp": 9,
+              "pv": [
+                "h6",
+                "Rd7",
+                "Kg8",
+                "Rxd5",
+                "Rh4",
+                "Rb5"
+              ]
+            },
+            {
+              "san": "Rc1",
+              "uci": "c4c1",
+              "cp": 0,
+              "pv": [
+                "Rc1",
+                "Rb7",
+                "Rc4",
+                "f4",
+                "Kg8",
+                "Kf3"
+              ]
+            },
+            {
+              "san": "Rc5",
+              "uci": "c4c5",
+              "cp": 0,
+              "pv": [
+                "Rc5",
+                "Rb7",
+                "Rc4",
+                "f4",
+                "Kg8",
+                "Kf3"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "b3",
+            "uci": "b4b3",
+            "cp_loss": 6,
+            "severity": "none"
+          }
+        },
+        "maia": [
+          {
+            "san": "b3",
+            "uci": "b4b3",
+            "policy": 0.48469999999999996
+          },
+          {
+            "san": "Kg8",
+            "uci": "h8g8",
+            "policy": 0.1496
+          },
+          {
+            "san": "Rc3+",
+            "uci": "c4c3",
+            "policy": 0.1407
+          },
+          {
+            "san": "d4+",
+            "uci": "d5d4",
+            "policy": 0.08130000000000001
+          },
+          {
+            "san": "Rc8",
+            "uci": "c4c8",
+            "policy": 0.0297
+          },
+          {
+            "san": "h6",
+            "uci": "h7h6",
+            "policy": 0.0183
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
+      },
+      "intermediate": {
+        "recommended_move_san": "b3",
+        "recommended_move_uci": "b4b3",
+        "coaching": "Move: b3  \nThis was a sensible endgame move by you. Since there are no undefended or currently attacked pieces, you do not need an emergency defensive move. The point of b3 is simple conversion: push the queenside pawn forward while keeping your rook active on c4. In practical terms, if White uses the rook actively, such as ...Rb7, you have kept progress going rather than letting the game become only about defending. How to find it: Use this routine in simplified positions: first scan for urgent problems — checks, hanging pieces, and direct attacks. Here, nothing is undefended or under attack. Next ask, 'Which side has my passed/advanced pawn, and can I improve it without making my rook passive?' Your queenside pawn on b4 gives you a clear target, so pushing it to b3 keeps the initiative. Finally compare quiet moves by activity: choose the pawn advance when it gains space and lets your rook stay useful.",
+        "takeaway": "In winning-like endgames, when there is no immediate tactic, convert by advancing your passed pawn while keeping your rook active.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "Rh4",
+          "best_cp": 21,
+          "sound_pool": [
+            {
+              "san": "Rh4",
+              "uci": "c4h4",
+              "cp": 21,
+              "pv": [
+                "Rh4",
+                "Rb7",
+                "Kg8",
+                "Rb5",
+                "d4+",
+                "Kd3"
+              ]
+            },
+            {
+              "san": "Kg8",
+              "uci": "h8g8",
+              "cp": 16,
+              "pv": [
+                "Kg8",
+                "Rb7",
+                "Rh4",
+                "h3",
+                "Rxh3",
+                "Kd4"
+              ]
+            },
+            {
+              "san": "h5",
+              "uci": "h7h5",
+              "cp": 6,
+              "pv": [
+                "h5",
+                "f4",
+                "Rc3+",
+                "Kd4",
+                "Rh3",
+                "Kxd5"
+              ]
+            },
+            {
+              "san": "b3",
+              "uci": "b4b3",
+              "cp": 2,
+              "pv": [
+                "b3",
+                "Rb7",
+                "Rc3+",
+                "Kd4",
+                "Rxf3",
+                "h4"
+              ]
+            },
+            {
+              "san": "Rc6",
+              "uci": "c4c6",
+              "cp": -5,
+              "pv": [
+                "Rc6",
+                "Rb7"
+              ]
+            },
+            {
+              "san": "h6",
+              "uci": "h7h6",
+              "cp": 9,
+              "pv": [
+                "h6",
+                "Rd7",
+                "Kg8",
+                "Rxd5",
+                "Rh4",
+                "Rb5"
+              ]
+            },
+            {
+              "san": "Rc1",
+              "uci": "c4c1",
+              "cp": 0,
+              "pv": [
+                "Rc1",
+                "Rb7",
+                "Rc4",
+                "f4",
+                "Kg8",
+                "Kf3"
+              ]
+            },
+            {
+              "san": "Rc5",
+              "uci": "c4c5",
+              "cp": 0,
+              "pv": [
+                "Rc5",
+                "Rb7",
+                "Rc4",
+                "f4",
+                "Kg8",
+                "Kf3"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "b3",
+            "uci": "b4b3",
+            "cp_loss": 6,
+            "severity": "none"
+          }
+        },
+        "maia": [
+          {
+            "san": "b3",
+            "uci": "b4b3",
+            "policy": 0.4943
+          },
+          {
+            "san": "Kg8",
+            "uci": "h8g8",
+            "policy": 0.15109999999999998
+          },
+          {
+            "san": "Rc3+",
+            "uci": "c4c3",
+            "policy": 0.146
+          },
+          {
+            "san": "d4+",
+            "uci": "d5d4",
+            "policy": 0.06280000000000001
+          },
+          {
+            "san": "Rh4",
+            "uci": "c4h4",
+            "policy": 0.0304
+          },
+          {
+            "san": "Rc8",
+            "uci": "c4c8",
+            "policy": 0.0274
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [
+            "The coach's first 3 draft(s) stated a false board fact and were re-generated; attempt 4 verified clean."
+          ],
+          "attempts": 4,
+          "verified_fallback": false
+        }
+      },
+      "advanced": {
+        "recommended_move_san": "Rh4",
+        "recommended_move_uci": "c4h4",
+        "coaching": "Move to learn: Rh4. Your b3 was understandable because pushing the queenside pawn feels like making progress, but it commits the pawn before improving the rook’s activity. Rh4 makes the rook do several jobs at once: it attacks the pawn on h2 while also defending both b4 and h7. That is the key endgame improvement — activate the heavy piece first, keep your own pawns protected, and create pressure without loosening anything. How to find it: In practical endgames, run this routine before any pawn push: first ask, 'Can my active rook improve with tempo or gain targets?' Then check whether that same move also protects important pawns. Here, moving the rook to h4 passes both tests: it creates direct pressure on h2 and keeps b4 and h7 defended. For an advanced player, compare commitment order: if a quiet rook move improves activity and covers weaknesses, choose that before committing a passed pawn.",
+        "takeaway": "Before advancing a pawn in an endgame, look for a multipurpose rook move that increases pressure while keeping your structure supported.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "Rh4",
+          "best_cp": 21,
+          "sound_pool": [
+            {
+              "san": "Rh4",
+              "uci": "c4h4",
+              "cp": 21,
+              "pv": [
+                "Rh4",
+                "Rb7",
+                "Kg8",
+                "Rb5",
+                "d4+",
+                "Kd3"
+              ]
+            },
+            {
+              "san": "Kg8",
+              "uci": "h8g8",
+              "cp": 16,
+              "pv": [
+                "Kg8",
+                "Rb7",
+                "Rh4",
+                "h3",
+                "Rxh3",
+                "Kd4"
+              ]
+            },
+            {
+              "san": "h5",
+              "uci": "h7h5",
+              "cp": 6,
+              "pv": [
+                "h5",
+                "f4",
+                "Rc3+",
+                "Kd4",
+                "Rh3",
+                "Kxd5"
+              ]
+            },
+            {
+              "san": "b3",
+              "uci": "b4b3",
+              "cp": 2,
+              "pv": [
+                "b3",
+                "Rb7",
+                "Rc3+",
+                "Kd4",
+                "Rxf3",
+                "h4"
+              ]
+            },
+            {
+              "san": "Rc6",
+              "uci": "c4c6",
+              "cp": -5,
+              "pv": [
+                "Rc6",
+                "Rb7"
+              ]
+            },
+            {
+              "san": "h6",
+              "uci": "h7h6",
+              "cp": 9,
+              "pv": [
+                "h6",
+                "Rd7",
+                "Kg8",
+                "Rxd5",
+                "Rh4",
+                "Rb5"
+              ]
+            },
+            {
+              "san": "Rc1",
+              "uci": "c4c1",
+              "cp": 0,
+              "pv": [
+                "Rc1",
+                "Rb7",
+                "Rc4",
+                "f4",
+                "Kg8",
+                "Kf3"
+              ]
+            },
+            {
+              "san": "Rc5",
+              "uci": "c4c5",
+              "cp": 0,
+              "pv": [
+                "Rc5",
+                "Rb7",
+                "Rc4",
+                "f4",
+                "Kg8",
+                "Kf3"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "b3",
+            "uci": "b4b3",
+            "cp_loss": 6,
+            "severity": "none"
+          }
+        },
+        "maia": [
+          {
+            "san": "b3",
+            "uci": "b4b3",
+            "policy": 0.4143
+          },
+          {
+            "san": "Kg8",
+            "uci": "h8g8",
+            "policy": 0.21280000000000002
+          },
+          {
+            "san": "Rc3+",
+            "uci": "c4c3",
+            "policy": 0.1384
+          },
+          {
+            "san": "d4+",
+            "uci": "d5d4",
+            "policy": 0.08960000000000001
+          },
+          {
+            "san": "Rh4",
+            "uci": "c4h4",
+            "policy": 0.0558
+          },
+          {
+            "san": "Rc6",
+            "uci": "c4c6",
+            "policy": 0.0213
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
       }
     }
   },
@@ -335,119 +817,121 @@
   },
   {
     "id": "L3FdBrfH_82",
-    "label": "Intermediate · endgame · played Rb1 · picks Re1 (engine's top)",
+    "label": "Intermediate · endgame · played Rb1 · picks Rb1 over engine Rd2",
     "fen": "7k/2K2R1p/6p1/1N6/8/4r2P/1r6/5B2 b - - 4 41",
     "tier": "intermediate",
     "phase": "endgame",
     "severity": null,
     "student_move": "Rb1",
     "coach": {
-      "recommended_move_san": "Re1",
-      "recommended_move_uci": "e3e1",
-      "coaching": "Play Re1. Your Rb1 was active too, but it goes after both the knight on b5 and the bishop on f1 all at once. The cleaner lesson is to improve the rook first by moving it to e1, where it directly attacks the bishop on f1. That gives White an immediate problem while keeping your other rook on b2 ready to stay active later. How to find it: In positions like this, run a quick “rook activity” check before choosing a forcing-looking rook move: ask, ‘Which enemy piece can my rook attack right now without making my setup awkward?’ Then compare the jobs. Here, Rb1 attacks two targets, but Re1 creates a direct attack on the bishop on f1 immediately. For an intermediate player, choose the move that makes a clear one-move threat while leaving your next rook move flexible.",
-      "takeaway": "Before grabbing multiple targets, look for the cleanest rook move that creates an immediate target and keeps future options open.",
+      "recommended_move_san": "Rb1",
+      "recommended_move_uci": "b2b1",
+      "coaching": "Play Rb1. Your move was a strong practical choice: instead of rushing into checks, you used the rook actively against both white pieces. From b1, the rook attacks the knight on b5 and the bishop on f1, so White has to deal with pressure rather than freely improve. The key idea is active defense: when there is no urgent danger, make your opponent answer multiple problems with their next move. How to find it: In an endgame-like position where nothing is immediately hanging, run this routine before choosing a forcing-looking move: first ask, 'Can I attack more than one enemy piece?' Then look along your rook’s file and rank for targets. Here, moving the rook to b1 creates direct contact with both the knight on b5 and the bishop on f1, while keeping the initiative without needing a long tactic.",
+      "takeaway": "Before playing a check, scan for rook moves that create double-purpose pressure by attacking two pieces at once.",
       "concepts_used": [],
       "side_to_move": "black",
       "engine": {
-        "best_san": "Re1",
-        "best_cp": 61,
+        "best_san": "Rd2",
+        "best_cp": 40,
         "sound_pool": [
-          {
-            "san": "Re1",
-            "uci": "e3e1",
-            "cp": 61,
-            "pv": [
-              "Re1",
-              "Nd6",
-              "Rc1+",
-              "Bc4",
-              "Rbc2"
-            ]
-          },
-          {
-            "san": "Rb1",
-            "uci": "b2b1",
-            "cp": 39,
-            "pv": [
-              "Rb1",
-              "Kc6"
-            ]
-          },
-          {
-            "san": "Kg8",
-            "uci": "h8g8",
-            "cp": 33,
-            "pv": [
-              "Kg8",
-              "Nd6",
-              "Rc3+",
-              "Kd7",
-              "Rd2"
-            ]
-          },
           {
             "san": "Rd2",
             "uci": "b2d2",
-            "cp": 32,
+            "cp": 40,
             "pv": [
               "Rd2",
               "Kc6",
               "Rd1",
-              "Kc7",
-              "Re4",
-              "Rf3"
+              "Bc4",
+              "Rxh3",
+              "Nd6"
             ]
           },
           {
-            "san": "h5",
-            "uci": "h7h5",
-            "cp": 26,
+            "san": "Re1",
+            "uci": "e3e1",
+            "cp": 35,
             "pv": [
-              "h5",
-              "Kd7",
-              "Rd2+",
-              "Kc6",
-              "h4",
-              "Kc5"
-            ]
-          },
-          {
-            "san": "Rg3",
-            "uci": "e3g3",
-            "cp": 26,
-            "pv": [
-              "Rg3",
-              "Kc6",
-              "Rd2",
-              "Rd7",
-              "Rxd7",
-              "Kxd7"
+              "Re1",
+              "Bc4"
             ]
           },
           {
             "san": "Rc2+",
             "uci": "b2c2",
-            "cp": 21,
+            "cp": 32,
             "pv": [
               "Rc2+",
               "Kd7",
               "Rd2+",
               "Nd6",
-              "Rc3",
-              "Re7"
+              "Re1",
+              "Bc4"
+            ]
+          },
+          {
+            "san": "Kg8",
+            "uci": "h8g8",
+            "cp": 32,
+            "pv": [
+              "Kg8",
+              "Nd6",
+              "Rc3+",
+              "Kd7",
+              "Rb7+",
+              "Nxb7"
+            ]
+          },
+          {
+            "san": "Rb1",
+            "uci": "b2b1",
+            "cp": 56,
+            "pv": [
+              "Rb1",
+              "Kc6",
+              "Rc1+",
+              "Kd5",
+              "Re8",
+              "Nd4"
             ]
           },
           {
             "san": "Ra2",
             "uci": "b2a2",
-            "cp": 20,
+            "cp": 24,
             "pv": [
               "Ra2",
               "Kc6",
               "Rd2",
               "Kc5",
-              "Rd1",
+              "Re8",
               "Bc4"
+            ]
+          },
+          {
+            "san": "Rh2",
+            "uci": "b2h2",
+            "cp": 24,
+            "pv": [
+              "Rh2",
+              "Kc6",
+              "Rd2",
+              "Kc5",
+              "Re8",
+              "Bc4"
+            ]
+          },
+          {
+            "san": "h5",
+            "uci": "h7h5",
+            "cp": 22,
+            "pv": [
+              "h5",
+              "Kc6",
+              "Rc2+",
+              "Kd5",
+              "Rd2+",
+              "Kc5"
             ]
           }
         ],
@@ -458,15 +942,523 @@
           "severity": "none"
         }
       },
-      "maia": [],
+      "maia": [
+        {
+          "san": "Rc2+",
+          "uci": "b2c2",
+          "policy": 0.3091
+        },
+        {
+          "san": "Kg8",
+          "uci": "h8g8",
+          "policy": 0.1168
+        },
+        {
+          "san": "Rb1",
+          "uci": "b2b1",
+          "policy": 0.0652
+        },
+        {
+          "san": "Rc3+",
+          "uci": "e3c3",
+          "policy": 0.0554
+        },
+        {
+          "san": "Re1",
+          "uci": "e3e1",
+          "policy": 0.0545
+        },
+        {
+          "san": "Re8",
+          "uci": "e3e8",
+          "policy": 0.0537
+        }
+      ],
       "meta": {
         "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
         "tuned": true,
-        "notes": [
-          "Human-likelihood (Maia) analysis was unavailable for this position."
-        ],
+        "notes": [],
         "attempts": 1,
         "verified_fallback": false
+      }
+    },
+    "coachByTier": {
+      "beginner": {
+        "recommended_move_san": "Rc2+",
+        "recommended_move_uci": "b2c2",
+        "coaching": "Move: Rc2+. Play Rc2+. Your Rb1 was understandable because it attacks both the knight on b5 and the bishop on f1, but Rc2+ uses the more forcing beginner idea first: make a check. The rook goes to c2 and directly checks the white king on c7, so White has to deal with your move before chasing anything else. How to find it: Before choosing an attacking move like Rb1, run this quick checklist: first look for any safe check, then ask if that check also improves your piece. Here, moving the rook to c2 gives check right away against the king on c7, while keeping the rook active. For beginners, checking 'do I have a useful check?' should come before picking targets.",
+        "takeaway": "When you see several attacking moves, check whether you have a simple, useful check first.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "Rd2",
+          "best_cp": 40,
+          "sound_pool": [
+            {
+              "san": "Rd2",
+              "uci": "b2d2",
+              "cp": 40,
+              "pv": [
+                "Rd2",
+                "Kc6",
+                "Rd1",
+                "Bc4",
+                "Rxh3",
+                "Nd6"
+              ]
+            },
+            {
+              "san": "Re1",
+              "uci": "e3e1",
+              "cp": 35,
+              "pv": [
+                "Re1",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "Rc2+",
+              "uci": "b2c2",
+              "cp": 32,
+              "pv": [
+                "Rc2+",
+                "Kd7",
+                "Rd2+",
+                "Nd6",
+                "Re1",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "Kg8",
+              "uci": "h8g8",
+              "cp": 32,
+              "pv": [
+                "Kg8",
+                "Nd6",
+                "Rc3+",
+                "Kd7",
+                "Rb7+",
+                "Nxb7"
+              ]
+            },
+            {
+              "san": "Rb1",
+              "uci": "b2b1",
+              "cp": 56,
+              "pv": [
+                "Rb1",
+                "Kc6",
+                "Rc1+",
+                "Kd5",
+                "Re8",
+                "Nd4"
+              ]
+            },
+            {
+              "san": "Ra2",
+              "uci": "b2a2",
+              "cp": 24,
+              "pv": [
+                "Ra2",
+                "Kc6",
+                "Rd2",
+                "Kc5",
+                "Re8",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "Rh2",
+              "uci": "b2h2",
+              "cp": 24,
+              "pv": [
+                "Rh2",
+                "Kc6",
+                "Rd2",
+                "Kc5",
+                "Re8",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "h5",
+              "uci": "h7h5",
+              "cp": 22,
+              "pv": [
+                "h5",
+                "Kc6",
+                "Rc2+",
+                "Kd5",
+                "Rd2+",
+                "Kc5"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "Rb1",
+            "uci": "b2b1",
+            "cp_loss": 0,
+            "severity": "none"
+          }
+        },
+        "maia": [
+          {
+            "san": "Rc2+",
+            "uci": "b2c2",
+            "policy": 0.1666
+          },
+          {
+            "san": "Kg8",
+            "uci": "h8g8",
+            "policy": 0.1085
+          },
+          {
+            "san": "Rxb5",
+            "uci": "b2b5",
+            "policy": 0.10210000000000001
+          },
+          {
+            "san": "Rc3+",
+            "uci": "e3c3",
+            "policy": 0.09939999999999999
+          },
+          {
+            "san": "Re5",
+            "uci": "e3e5",
+            "policy": 0.0678
+          },
+          {
+            "san": "Rb1",
+            "uci": "b2b1",
+            "policy": 0.057999999999999996
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
+      },
+      "intermediate": {
+        "recommended_move_san": "Rb1",
+        "recommended_move_uci": "b2b1",
+        "coaching": "Play Rb1. Your move was a strong practical choice: instead of rushing into checks, you used the rook actively against both white pieces. From b1, the rook attacks the knight on b5 and the bishop on f1, so White has to deal with pressure rather than freely improve. The key idea is active defense: when there is no urgent danger, make your opponent answer multiple problems with their next move. How to find it: In an endgame-like position where nothing is immediately hanging, run this routine before choosing a forcing-looking move: first ask, 'Can I attack more than one enemy piece?' Then look along your rook’s file and rank for targets. Here, moving the rook to b1 creates direct contact with both the knight on b5 and the bishop on f1, while keeping the initiative without needing a long tactic.",
+        "takeaway": "Before playing a check, scan for rook moves that create double-purpose pressure by attacking two pieces at once.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "Rd2",
+          "best_cp": 40,
+          "sound_pool": [
+            {
+              "san": "Rd2",
+              "uci": "b2d2",
+              "cp": 40,
+              "pv": [
+                "Rd2",
+                "Kc6",
+                "Rd1",
+                "Bc4",
+                "Rxh3",
+                "Nd6"
+              ]
+            },
+            {
+              "san": "Re1",
+              "uci": "e3e1",
+              "cp": 35,
+              "pv": [
+                "Re1",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "Rc2+",
+              "uci": "b2c2",
+              "cp": 32,
+              "pv": [
+                "Rc2+",
+                "Kd7",
+                "Rd2+",
+                "Nd6",
+                "Re1",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "Kg8",
+              "uci": "h8g8",
+              "cp": 32,
+              "pv": [
+                "Kg8",
+                "Nd6",
+                "Rc3+",
+                "Kd7",
+                "Rb7+",
+                "Nxb7"
+              ]
+            },
+            {
+              "san": "Rb1",
+              "uci": "b2b1",
+              "cp": 56,
+              "pv": [
+                "Rb1",
+                "Kc6",
+                "Rc1+",
+                "Kd5",
+                "Re8",
+                "Nd4"
+              ]
+            },
+            {
+              "san": "Ra2",
+              "uci": "b2a2",
+              "cp": 24,
+              "pv": [
+                "Ra2",
+                "Kc6",
+                "Rd2",
+                "Kc5",
+                "Re8",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "Rh2",
+              "uci": "b2h2",
+              "cp": 24,
+              "pv": [
+                "Rh2",
+                "Kc6",
+                "Rd2",
+                "Kc5",
+                "Re8",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "h5",
+              "uci": "h7h5",
+              "cp": 22,
+              "pv": [
+                "h5",
+                "Kc6",
+                "Rc2+",
+                "Kd5",
+                "Rd2+",
+                "Kc5"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "Rb1",
+            "uci": "b2b1",
+            "cp_loss": 0,
+            "severity": "none"
+          }
+        },
+        "maia": [
+          {
+            "san": "Rc2+",
+            "uci": "b2c2",
+            "policy": 0.3091
+          },
+          {
+            "san": "Kg8",
+            "uci": "h8g8",
+            "policy": 0.1168
+          },
+          {
+            "san": "Rb1",
+            "uci": "b2b1",
+            "policy": 0.0652
+          },
+          {
+            "san": "Rc3+",
+            "uci": "e3c3",
+            "policy": 0.0554
+          },
+          {
+            "san": "Re1",
+            "uci": "e3e1",
+            "policy": 0.0545
+          },
+          {
+            "san": "Re8",
+            "uci": "e3e8",
+            "policy": 0.0537
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
+      },
+      "advanced": {
+        "recommended_move_san": "Rb1",
+        "recommended_move_uci": "b2b1",
+        "coaching": "Move to learn: Rb1. You found the right practical endgame move: instead of rushing into checks like ...Rc2+, you improve the rook while creating pressure on both White’s knight on b5 and bishop on f1. The key point is activity over urgency: when nothing is immediately hanging, make the opponent answer multiple problems rather than giving up tempi chasing the king. How to find it: In an active rook ending where there is no immediate loose-piece tactic, run this routine: first ask, 'Is anything undefended?' Here, no. Then compare forcing moves against improving moves: if a check only makes the king move, look for a quiet rook lift that creates more targets. Scan along open files and ranks for rook moves that attack more than one enemy piece. That process leads you to ...Rb1, because the rook becomes active and hits both the knight on b5 and the bishop on f1.",
+        "takeaway": "Before playing automatic checks in an endgame, see whether a quiet rook move improves activity and attacks several targets at once.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "Rd2",
+          "best_cp": 40,
+          "sound_pool": [
+            {
+              "san": "Rd2",
+              "uci": "b2d2",
+              "cp": 40,
+              "pv": [
+                "Rd2",
+                "Kc6",
+                "Rd1",
+                "Bc4",
+                "Rxh3",
+                "Nd6"
+              ]
+            },
+            {
+              "san": "Re1",
+              "uci": "e3e1",
+              "cp": 35,
+              "pv": [
+                "Re1",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "Rc2+",
+              "uci": "b2c2",
+              "cp": 32,
+              "pv": [
+                "Rc2+",
+                "Kd7",
+                "Rd2+",
+                "Nd6",
+                "Re1",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "Kg8",
+              "uci": "h8g8",
+              "cp": 32,
+              "pv": [
+                "Kg8",
+                "Nd6",
+                "Rc3+",
+                "Kd7",
+                "Rb7+",
+                "Nxb7"
+              ]
+            },
+            {
+              "san": "Rb1",
+              "uci": "b2b1",
+              "cp": 56,
+              "pv": [
+                "Rb1",
+                "Kc6",
+                "Rc1+",
+                "Kd5",
+                "Re8",
+                "Nd4"
+              ]
+            },
+            {
+              "san": "Ra2",
+              "uci": "b2a2",
+              "cp": 24,
+              "pv": [
+                "Ra2",
+                "Kc6",
+                "Rd2",
+                "Kc5",
+                "Re8",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "Rh2",
+              "uci": "b2h2",
+              "cp": 24,
+              "pv": [
+                "Rh2",
+                "Kc6",
+                "Rd2",
+                "Kc5",
+                "Re8",
+                "Bc4"
+              ]
+            },
+            {
+              "san": "h5",
+              "uci": "h7h5",
+              "cp": 22,
+              "pv": [
+                "h5",
+                "Kc6",
+                "Rc2+",
+                "Kd5",
+                "Rd2+",
+                "Kc5"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "Rb1",
+            "uci": "b2b1",
+            "cp_loss": 0,
+            "severity": "none"
+          }
+        },
+        "maia": [
+          {
+            "san": "Rc2+",
+            "uci": "b2c2",
+            "policy": 0.2242
+          },
+          {
+            "san": "Kg8",
+            "uci": "h8g8",
+            "policy": 0.1727
+          },
+          {
+            "san": "Re1",
+            "uci": "e3e1",
+            "policy": 0.1308
+          },
+          {
+            "san": "Re5",
+            "uci": "e3e5",
+            "policy": 0.0558
+          },
+          {
+            "san": "Reb3",
+            "uci": "e3b3",
+            "policy": 0.0536
+          },
+          {
+            "san": "Re8",
+            "uci": "e3e8",
+            "policy": 0.045899999999999996
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
       }
     }
   },
@@ -1363,8 +2355,8 @@
     "coach": {
       "recommended_move_san": "Rfe8",
       "recommended_move_uci": "f8e8",
-      "coaching": "Play Rfe8. Your Ne7 was understandable because moving a developed knight feels natural, but it misses a simple chance to improve a rook first. Rfe8 brings the rook from f8 toward the center area and keeps your setup solid without creating an obvious problem. How to find it: In positions like this, run a quick opening checklist before moving a knight again: 1) Are any pieces hanging? Here, no. 2) Is my king still safe, so I should keep improving pieces? Yes. 3) Which major piece can join the game safely right now? The rook on f8 has a clear improving move: Rfe8.",
-      "takeaway": "Before making another normal-looking developing move, check whether you can bring a rook into the game simply and safely.",
+      "coaching": "Play Rfe8. Your Ne7 was understandable, but it spends time moving a developed knight again while your rooks still need useful jobs. Rfe8 brings the rook from f8 onto the e-file, where it helps coordinate your pieces without creating an immediate problem. How to find it: In positions like this, run a simple checklist before moving a piece twice: first ask, 'Is anything hanging?' Here, no. Then ask, 'Can I improve my least active major piece?' Since neither rook has been given a clear file yet, look for a safe rook move along a central file. That leads you to Rfe8.",
+      "takeaway": "Before moving the same minor piece again, check whether a rook or other major piece needs a better file.",
       "concepts_used": [],
       "side_to_move": "black",
       "engine": {
@@ -1424,9 +2416,22 @@
             ]
           },
           {
+            "san": "Rae8",
+            "uci": "a8e8",
+            "cp": 61,
+            "pv": [
+              "Rae8",
+              "b4",
+              "Be7",
+              "Nc4",
+              "Nd7",
+              "Bd5"
+            ]
+          },
+          {
             "san": "Rac8",
             "uci": "a8c8",
-            "cp": 32,
+            "cp": 33,
             "pv": [
               "Rac8",
               "b4"
@@ -1457,25 +2462,12 @@
               "f6",
               "Bd2"
             ]
-          },
-          {
-            "san": "Rae8",
-            "uci": "a8e8",
-            "cp": 60,
-            "pv": [
-              "Rae8",
-              "b4",
-              "Be7",
-              "Nc4",
-              "Nd7",
-              "b5"
-            ]
           }
         ],
         "student_move": {
           "san": "Ne7",
           "uci": "c6e7",
-          "cp_loss": 55,
+          "cp_loss": 52,
           "severity": "inaccuracy"
         }
       },
@@ -1518,11 +2510,490 @@
         "attempts": 1,
         "verified_fallback": false
       }
+    },
+    "coachByTier": {
+      "beginner": {
+        "recommended_move_san": "Rfe8",
+        "recommended_move_uci": "f8e8",
+        "coaching": "Play Rfe8. Your Ne7 was understandable, but it spends time moving a developed knight again while your rooks still need useful jobs. Rfe8 brings the rook from f8 onto the e-file, where it helps coordinate your pieces without creating an immediate problem. How to find it: In positions like this, run a simple checklist before moving a piece twice: first ask, 'Is anything hanging?' Here, no. Then ask, 'Can I improve my least active major piece?' Since neither rook has been given a clear file yet, look for a safe rook move along a central file. That leads you to Rfe8.",
+        "takeaway": "Before moving the same minor piece again, check whether a rook or other major piece needs a better file.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "a5",
+          "best_cp": 93,
+          "sound_pool": [
+            {
+              "san": "a5",
+              "uci": "a7a5",
+              "cp": 93,
+              "pv": [
+                "a5",
+                "Nde4",
+                "Nxe4",
+                "dxe4",
+                "Ne7",
+                "Be2"
+              ]
+            },
+            {
+              "san": "Rad8",
+              "uci": "a8d8",
+              "cp": 88,
+              "pv": [
+                "Rad8",
+                "Nde4",
+                "Nxe4",
+                "dxe4",
+                "Ne7",
+                "Re1"
+              ]
+            },
+            {
+              "san": "Be7",
+              "uci": "c5e7",
+              "cp": 71,
+              "pv": [
+                "Be7",
+                "Nc4",
+                "Rae8",
+                "b4",
+                "Nd7",
+                "Bd5"
+              ]
+            },
+            {
+              "san": "Nd7",
+              "uci": "f6d7",
+              "cp": 68,
+              "pv": [
+                "Nd7",
+                "b4",
+                "Be7",
+                "Nc4",
+                "Rae8",
+                "Bd5"
+              ]
+            },
+            {
+              "san": "Rae8",
+              "uci": "a8e8",
+              "cp": 61,
+              "pv": [
+                "Rae8",
+                "b4",
+                "Be7",
+                "Nc4",
+                "Nd7",
+                "Bd5"
+              ]
+            },
+            {
+              "san": "Rac8",
+              "uci": "a8c8",
+              "cp": 33,
+              "pv": [
+                "Rac8",
+                "b4"
+              ]
+            },
+            {
+              "san": "a6",
+              "uci": "a7a6",
+              "cp": 93,
+              "pv": [
+                "a6",
+                "h4",
+                "h6",
+                "Nde4",
+                "Nxe4",
+                "dxe4"
+              ]
+            },
+            {
+              "san": "Rfe8",
+              "uci": "f8e8",
+              "cp": 73,
+              "pv": [
+                "Rfe8",
+                "Nde4",
+                "Nxe4",
+                "dxe4",
+                "f6",
+                "Bd2"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "Ne7",
+            "uci": "c6e7",
+            "cp_loss": 52,
+            "severity": "inaccuracy"
+          }
+        },
+        "maia": [
+          {
+            "san": "Rfe8",
+            "uci": "f8e8",
+            "policy": 0.1641
+          },
+          {
+            "san": "Rae8",
+            "uci": "a8e8",
+            "policy": 0.1281
+          },
+          {
+            "san": "Rad8",
+            "uci": "a8d8",
+            "policy": 0.0827
+          },
+          {
+            "san": "Ne7",
+            "uci": "c6e7",
+            "policy": 0.059500000000000004
+          },
+          {
+            "san": "b5",
+            "uci": "b7b5",
+            "policy": 0.0557
+          },
+          {
+            "san": "h6",
+            "uci": "h7h6",
+            "policy": 0.046799999999999994
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
+      },
+      "intermediate": {
+        "recommended_move_san": "Rad8",
+        "recommended_move_uci": "a8d8",
+        "coaching": "Play Rad8. Your Ne7 was understandable because moving a developed knight feels natural, but it missed a cleaner improving move: bring the a8-rook into the game while supporting your central structure. The point is simple and practical: after Rad8, the rook goes to d8, defends the pawn on d4, and also keeps the rook on f8 defended. That means your center stays stable before you decide whether to trade with ...Nxe4 if White plays Nde4. How to find it: In positions like this, run a quick “improve first” check before making a normal-looking developing move: 1) Which side has an undeveloped heavy piece? Here, the a8-rook still needs a useful file. 2) Can I improve that rook without weakening anything? Rad8 brings it toward the center. 3) Does the move support my key pawn or piece? Yes — Rad8 defends d4 and supports coordination around the rook on f8. Once those boxes are checked, choose the active improving move over a routine retreat.",
+        "takeaway": "Before retreating or regrouping a minor piece, look for a rook-improving move that supports your center and improves coordination.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "a5",
+          "best_cp": 93,
+          "sound_pool": [
+            {
+              "san": "a5",
+              "uci": "a7a5",
+              "cp": 93,
+              "pv": [
+                "a5",
+                "Nde4",
+                "Nxe4",
+                "dxe4",
+                "Ne7",
+                "Be2"
+              ]
+            },
+            {
+              "san": "Rad8",
+              "uci": "a8d8",
+              "cp": 88,
+              "pv": [
+                "Rad8",
+                "Nde4",
+                "Nxe4",
+                "dxe4",
+                "Ne7",
+                "Re1"
+              ]
+            },
+            {
+              "san": "Be7",
+              "uci": "c5e7",
+              "cp": 71,
+              "pv": [
+                "Be7",
+                "Nc4",
+                "Rae8",
+                "b4",
+                "Nd7",
+                "Bd5"
+              ]
+            },
+            {
+              "san": "Nd7",
+              "uci": "f6d7",
+              "cp": 68,
+              "pv": [
+                "Nd7",
+                "b4",
+                "Be7",
+                "Nc4",
+                "Rae8",
+                "Bd5"
+              ]
+            },
+            {
+              "san": "Rae8",
+              "uci": "a8e8",
+              "cp": 61,
+              "pv": [
+                "Rae8",
+                "b4",
+                "Be7",
+                "Nc4",
+                "Nd7",
+                "Bd5"
+              ]
+            },
+            {
+              "san": "Rac8",
+              "uci": "a8c8",
+              "cp": 33,
+              "pv": [
+                "Rac8",
+                "b4"
+              ]
+            },
+            {
+              "san": "a6",
+              "uci": "a7a6",
+              "cp": 93,
+              "pv": [
+                "a6",
+                "h4",
+                "h6",
+                "Nde4",
+                "Nxe4",
+                "dxe4"
+              ]
+            },
+            {
+              "san": "Rfe8",
+              "uci": "f8e8",
+              "cp": 73,
+              "pv": [
+                "Rfe8",
+                "Nde4",
+                "Nxe4",
+                "dxe4",
+                "f6",
+                "Bd2"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "Ne7",
+            "uci": "c6e7",
+            "cp_loss": 52,
+            "severity": "inaccuracy"
+          }
+        },
+        "maia": [
+          {
+            "san": "Rfe8",
+            "uci": "f8e8",
+            "policy": 0.1866
+          },
+          {
+            "san": "Rad8",
+            "uci": "a8d8",
+            "policy": 0.14880000000000002
+          },
+          {
+            "san": "Rae8",
+            "uci": "a8e8",
+            "policy": 0.0895
+          },
+          {
+            "san": "Bd6",
+            "uci": "c5d6",
+            "policy": 0.0797
+          },
+          {
+            "san": "h6",
+            "uci": "h7h6",
+            "policy": 0.063
+          },
+          {
+            "san": "Rac8",
+            "uci": "a8c8",
+            "policy": 0.051399999999999994
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
+      },
+      "advanced": {
+        "recommended_move_san": "a5",
+        "recommended_move_uci": "a7a5",
+        "coaching": "Move to learn: a5. Your Ne7 was understandable because it looks like a useful regrouping move, but it spends time moving a developed knight while giving up the chance to gain queenside space right away. The point of a5 is simple and practical: make an improving flank move before committing either rook. It keeps your central setup flexible and asks White to react to your expansion rather than letting White choose comfortably where their next developing/improving move should go. A sample direction is: after a5, if White plays Nde4, ...Nxe4 gives you activity without having first locked down every rook placement. How to find it: In positions like this, run a “commitment audit” before making a natural-looking regrouping move:  \n1. Are any pieces actually hanging? Here, no.  \n2. Which forcing feature already exists? You have pressure around the knight on g3 via ...Nxe4 when appropriate.  \n3. Before I commit my rooks, do I need to solve something urgent, or can I improve my structure/pace first? Since nothing is tactically forced, look for a quiet move that gains space and makes White show their hand. That leads you to a5: expand first, decide later whether Rad8, Rae8, or another rook route fits best once White has committed.",
+        "takeaway": "When there is no immediate tactic, avoid automatic regrouping; first check whether a low-commitment expanding move improves your position while keeping more options open.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "a5",
+          "best_cp": 93,
+          "sound_pool": [
+            {
+              "san": "a5",
+              "uci": "a7a5",
+              "cp": 93,
+              "pv": [
+                "a5",
+                "Nde4",
+                "Nxe4",
+                "dxe4",
+                "Ne7",
+                "Be2"
+              ]
+            },
+            {
+              "san": "Rad8",
+              "uci": "a8d8",
+              "cp": 88,
+              "pv": [
+                "Rad8",
+                "Nde4",
+                "Nxe4",
+                "dxe4",
+                "Ne7",
+                "Re1"
+              ]
+            },
+            {
+              "san": "Be7",
+              "uci": "c5e7",
+              "cp": 71,
+              "pv": [
+                "Be7",
+                "Nc4",
+                "Rae8",
+                "b4",
+                "Nd7",
+                "Bd5"
+              ]
+            },
+            {
+              "san": "Nd7",
+              "uci": "f6d7",
+              "cp": 68,
+              "pv": [
+                "Nd7",
+                "b4",
+                "Be7",
+                "Nc4",
+                "Rae8",
+                "Bd5"
+              ]
+            },
+            {
+              "san": "Rae8",
+              "uci": "a8e8",
+              "cp": 61,
+              "pv": [
+                "Rae8",
+                "b4",
+                "Be7",
+                "Nc4",
+                "Nd7",
+                "Bd5"
+              ]
+            },
+            {
+              "san": "Rac8",
+              "uci": "a8c8",
+              "cp": 33,
+              "pv": [
+                "Rac8",
+                "b4"
+              ]
+            },
+            {
+              "san": "a6",
+              "uci": "a7a6",
+              "cp": 93,
+              "pv": [
+                "a6",
+                "h4",
+                "h6",
+                "Nde4",
+                "Nxe4",
+                "dxe4"
+              ]
+            },
+            {
+              "san": "Rfe8",
+              "uci": "f8e8",
+              "cp": 73,
+              "pv": [
+                "Rfe8",
+                "Nde4",
+                "Nxe4",
+                "dxe4",
+                "f6",
+                "Bd2"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "Ne7",
+            "uci": "c6e7",
+            "cp_loss": 52,
+            "severity": "inaccuracy"
+          }
+        },
+        "maia": [
+          {
+            "san": "Rfe8",
+            "uci": "f8e8",
+            "policy": 0.231
+          },
+          {
+            "san": "Rac8",
+            "uci": "a8c8",
+            "policy": 0.1131
+          },
+          {
+            "san": "Rad8",
+            "uci": "a8d8",
+            "policy": 0.09759999999999999
+          },
+          {
+            "san": "Rae8",
+            "uci": "a8e8",
+            "policy": 0.0944
+          },
+          {
+            "san": "Bd6",
+            "uci": "c5d6",
+            "policy": 0.0935
+          },
+          {
+            "san": "a5",
+            "uci": "a7a5",
+            "policy": 0.0617
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
+      }
     }
   },
   {
     "id": "zPEEOpMJ_22",
-    "label": "Intermediate · opening · played Bd6 · picks Bd6 (engine's top)",
+    "label": "Intermediate · opening · played Bd6 · picks Bd6 over engine Bd6",
     "fen": "r2qkbnr/2p3pp/p4p2/1p1Pp3/8/2N2Q1P/PPP2PP1/R1B1K2R b KQkq - 0 11",
     "tier": "intermediate",
     "phase": "opening",
@@ -1531,18 +3002,18 @@
     "coach": {
       "recommended_move_san": "Bd6",
       "recommended_move_uci": "f8d6",
-      "coaching": "Bd6 was a solid choice. It develops your bishop from f8 to an active diagonal, so you improve a minor piece without creating a new problem. The nice practical point is that Bd6 also adds protection to both c7 and e5, while keeping your next development simple: after White gets ready, ...Ne7 is a natural follow-up. How to find it: In positions like this, run a quick “development first” check before moving anything fancy: 1) Which of my bishops or knights still needs a useful square? Here, the bishop on f8 has a clear developing route. 2) Can I develop that piece while defending something important? Bd6 improves the bishop and protects c7 and e5. 3) After that, ask where the rest of my pieces belong — here, ...Ne7 becomes easy to see.",
-      "takeaway": "Look for developing moves that do more than one job: activate a piece and protect key pawns.",
+      "coaching": "Play Bd6. Your move was a sensible developing choice: the bishop comes into the game and immediately helps hold important central pawns by defending both c7 and e5. The key point is that this is not just “developing a bishop” — it improves coordination while keeping your structure supported before you continue with normal development like bringing the knight into the game. How to find it: In positions where nothing is hanging, run this routine: first ask, “Which undeveloped piece can improve?” Then check whether moving it also solves something useful. Here the f8-bishop has a natural route to d6, and once there it adds defense to c7 and e5. So Bd6 passes the practical test: develop an inactive piece, support your center, and keep your next moves flexible.",
+      "takeaway": "When no immediate tactic decides the position, choose the developing move that also supports your important pawns or pieces.",
       "concepts_used": [],
       "side_to_move": "black",
       "engine": {
         "best_san": "Bd6",
-        "best_cp": 2,
+        "best_cp": -14,
         "sound_pool": [
           {
             "san": "Bd6",
             "uci": "f8d6",
-            "cp": 2,
+            "cp": -14,
             "pv": [
               "Bd6",
               "O-O",
@@ -1555,10 +3026,14 @@
           {
             "san": "Rb8",
             "uci": "a8b8",
-            "cp": -51,
+            "cp": -31,
             "pv": [
               "Rb8",
-              "Be3"
+              "O-O",
+              "Bd6",
+              "Qg3",
+              "Qd7",
+              "a4"
             ]
           },
           {
@@ -1601,19 +3076,6 @@
             ]
           },
           {
-            "san": "Be7",
-            "uci": "f8e7",
-            "cp": -88,
-            "pv": [
-              "Be7",
-              "Ne4",
-              "Bd6",
-              "a4",
-              "b4",
-              "O-O"
-            ]
-          },
-          {
             "san": "Ne7",
             "uci": "g8e7",
             "cp": -101,
@@ -1629,33 +3091,546 @@
           {
             "san": "b4",
             "uci": "b5b4",
-            "cp": -112,
+            "cp": -120,
             "pv": [
-              "b4",
-              "Ne4",
+              "b4"
+            ]
+          },
+          {
+            "san": "Be7",
+            "uci": "f8e7",
+            "cp": -130,
+            "pv": [
+              "Be7",
+              "O-O",
               "Bd6",
-              "a3",
-              "bxa3",
-              "Nxd6+"
+              "Qg3",
+              "Qd7",
+              "Ne4"
             ]
           }
         ],
         "student_move": {
           "san": "Bd6",
           "uci": "f8d6",
-          "cp_loss": 33,
+          "cp_loss": 46,
           "severity": "none"
         }
       },
-      "maia": [],
+      "maia": [
+        {
+          "san": "Bb4",
+          "uci": "f8b4",
+          "policy": 0.29719999999999996
+        },
+        {
+          "san": "Bd6",
+          "uci": "f8d6",
+          "policy": 0.2216
+        },
+        {
+          "san": "Ne7",
+          "uci": "g8e7",
+          "policy": 0.1371
+        },
+        {
+          "san": "b4",
+          "uci": "b5b4",
+          "policy": 0.0866
+        },
+        {
+          "san": "Bc5",
+          "uci": "f8c5",
+          "policy": 0.0623
+        },
+        {
+          "san": "Qd6",
+          "uci": "d8d6",
+          "policy": 0.04190000000000001
+        }
+      ],
       "meta": {
         "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
         "tuned": true,
-        "notes": [
-          "Human-likelihood (Maia) analysis was unavailable for this position."
-        ],
+        "notes": [],
         "attempts": 1,
         "verified_fallback": false
+      }
+    },
+    "coachByTier": {
+      "beginner": {
+        "recommended_move_san": "Bb4",
+        "recommended_move_uci": "f8b4",
+        "coaching": "Play Bb4. Your Bd6 was understandable because it developed the bishop and defended some pawns, but Bb4 gives that same developing move an extra purpose: the bishop attacks White’s knight on c3 right away. That means you improve a piece while making White answer a simple problem. How to find it: In the opening, when you have several normal-looking developing moves, ask: 'Can I develop a piece AND attack something?' First look at your undeveloped bishops and knights, then check whether moving one of them creates a direct one-move threat against an enemy piece. Here, Bb4 develops the bishop and attacks the knight on c3, so it is easy to find by using that checklist.",
+        "takeaway": "Prefer development with a clear job: if you can develop a piece and make a simple threat at the same time, look at that move first.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "Bd6",
+          "best_cp": -14,
+          "sound_pool": [
+            {
+              "san": "Bd6",
+              "uci": "f8d6",
+              "cp": -14,
+              "pv": [
+                "Bd6",
+                "O-O",
+                "Ne7",
+                "a4",
+                "b4",
+                "Ne4"
+              ]
+            },
+            {
+              "san": "Rb8",
+              "uci": "a8b8",
+              "cp": -31,
+              "pv": [
+                "Rb8",
+                "O-O",
+                "Bd6",
+                "Qg3",
+                "Qd7",
+                "a4"
+              ]
+            },
+            {
+              "san": "Bb4",
+              "uci": "f8b4",
+              "cp": -46,
+              "pv": [
+                "Bb4",
+                "O-O",
+                "Ne7",
+                "a4",
+                "Bxc3",
+                "bxc3"
+              ]
+            },
+            {
+              "san": "Qd7",
+              "uci": "d8d7",
+              "cp": -48,
+              "pv": [
+                "Qd7",
+                "d6",
+                "Rd8",
+                "dxc7",
+                "Qxc7",
+                "O-O"
+              ]
+            },
+            {
+              "san": "Qc8",
+              "uci": "d8c8",
+              "cp": -79,
+              "pv": [
+                "Qc8",
+                "O-O",
+                "Bd6",
+                "Qg3",
+                "Qd7",
+                "a4"
+              ]
+            },
+            {
+              "san": "Ne7",
+              "uci": "g8e7",
+              "cp": -101,
+              "pv": [
+                "Ne7",
+                "O-O",
+                "b4",
+                "d6",
+                "cxd6",
+                "Nd5"
+              ]
+            },
+            {
+              "san": "b4",
+              "uci": "b5b4",
+              "cp": -120,
+              "pv": [
+                "b4"
+              ]
+            },
+            {
+              "san": "Be7",
+              "uci": "f8e7",
+              "cp": -130,
+              "pv": [
+                "Be7",
+                "O-O",
+                "Bd6",
+                "Qg3",
+                "Qd7",
+                "Ne4"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "Bd6",
+            "uci": "f8d6",
+            "cp_loss": 46,
+            "severity": "none"
+          }
+        },
+        "maia": [
+          {
+            "san": "Bb4",
+            "uci": "f8b4",
+            "policy": 0.2314
+          },
+          {
+            "san": "Ne7",
+            "uci": "g8e7",
+            "policy": 0.1848
+          },
+          {
+            "san": "b4",
+            "uci": "b5b4",
+            "policy": 0.09849999999999999
+          },
+          {
+            "san": "Bc5",
+            "uci": "f8c5",
+            "policy": 0.07980000000000001
+          },
+          {
+            "san": "Bd6",
+            "uci": "f8d6",
+            "policy": 0.0583
+          },
+          {
+            "san": "Qd7",
+            "uci": "d8d7",
+            "policy": 0.039900000000000005
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
+      },
+      "intermediate": {
+        "recommended_move_san": "Bd6",
+        "recommended_move_uci": "f8d6",
+        "coaching": "Play Bd6. Your move was a sensible developing choice: the bishop comes into the game and immediately helps hold important central pawns by defending both c7 and e5. The key point is that this is not just “developing a bishop” — it improves coordination while keeping your structure supported before you continue with normal development like bringing the knight into the game. How to find it: In positions where nothing is hanging, run this routine: first ask, “Which undeveloped piece can improve?” Then check whether moving it also solves something useful. Here the f8-bishop has a natural route to d6, and once there it adds defense to c7 and e5. So Bd6 passes the practical test: develop an inactive piece, support your center, and keep your next moves flexible.",
+        "takeaway": "When no immediate tactic decides the position, choose the developing move that also supports your important pawns or pieces.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "Bd6",
+          "best_cp": -14,
+          "sound_pool": [
+            {
+              "san": "Bd6",
+              "uci": "f8d6",
+              "cp": -14,
+              "pv": [
+                "Bd6",
+                "O-O",
+                "Ne7",
+                "a4",
+                "b4",
+                "Ne4"
+              ]
+            },
+            {
+              "san": "Rb8",
+              "uci": "a8b8",
+              "cp": -31,
+              "pv": [
+                "Rb8",
+                "O-O",
+                "Bd6",
+                "Qg3",
+                "Qd7",
+                "a4"
+              ]
+            },
+            {
+              "san": "Bb4",
+              "uci": "f8b4",
+              "cp": -46,
+              "pv": [
+                "Bb4",
+                "O-O",
+                "Ne7",
+                "a4",
+                "Bxc3",
+                "bxc3"
+              ]
+            },
+            {
+              "san": "Qd7",
+              "uci": "d8d7",
+              "cp": -48,
+              "pv": [
+                "Qd7",
+                "d6",
+                "Rd8",
+                "dxc7",
+                "Qxc7",
+                "O-O"
+              ]
+            },
+            {
+              "san": "Qc8",
+              "uci": "d8c8",
+              "cp": -79,
+              "pv": [
+                "Qc8",
+                "O-O",
+                "Bd6",
+                "Qg3",
+                "Qd7",
+                "a4"
+              ]
+            },
+            {
+              "san": "Ne7",
+              "uci": "g8e7",
+              "cp": -101,
+              "pv": [
+                "Ne7",
+                "O-O",
+                "b4",
+                "d6",
+                "cxd6",
+                "Nd5"
+              ]
+            },
+            {
+              "san": "b4",
+              "uci": "b5b4",
+              "cp": -120,
+              "pv": [
+                "b4"
+              ]
+            },
+            {
+              "san": "Be7",
+              "uci": "f8e7",
+              "cp": -130,
+              "pv": [
+                "Be7",
+                "O-O",
+                "Bd6",
+                "Qg3",
+                "Qd7",
+                "Ne4"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "Bd6",
+            "uci": "f8d6",
+            "cp_loss": 46,
+            "severity": "none"
+          }
+        },
+        "maia": [
+          {
+            "san": "Bb4",
+            "uci": "f8b4",
+            "policy": 0.29719999999999996
+          },
+          {
+            "san": "Bd6",
+            "uci": "f8d6",
+            "policy": 0.2216
+          },
+          {
+            "san": "Ne7",
+            "uci": "g8e7",
+            "policy": 0.1371
+          },
+          {
+            "san": "b4",
+            "uci": "b5b4",
+            "policy": 0.0866
+          },
+          {
+            "san": "Bc5",
+            "uci": "f8c5",
+            "policy": 0.0623
+          },
+          {
+            "san": "Qd6",
+            "uci": "d8d6",
+            "policy": 0.04190000000000001
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
+      },
+      "advanced": {
+        "recommended_move_san": "Bd6",
+        "recommended_move_uci": "f8d6",
+        "coaching": "Move to learn: Bd6. Your move was actually the right practical choice here: develop the f8-bishop while also defending both c7 and e5. The important point is that this is not an automatic developing move — it improves coordination and stabilizes key central/queenside pawns before either side commits further. After Bd6, if White castles, ...Ne7 becomes a natural follow-up, bringing another minor piece into the game while adding pressure to the d5 pawn. How to find it: In positions like this, run a three-step routine: first ask, 'Which undeveloped piece can improve without creating a new weakness?' Then check whether that improving move also solves more than one problem. Here Bd6 passes both tests: the bishop leaves f8, and it adds defense to c7 and e5. Finally compare it with forcing-looking alternatives by asking, 'If I make this quiet move now, do I still have useful development next?' Since ...Bd6 keeps ...Ne7 available afterward, it is a clean multi-purpose move rather than a rushed decision.",
+        "takeaway": "At this level, look for quiet moves that combine development with prophylaxis: improve a piece while making future plans easier and fewer targets vulnerable.",
+        "concepts_used": [],
+        "side_to_move": "black",
+        "engine": {
+          "best_san": "Bd6",
+          "best_cp": -14,
+          "sound_pool": [
+            {
+              "san": "Bd6",
+              "uci": "f8d6",
+              "cp": -14,
+              "pv": [
+                "Bd6",
+                "O-O",
+                "Ne7",
+                "a4",
+                "b4",
+                "Ne4"
+              ]
+            },
+            {
+              "san": "Rb8",
+              "uci": "a8b8",
+              "cp": -31,
+              "pv": [
+                "Rb8",
+                "O-O",
+                "Bd6",
+                "Qg3",
+                "Qd7",
+                "a4"
+              ]
+            },
+            {
+              "san": "Bb4",
+              "uci": "f8b4",
+              "cp": -46,
+              "pv": [
+                "Bb4",
+                "O-O",
+                "Ne7",
+                "a4",
+                "Bxc3",
+                "bxc3"
+              ]
+            },
+            {
+              "san": "Qd7",
+              "uci": "d8d7",
+              "cp": -48,
+              "pv": [
+                "Qd7",
+                "d6",
+                "Rd8",
+                "dxc7",
+                "Qxc7",
+                "O-O"
+              ]
+            },
+            {
+              "san": "Qc8",
+              "uci": "d8c8",
+              "cp": -79,
+              "pv": [
+                "Qc8",
+                "O-O",
+                "Bd6",
+                "Qg3",
+                "Qd7",
+                "a4"
+              ]
+            },
+            {
+              "san": "Ne7",
+              "uci": "g8e7",
+              "cp": -101,
+              "pv": [
+                "Ne7",
+                "O-O",
+                "b4",
+                "d6",
+                "cxd6",
+                "Nd5"
+              ]
+            },
+            {
+              "san": "b4",
+              "uci": "b5b4",
+              "cp": -120,
+              "pv": [
+                "b4"
+              ]
+            },
+            {
+              "san": "Be7",
+              "uci": "f8e7",
+              "cp": -130,
+              "pv": [
+                "Be7",
+                "O-O",
+                "Bd6",
+                "Qg3",
+                "Qd7",
+                "Ne4"
+              ]
+            }
+          ],
+          "student_move": {
+            "san": "Bd6",
+            "uci": "f8d6",
+            "cp_loss": 46,
+            "severity": "none"
+          }
+        },
+        "maia": [
+          {
+            "san": "Bd6",
+            "uci": "f8d6",
+            "policy": 0.2386
+          },
+          {
+            "san": "Ne7",
+            "uci": "g8e7",
+            "policy": 0.19469999999999998
+          },
+          {
+            "san": "Bb4",
+            "uci": "f8b4",
+            "policy": 0.1634
+          },
+          {
+            "san": "Bc5",
+            "uci": "f8c5",
+            "policy": 0.113
+          },
+          {
+            "san": "b4",
+            "uci": "b5b4",
+            "policy": 0.0592
+          },
+          {
+            "san": "Qd7",
+            "uci": "d8d7",
+            "policy": 0.0592
+          }
+        ],
+        "meta": {
+          "model": "OURS-v6-dpo2 (Qwen3-32B tuned)",
+          "tuned": true,
+          "notes": [],
+          "attempts": 1,
+          "verified_fallback": false
+        }
       }
     }
   },

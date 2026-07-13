@@ -1,10 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { LibraryEntry, Tier } from "@/lib/api";
+import type { CoachResponse, LibraryEntry, Tier } from "@/lib/api";
 
 type Filter = Tier | "all";
 export type LibStatus = "loading" | "ready" | "error";
+
+// The move to show on a library row. Prefer the entry's own tier from the
+// per-tier map (so the row matches the level it's filed under), then any seeded
+// tier, and finally the legacy single-tier `coach` for older entries.
+function rowCoach(e: LibraryEntry): CoachResponse {
+  const byTier = e.coachByTier;
+  if (byTier) {
+    return byTier[e.tier] ?? byTier.intermediate ?? byTier.beginner ?? byTier.advanced ?? e.coach;
+  }
+  return e.coach;
+}
 
 const FILTERS: { id: Filter; label: string }[] = [
   { id: "all", label: "All" },
@@ -162,7 +173,7 @@ export default function PositionLibrary({
                       <div className="flex shrink-0 items-baseline gap-1.5">
                         <span className="text-xs text-muted">coach</span>
                         <span className="font-serif text-base font-semibold text-signal tnum">
-                          {e.coach.recommended_move_san}
+                          {rowCoach(e).recommended_move_san}
                         </span>
                       </div>
                     </button>

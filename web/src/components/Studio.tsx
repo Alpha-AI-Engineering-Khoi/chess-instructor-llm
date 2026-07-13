@@ -435,9 +435,11 @@ export default function Studio() {
     setLastMove(su ? [su.slice(0, 2), su.slice(2, 4)] : null);
     setOrientation((e.coach.side_to_move as Orientation) ?? sideToMove(e.fen));
     setActiveLibId(e.id);
-    // Seed the entry's tier with its cached coaching (precomputed, instant); the
-    // other two tiers stay idle until the user runs them live.
-    resetSession(e.fen, su, { [e.tier]: e.coach });
+    // Seed EVERY tier we have precomputed coaching for so all three bands show
+    // instantly (no "Run live" idle) and switching levels is a no-network swap.
+    // Entries carrying the full `coachByTier` map seed all three; older
+    // single-tier entries fall back to seeding just their one cached tier.
+    resetSession(e.fen, su, e.coachByTier ?? { [e.tier]: e.coach });
   };
 
   const loadFen = () => {
