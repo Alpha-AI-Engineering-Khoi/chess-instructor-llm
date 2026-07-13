@@ -83,14 +83,29 @@ export default function ChessgroundBoard(props: ChessgroundBoardProps) {
     fenRef.current = fen;
   });
 
-  // Apply the annotation arrows, but ONLY once the board has real, non-zero bounds.
-  // Chessground's pos2user divides board width by height, so a 0×0 board produces
-  // 0/0 = NaN arrow coordinates — the "<line> attribute x1: Expected length NaN"
-  // console errors (192 of them across the Showdown grid of boards). We read the
-  // element's LIVE rect (chessground's own bounds() memo can still hold a
-  // pre-layout 0×0), refresh that memo with redrawAll, then draw. While the board
-  // is still 0×0 we bail; the ResizeObserver re-invokes this the moment it sizes.
-  const drawArrows = useCallback(() => {
+  // Apply the coach's auto-shapes (the pinned recommended + your-move arrows).
+  // These are chessground AUTOSHAPES: app-controlled and redrawn by us, and are
+  // NEVER touched by the user's own right-click arrows or left-click clears (those
+  // only mutate drawable.shapes), so the two coaching arrows are permanent. We
+  // pass the shapes EXPLICITLY from the current render (not via shapesRef) so the
+  // recommended arrow can never lag a tier behind when the user switches levels.
+  // Bounds-guarded: chessground's pos2user divides board width by height, so a 0×0
+  // board would produce 0/0 = NaN <line> coordinates; we bail until it has real
+  // size (the ResizeObserver re-invokes the draw the moment the board sizes).
+  const drawArrows = useCallback((shapes: DrawShape[] = shapesRef.current) => {
+    const cg = apiRef.current;
+    const el = elRef.current;
+    if (!cg || !el) return;
+    const b = el.getBoundingClientRect();
+    if (b.width === 0 || b.height === 0) return;
+    cg.setAutoShapes(shapes);
+  }, []);
+
+  // Resize / first-layout path: the board bounds changed, so refresh chessground's
+  // bounds memo (redrawAll) before repainting the current shapes. Kept out of the
+  // per-update path so a plain tier/prop change is a light setAutoShapes, not a
+  // full DOM rebuild.
+  const redrawForResize = useCallback(() => {
     const cg = apiRef.current;
     const el = elRef.current;
     if (!cg || !el) return;
@@ -151,7 +166,7 @@ export default function ChessgroundBoard(props: ChessgroundBoardProps) {
     // NaN arrow coordinates a 0×0 board would produce. This replaces the old
     // requestAnimationFrame(redrawAll/bounds) loop that thrashed layout every
     // frame until the board measured.
-    const ro = new ResizeObserver(() => drawArrows());
+    const ro = new ResizeObserver(() => redrawForResize());
     ro.observe(elRef.current);
     return () => {
       ro.disconnect();
@@ -188,9 +203,10 @@ export default function ChessgroundBoard(props: ChessgroundBoardProps) {
         events: { after: handleAfter },
       },
     });
-    // Apply annotation arrows through the bounds-guarded drawer so they render
-    // only once the board has real size (never NaN <line> coordinates).
-    drawArrows();
+    // Re-apply the coach arrows from THIS render's shapes (bounds-guarded) so a
+    // tier switch updates the recommended arrow immediately, and so a fen change
+    // (which clears user-drawn shapes) never drops the pinned coach arrows.
+    drawArrows(autoShapes);
   }, [fen, orientation, turnColor, movableColor, lastMove, check, dests, autoShapes, handleAfter, drawArrows]);
 
   return (
