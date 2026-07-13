@@ -544,28 +544,6 @@ export default function Studio() {
             The fine-tune picks the level-appropriate move far more reliably than its base or the
             frontier.
           </h1>
-          <p className="text-pretty text-sm leading-relaxed text-muted sm:text-base">
-            A fine-tuned chess coach served on a hosted endpoint. Set a position, mark the move
-            you&apos;re unsure about, and pick your rating. It hands back <span className="text-ink">one
-            move chosen for your level</span> and a short <span className="text-ink">principle
-            tag</span> for why. Its one job is selecting the tier-appropriate move; the full
-            explanation is an <span className="text-ink">optional layer</span> underneath, not the
-            headline. On the original v4-era 120-position held-out eval it is substantially more
-            reliable at this{" "}
-            <span className="text-ink tnum">(76.7% tuned vs 34.7% base / 55.3% best frontier)</span>;{" "}
-            the corrected v6 numbers are on the Benchmark Space.{" "}
-            <span className="text-faint">
-              See the{" "}
-              <Link
-                href="/showcase.html"
-                className="text-muted underline decoration-dotted underline-offset-2 transition-colors hover:text-ink"
-              >
-                multi-model comparison
-              </Link>{" "}
-              (OURS against frontier and open models on tier-appropriate move selection, with the
-              measured per-model metrics).
-            </span>
-          </p>
         </div>
 
         {/* GRADER 30-SECOND ORIENTATION: the one behavior + the three-step loop,
