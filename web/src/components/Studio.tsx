@@ -524,7 +524,6 @@ export default function Studio() {
             className="inline-flex min-h-9 items-center gap-1.5 rounded-full bg-signal/12 px-3.5 text-sm font-medium text-signal ring-1 ring-signal/40 transition-colors hover:bg-signal/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal/60"
           >
             Multi-Model Showcase
-            <span aria-hidden>★</span>
             <span aria-hidden className="text-signal/70">›</span>
           </Link>
         </div>
